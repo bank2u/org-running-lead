@@ -767,7 +767,7 @@ function drawWin() {
     `<div class="legend"><span><i class="line" style="background:${OFF}"></i>ทีมผู้นำ</span><span><i class="line" style="background:${US}"></i>ทีมเรา</span><span><i class="dash" style="color:${INK2}"></i>คาดการณ์ / ตามแผน</span><span><i style="background:${OFF};opacity:.18"></i>ช่วงที่ทีมผู้นำอาจจบ</span></div>` +
     `<div id="gapc"></div>` +
     (SP ? `<div class="sq"><h4>แบ่งแรงในทีม<small>${SP.members} คน</small></h4>` +
-      `<div class="sq-ctl"><label>ตัวแรง <select id="sq-k">${Array.from({ length: SP.members - 1 }, (_, i) => `<option value="${i + 1}"${i + 1 === PLAN.k ? " selected" : ""}>${i + 1} คน</option>`).join("")}</select></label>` +
+      `<div class="sq-ctl"><label>เดอะแบก <select id="sq-k">${Array.from({ length: SP.members - 1 }, (_, i) => `<option value="${i + 1}"${i + 1 === PLAN.k ? " selected" : ""}>${i + 1} คน</option>`).join("")}</select></label>` +
       `<label>เดินคนละ <select id="sq-s">${SP.strong.map(v => `<option value="${v}"${v === PLAN.s ? " selected" : ""}>${k(v)}</option>`).join("")}</select> ต่อวัน</label></div>` +
       `<div class="sq-out" role="status" aria-live="polite"><div class="sq-big" id="sq-big"></div><div id="sq-bars"></div><p class="sub" id="sq-sub"></p></div></div>` : "") +
     `</div>`
@@ -828,7 +828,7 @@ function drawWin() {
     if (!PL) return `ทีมเรานำทีมผู้นำ ${k(S.lead)} ก้าว/คน`;
     const sp = SP && SP.rest[PLAN.k - 1][SP.strong.indexOf(PLAN.s)][planIdx()][0];
     return `แผนแซงทีมผู้นำภายใน ${PL.dow} ${PL.label}: ทีมเราเดินเฉลี่ยคนละ ${k(PL.need)} ก้าวทุกวัน` +
-      (SP ? ` (ตัวแรง ${PLAN.k} คน เดินคนละ ${k(PLAN.s)} ที่เหลือคนละ ${sp > 0 ? k(sp) : "เท่าที่ไหว"})` : "") +
+      (SP ? ` (เดอะแบก ${PLAN.k} คน เดินคนละ ${k(PLAN.s)} ที่เหลือคนละ ${sp > 0 ? k(sp) : "เท่าที่ไหว"})` : "") +
       (nextCp ? ` เช็คอีกที ${nextCp.dow} ${nextCp.label} ต้องมีเฉลี่ย ${k(nextCp.us_plan)}` : "");
   };
   const foot = `<div class="w-foot"><p>ค่าประมาณ จาก Team Ranking ${S.history.length} ภาพ · ` +
@@ -866,19 +866,19 @@ function wirePlanner(host, PL) {
     const [rest, restLo, restHi] = SP.rest[kk - 1][SP.strong.indexOf(sv)][i];
     $("#sq-big", host).innerHTML = rest <= 0 ? `อีก ${others} คน <b>ไม่ต้องเดินเพิ่ม</b> ก็แซงทัน`
       : `อีก ${others} คน ต้องเดินคนละ <b>${k(rest)}</b> ก้าวต่อวัน`;
-    $("#sq-sub", host).innerHTML = `ตัวแรง ${kk} คน เดินคนละ ${k(sv)} ทั้งทีมได้เฉลี่ย ${k(p.need)} ตามแผน · ถ้าทีมผู้นำแผ่ว ที่เหลือเดินคนละ ${k(Math.max(0, restLo))} ถ้าเขาแรง ต้อง ${k(restHi)}`;
+    $("#sq-sub", host).innerHTML = `เดอะแบก ${kk} คน เดินคนละ ${k(sv)} ทั้งทีมได้เฉลี่ย ${k(p.need)} ตามแผน · ถ้าทีมผู้นำแผ่ว ที่เหลือเดินคนละ ${k(Math.max(0, restLo))} ถ้าเขาแรง ต้อง ${k(restHi)}`;
     // six runners as bars: strong ones, the rest, and the plan's team average behind them
     const host2 = $("#sq-bars", host), w = Math.min(W(host2), 640), hh = 150, n = SP.members, gap = 10, bw = (w - 40 - gap * (n - 1)) / n;
     const vals = Array.from({ length: n }, (_, j) => j < kk ? sv : Math.max(0, rest)), top = niceMax(Math.max(...vals, p.need) * 1.1);
     const Y = v => 18 + (hh - 40) * (1 - v / top);
-    const s = svgIn(host2, w, hh, `ตัวแรง ${kk} คน คนละ ${k(sv)} ที่เหลือคนละ ${k(rest)}`);
+    const s = svgIn(host2, w, hh, `เดอะแบก ${kk} คน คนละ ${k(sv)} ที่เหลือคนละ ${k(rest)}`);
     el("line", { x1: 36, x2: w, y1: Y(p.need), y2: Y(p.need), stroke: C("--us-deep"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, s);
     txt(s, 34, Y(p.need) + 4, k(p.need), { "text-anchor": "end", "font-size": 11, "font-weight": 600, fill: C("--us-deep") });
     vals.forEach((v, j) => {
       const x = 40 + j * (bw + gap);
       rise(vbar(s, x, Y(v), bw, Y(0) - Y(v), { fill: j < kk ? US : C("--us-soft") }), j * 40, 450);
       txt(s, x + bw / 2, Y(v) + 18, k(v), { "text-anchor": "middle", "font-size": 13, "font-weight": 700, "font-style": "italic", fill: j < kk ? "#fff" : C("--us-deep") });   // inside the bar: never under the target line
-      txt(s, x + bw / 2, hh - 6, j < kk ? "ตัวแรง" : "คนอื่น", { "text-anchor": "middle", "font-size": 11, fill: MUTED });
+      txt(s, x + bw / 2, hh - 6, j < kk ? "เดอะแบก" : "คนอื่น", { "text-anchor": "middle", "font-size": 11, fill: MUTED });
     });
     el("line", { x1: 36, x2: w, y1: Y(0), y2: Y(0), stroke: RULE }, s);
   };
