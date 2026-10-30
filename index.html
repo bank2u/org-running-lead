@@ -20,9 +20,11 @@
   --ground: #eef1f5; --panel: #ffffff; --tint: #f5f7fa;
   --ink: #0f1d33; --ink-2: #44526b; --muted: #5d6a82; --rule: #d6dce6; --rule-2: #e7ebf1;
   --hot: #ff5a1f; --hot-ink: #b83a0c; --hot-bg: #fff0e9;
-  --off: #0f1d33; --off-ink: #0f1d33;
+  --off: #4a5f82; --off-ink: #2c3e5c;
+  /* light straps (user, 2026-10-30: lighter, easier to read, never a dark theme) */
+  --strap: #e9eef6; --strap-2: #dfe6f1; --gantry: #dbe3ef; --strap-ink: #44526b;
   /* ทีมเรา: deep teal, used only in the ทางชนะ section (navy = them, orange = their weak window) */
-  --us: #0c5c60; --us-2: #137077; --us-ink: #c3e4e2; --us-tint: #eef6f5; --us-band: #dceeec;
+  --us: #0c5c60; --us-2: #137077; --us-ink: #c3e4e2; --us-tint: #f2f8f7; --us-band: #ddefec; --us-strap: #dcefec; --us-strap-2: #cfe7e3; --us-deep: #0a4a4e;
   /* member series: fixed per alias (validated: dataviz validate_palette, light, adjacent pairs; relief = direct labels) */
   --m1: #2a78d6; --m2: #e87ba4; --m3: #1baf7a; --m4: #eda100; --m5: #6250d6; --m6: #008300;
   --font: "Kanit", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -35,26 +37,26 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-color: 
 body { margin: 0; background: var(--ground); color: var(--ink); font: 400 15px/1.6 var(--font); font-variant-numeric: tabular-nums; }
 ::selection { background: var(--navy); color: #fff; }
 :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 4px; }
-.top :focus-visible { outline-color: #fff; }
+
 button { font: inherit; color: inherit; }
 a { color: inherit; text-underline-offset: 3px; }
 .num { font-variant-numeric: tabular-nums; }
 
 /* ---------- header strap ---------- */
-.top { position: sticky; top: 0; z-index: 20; background: var(--navy); color: #fff; }
+.top { position: sticky; top: 0; z-index: 20; background: #fff; color: var(--ink); box-shadow: 0 1px 0 var(--rule); }
 .top-in { max-width: 1120px; margin: 0 auto; padding: 10px max(16px, env(safe-area-inset-left)) 0; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 16px; }
 .brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .brand b { font-weight: 700; font-style: italic; font-size: 19px; letter-spacing: .01em; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
-.brand b::before { content: ""; width: 7px; height: 18px; background: #fff; transform: skewX(-18deg); box-shadow: 5px 0 0 rgba(255, 255, 255, .35); margin-right: 5px; }
-.brand span { color: var(--navy-ink); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--navy-ink); white-space: nowrap; }
-.live i { width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .22); }
-.live b { color: #fff; font-weight: 500; }
+.brand b::before { content: ""; width: 7px; height: 18px; background: var(--navy); transform: skewX(-18deg); box-shadow: 5px 0 0 rgba(15, 29, 51, .3); margin-right: 5px; }
+.brand span { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--navy); box-shadow: 0 0 0 3px rgba(15, 29, 51, .12); }
+.live b { color: var(--ink); font-weight: 500; }
 .tabs { grid-column: 1 / -1; display: flex; gap: 4px; margin-top: 6px; }
-.tabs button { appearance: none; border: 0; background: none; color: var(--navy-ink); padding: 10px 14px 12px; font-size: 15px; font-weight: 500; cursor: pointer; position: relative; border-radius: 6px 6px 0 0; }
-.tabs button:hover { color: #fff; background: var(--navy-2); }
-.tabs button[aria-selected="true"] { color: #fff; }
-.tabs button::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; background: #fff; transform: scaleX(0); transform-origin: 0 50%; transition: transform 260ms cubic-bezier(.16, 1, .3, 1); }
+.tabs button { appearance: none; border: 0; background: none; color: var(--ink-2); padding: 10px 14px 12px; font-size: 15px; font-weight: 500; cursor: pointer; position: relative; border-radius: 6px 6px 0 0; }
+.tabs button:hover { color: var(--ink); background: var(--tint); }
+.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.tabs button::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; background: var(--navy); transform: scaleX(0); transform-origin: 0 50%; transition: transform 260ms cubic-bezier(.16, 1, .3, 1); }
 .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 20px max(16px, env(safe-area-inset-left)) 72px; }
@@ -65,11 +67,11 @@ a { color: inherit; text-underline-offset: 3px; }
 
 /* ---------- race (signature) ---------- */
 /* broadcast strap: speed lines fading in from the right edge */
-.race-head { color: #fff; border-radius: var(--r) var(--r) 0 0; padding: 18px 20px 16px;
-  background: linear-gradient(90deg, var(--navy) 35%, rgba(15, 29, 51, .7) 100%), repeating-linear-gradient(115deg, var(--navy) 0 26px, var(--navy-2) 26px 30px); }
-.race-head h1 { margin: 0; font-weight: 500; font-size: 17px; line-height: 1.35; color: var(--navy-ink); }
-.race-head h1 strong { display: block; color: #fff; font-style: italic; font-weight: 700; font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: -.01em; margin-top: 4px; }
-.race-head h1 strong small { font-size: 17px; font-style: normal; font-weight: 400; color: var(--navy-ink); letter-spacing: 0; margin-left: 10px; white-space: nowrap; }
+.race-head { color: var(--ink); border-radius: var(--r) var(--r) 0 0; padding: 18px 20px 16px;
+  background: linear-gradient(90deg, var(--strap) 35%, rgba(233, 238, 246, .55) 100%), repeating-linear-gradient(115deg, var(--strap) 0 26px, var(--strap-2) 26px 30px); }
+.race-head h1 { margin: 0; font-weight: 500; font-size: 17px; line-height: 1.35; color: var(--strap-ink); }
+.race-head h1 strong { display: block; color: var(--ink); font-style: italic; font-weight: 700; font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: -.01em; margin-top: 4px; }
+.race-head h1 strong small { font-size: 17px; font-style: normal; font-weight: 400; color: var(--strap-ink); letter-spacing: 0; margin-left: 10px; white-space: nowrap; color: var(--strap-ink); }
 .race-body { padding: 8px 12px 14px 12px; }
 .race-note { padding: 0 20px 16px; color: var(--muted); font-size: 13px; }
 svg { display: block; overflow: visible; }
@@ -156,7 +158,7 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 .limits[open] summary svg { transform: rotate(180deg); }
 .limits ul { margin: 0; padding: 0 20px 18px 36px; color: var(--ink-2); font-size: 14px; display: grid; gap: 6px; }
 
-.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--navy); color: #fff; border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.45; box-shadow: 0 6px 20px rgba(15, 29, 51, .25); max-width: 240px; }
+.tip { position: fixed; z-index: 50; pointer-events: none; background: #fff; color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.45; box-shadow: 0 6px 20px rgba(15, 29, 51, .25); max-width: 240px; }
 .tip b { font-weight: 600; }
 .tip .r { display: flex; justify-content: space-between; gap: 14px; }
 .tip .r i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
@@ -165,17 +167,17 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 /* ---------- ทางชนะ: our race against the leader (Team Ranking screenshots; roles only, never a team name) ---------- */
 .teaser { appearance: none; width: 100%; margin-top: 18px; border: 0; border-radius: var(--r); cursor: pointer; text-align: left;
   display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 14px 20px; font-size: 15px;
-  color: var(--us-ink); background: linear-gradient(90deg, var(--us) 35%, rgba(12, 92, 96, .72) 100%), repeating-linear-gradient(115deg, var(--us) 0 26px, var(--us-2) 26px 30px); }
-.teaser b { color: #fff; font-weight: 700; font-style: italic; font-size: 17px; }
-.teaser .go { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; white-space: nowrap; }
+  color: var(--us-deep); background: linear-gradient(90deg, var(--us-strap) 35%, rgba(220, 239, 236, .55) 100%), repeating-linear-gradient(115deg, var(--us-strap) 0 26px, var(--us-strap-2) 26px 30px); }
+.teaser b { color: var(--us-deep); font-weight: 700; font-style: italic; font-size: 17px; }
+.teaser .go { display: inline-flex; align-items: center; gap: 6px; color: var(--us-deep); font-weight: 600; white-space: nowrap; }
 .teaser .go svg { width: 14px; height: 14px; transition: transform 200ms cubic-bezier(.16, 1, .3, 1); }
 .teaser:hover .go svg { transform: translateX(3px); }
 .teaser:focus-visible { outline-color: var(--us); }
 .win { background: var(--us-tint); box-shadow: 0 1px 2px rgba(12, 92, 96, .08), 0 4px 14px rgba(12, 92, 96, .07); }
-.win .race-head.win-head { background: linear-gradient(90deg, var(--us) 35%, rgba(12, 92, 96, .72) 100%), repeating-linear-gradient(115deg, var(--us) 0 26px, var(--us-2) 26px 30px); }
-.win-head h2, .win-head p { color: var(--us-ink) !important; }
-.win-head h2 b, .win-head p b, .win-head h2 strong { color: #fff !important; }
-.win-head h2 strong small { color: var(--us-ink) !important; }
+.win .race-head.win-head { background: linear-gradient(90deg, var(--us-strap) 35%, rgba(220, 239, 236, .55) 100%), repeating-linear-gradient(115deg, var(--us-strap) 0 26px, var(--us-strap-2) 26px 30px); }
+.win-head h2, .win-head p { color: #2f5d5f !important; }
+.win-head h2 b, .win-head p b, .win-head h2 strong { color: var(--us-deep) !important; }
+.win-head h2 strong small { color: #2f5d5f !important; }
 .win .wb + .wb, .win .wpair + .wb, .win .wb + .wpair, .win .play + .play, .win .wnote, .win .wpair > .w-chart { border-color: rgba(12, 92, 96, .14); }
 .win .board tr.us td:not(.g), .win .cp.next { background: var(--us-band); }
 .win .board tr.us .tm { color: var(--us); }
@@ -207,10 +209,10 @@ table.board { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .board .tm { text-align: left; }
 .board tr.us td { background: var(--tint); font-weight: 700; }
 .board tr.us td:first-child { border-radius: 6px 0 0 6px; }
-.board .g { width: 1%; background: var(--navy); color: #fff; font-style: italic; font-weight: 700; font-size: 15px; padding-left: 18px; }
-.board tr.us td.g { background: var(--navy); }
-.board th.g { font-style: normal; font-weight: 600; font-size: 11px; color: #fff; border-radius: 4px 4px 0 0; padding-top: 12px;
-  background: repeating-conic-gradient(#fff 0 25%, var(--navy) 0 50%) 0 0 / 8px 8px repeat-x var(--navy); }
+.board .g { width: 1%; background: var(--gantry); color: var(--ink); font-style: italic; font-weight: 700; font-size: 15px; padding-left: 18px; }
+.board tr.us td.g { background: var(--gantry); }
+.board th.g { font-style: normal; font-weight: 600; font-size: 11px; color: var(--ink); border-radius: 4px 4px 0 0; padding-top: 12px;
+  background: repeating-conic-gradient(#fff 0 25%, var(--navy) 0 50%) 0 0 / 8px 8px repeat-x var(--gantry); }
 .board tbody tr:last-child td.g { border-radius: 0 0 4px 4px; }
 .board .ln { width: 46%; padding-left: 4px; padding-right: 20px; }
 .lt { position: relative; height: 16px; }
@@ -513,11 +515,11 @@ function drawRace() {
   const cx = j => w - colsW + j * cw + cw - 6;
   // finish gantry: navy column with a chequered strip along its top
   const defs = el("defs", {}, s), chk = el("pattern", { id: "chk", width: 8, height: 8, patternUnits: "userSpaceOnUse", x: w - cw }, defs);
-  el("rect", { width: 8, height: 8, fill: OFF }, chk); el("rect", { width: 4, height: 4, fill: "#fff" }, chk); el("rect", { x: 4, y: 4, width: 4, height: 4, fill: "#fff" }, chk);
+  el("rect", { width: 8, height: 8, fill: C("--navy") }, chk); el("rect", { width: 4, height: 4, fill: "#fff" }, chk); el("rect", { x: 4, y: 4, width: 4, height: 4, fill: "#fff" }, chk);
   const clip = el("clipPath", { id: "gclip" }, defs); el("rect", { x: w - cw, y: 0, width: cw, height: h, rx: 4 }, clip);
-  el("rect", { x: w - cw, y: 0, width: cw, height: h, rx: 4, fill: OFF }, s);
+  el("rect", { x: w - cw, y: 0, width: cw, height: h, rx: 4, fill: C("--gantry") }, s);
   el("rect", { x: w - cw, y: 0, width: cw, height: 8, fill: "url(#chk)", "clip-path": "url(#gclip)" }, s);
-  cols.forEach(([name], j) => txt(s, cx(j), 22, name, { "text-anchor": "end", "font-size": 11, "font-weight": j === cols.length - 1 ? 600 : 400, fill: j === cols.length - 1 ? "#fff" : MUTED }));
+  cols.forEach(([name], j) => txt(s, cx(j), 22, name, { "text-anchor": "end", "font-size": 11, "font-weight": j === cols.length - 1 ? 600 : 400, fill: j === cols.length - 1 ? INK : MUTED }));
   lanes.forEach((l, i) => {
     const y = top + i * lh + lh / 2, col = l.team ? OFF : hue[l.alias];
     const g = el("g", { class: "lane" }, s);
@@ -537,7 +539,7 @@ function drawRace() {
     fade(el("line", { x1: X(l.p.mid), x2: X(l.p.mid), y1: y - 8, y2: y + 8, stroke: col, "stroke-width": 2 }, g), d1, 450);
     cols.forEach(([, f], j) => {
       const last = j === cols.length - 1;
-      const tx = txt(g, cx(j), y + 5, f(l), { "text-anchor": "end", "font-size": last ? 15 : 13, "font-weight": last || l.team ? 700 : 500, "font-style": last ? "italic" : "normal", fill: last ? "#fff" : INK });
+      const tx = txt(g, cx(j), y + 5, f(l), { "text-anchor": "end", "font-size": last ? 15 : 13, "font-weight": last || l.team ? 700 : 500, "font-style": last ? "italic" : "normal", fill: INK });
       if (last) run(tx, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], d1 + 150, 450);
     });
     const hit = el("rect", { x: 0, y: y - lh / 2, width: w, height: lh, fill: "transparent" }, g);
@@ -827,7 +829,7 @@ function drawGap(host) {
   }
   // finish gantry: a chequered strip at the end of the last day
   const defs = el("defs", {}, s), chk = el("pattern", { id: "wchk", width: 8, height: 8, patternUnits: "userSpaceOnUse", x: X(nd) }, defs);
-  el("rect", { width: 8, height: 8, fill: OFF }, chk); el("rect", { width: 4, height: 4, fill: "#fff" }, chk); el("rect", { x: 4, y: 4, width: 4, height: 4, fill: "#fff" }, chk);
+  el("rect", { width: 8, height: 8, fill: C("--navy") }, chk); el("rect", { width: 4, height: 4, fill: "#fff" }, chk); el("rect", { x: 4, y: 4, width: 4, height: 4, fill: "#fff" }, chk);
   el("rect", { x: X(nd), y: T - 8, width: 8, height: h - T - Bm + 8, fill: "url(#wchk)", stroke: OFF, "stroke-width": 1 }, s);
   // now (dotted) and the cut-off (solid ink)
   el("line", { x1: X(S.now_t), x2: X(S.now_t), y1: T, y2: h - Bm, stroke: INK2, "stroke-dasharray": "2 3" }, s);
@@ -890,7 +892,7 @@ function teamOrMember(i) {
 function viewDaily(host) {
   const f = state.focus;
   host.innerHTML = `<h2>${f ? `ก้าวต่อวันของ ${esc(f)}` : "ก้าวเฉลี่ยต่อคนต่อวัน (ทั้งทีม)"}</h2>` +
-    `<p class="sub">แท่งส้มคือวันทำงาน แท่งน้ำเงินเข้มคือวันหยุด เส้นประคือค่าเฉลี่ยของแต่ละกลุ่ม</p>` +
+    `<p class="sub">แท่งส้มคือวันทำงาน แท่งน้ำเงินคือวันหยุด เส้นประคือค่าเฉลี่ยของแต่ละกลุ่ม</p>` +
     `<div class="legend"><span><i style="background:${HOT}"></i>วันทำงาน</span><span><i style="background:${OFF}"></i>วันหยุด</span><span><i class="hatch"></i>ประมาณ</span><span><i style="border:1.5px dashed ${MUTED}"></i>ยังไม่จบวัน</span></div><div id="c"></div><div class="halves" id="halves"></div>`;
   const c = $("#c", host), w = W(c), h = w < 560 ? 230 : 280, L = 40, R = 8, T = 18, B = 40;
   const vals = days.map((d, i) => teamOrMember(i));
