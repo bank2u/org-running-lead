@@ -185,7 +185,8 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 .win-head h2 b, .win-head p b, .win-head h2 strong { color: var(--us-deep) !important; }
 .win-head h2 strong small { color: #2f5d5f !important; }
 .win .wb + .wb, .win .wpair + .wb, .win .wb + .wpair, .win .play + .play, .win .wnote, .win .wpair > .w-chart { border-color: rgba(12, 92, 96, .14); }
-.win .board tr.us td:not(.g), .win .cp.next { background: var(--us-band); }
+.win .board tr.us td:not(.g) { background: var(--us-band); }
+.win .cp.next { background: var(--strap); }
 .win .proof:hover { border-color: var(--us-mark); background: var(--us-tint); }
 .win .board tr.us .tm { color: var(--us); }
 .win .st.on { background: var(--us-mark); }
@@ -240,26 +241,41 @@ table.board { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 
 /* plays beside their proof chart */
 .sq-ctl { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 12px; font-size: 14px; color: var(--ink-2); }
-.sq-ctl select { font: inherit; font-weight: 600; color: var(--us-deep); background: #fff; border: 1px solid rgba(12, 92, 96, .3); border-radius: 6px; padding: 4px 8px; margin: 0 4px; }
-.sq-out { background: var(--us-tint); border: 1px solid rgba(12, 92, 96, .1); border-radius: 8px; padding: 14px; }
+.sq-ctl select { font: inherit; font-weight: 600; color: var(--us-deep); background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 4px 8px; margin: 0 4px; }
+.sq-out { background: var(--tint); border: 1px solid var(--rule-2); border-radius: 8px; padding: 14px; }
 .sq-big { font-size: 16px; color: var(--ink); margin-bottom: 6px; }
 .sq-big b { font-style: italic; font-weight: 700; font-size: 30px; color: var(--us-deep); margin: 0 4px; }
-.pace { display: grid; gap: 6px; margin: 0 0 12px; padding: 12px 14px; background: var(--us-tint); border: 1px solid rgba(12, 92, 96, .1); border-radius: 8px; }
+.pace { display: grid; gap: 6px; margin: 0 0 12px; padding: 12px 14px; background: var(--tint); border: 1px solid var(--rule-2); border-radius: 8px; --fill: var(--us-mark); }
+.pace.late { --fill: var(--warn); }
 .pace label { font-size: 15px; color: var(--ink-2); }
 .pace label b { font-style: italic; font-weight: 700; font-size: 22px; color: var(--us-deep); }
-.pace input[type=range] { width: 100%; accent-color: var(--us-mark); height: 28px; }
+/* the target-day slider: a teal run from today to the plan (crimson when the plan asks more than the leader's best day) */
+.pace input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; --f: 1; }
+.pace input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--fill) calc(11px + (100% - 22px) * var(--f)), var(--rule) 0); }
+.pace input[type=range]::-moz-range-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--fill) calc(11px + (100% - 22px) * var(--f)), var(--rule) 0); }
+.pace input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: #fff; border: 3px solid var(--fill); box-shadow: 0 1px 2px rgba(15, 29, 51, .2), 0 2px 6px rgba(15, 29, 51, .12); }
+.pace input[type=range]::-moz-range-thumb { box-sizing: border-box; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--fill); box-shadow: 0 1px 2px rgba(15, 29, 51, .2), 0 2px 6px rgba(15, 29, 51, .12); }
+.pace input[type=range]:focus-visible { outline: 2px solid var(--fill); outline-offset: 2px; border-radius: 6px; }
+/* one tag per day under the track, in the site's day grammar: orange = weekday, slate = off-day */
+.pl-days { position: relative; height: 3px; margin: -4px 11px 2px; }
+.pl-days i { position: absolute; top: 0; width: 10px; height: 3px; border-radius: 2px; transform: translateX(-50%); background: var(--hot); }
+.pl-days i.off { background: var(--off); }
+.pl-days i.on { height: 5px; top: -1px; }
 .pace-out { margin: 0; font-size: 15px; color: var(--ink); }
 .pace-out b { color: var(--us-deep); font-weight: 700; }
 .pace-out span { display: block; font-size: 13px; color: var(--muted); }
 .pace-out em.warn { font-style: normal; font-weight: 600; color: var(--warn); white-space: nowrap; }
 .pl-ends { display: flex; justify-content: space-between; gap: 12px; margin-top: -6px; font-size: 12px; color: var(--muted); }
-.sq { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(12, 92, 96, .14); }
+.sq { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--rule-2); }
 .sq h4 { margin: 0 0 10px; font-size: 16px; font-weight: 500; line-height: 1.35; }
 .sq h4 small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 6px; }
 .wpair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "plays chart"; }
 .wpair > .w-chart { grid-area: chart; border-left: 1px solid var(--rule-2); }
 .wpair > .w-plays { grid-area: plays; }
 .play + .play { border-top: 1px solid var(--rule-2); margin-top: 16px; padding-top: 16px; }
+.play::before { content: ""; display: block; width: 20px; height: 3px; border-radius: 2px; margin-bottom: 10px; background: var(--us-mark); }
+.play.hot::before { background: var(--hot); }
+.play.off::before { background: var(--off); }
 .play h3 { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.35; }
 .play h3 strong { font-style: italic; font-weight: 700; font-size: 30px; line-height: 1.1; margin-left: 6px; white-space: nowrap; }
 .play h3 strong { color: var(--us-deep); }
@@ -285,6 +301,8 @@ table.board { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .cp.next + .cp, .cp + .cp.next { border-top-color: transparent; }
 .cp .d { font-weight: 600; white-space: nowrap; }
 .cp .d small { font-weight: 400; color: var(--ink-2); font-size: 13px; margin-right: 4px; }
+.cp .d small.wk { color: var(--hot-ink); }
+.cp .d small.off { color: var(--off-ink); }
 .cp .v { font-style: italic; font-weight: 700; font-size: 17px; color: var(--us-deep); }
 .cp .v.keep { font-style: normal; font-weight: 400; font-size: 14px; color: var(--muted); }
 .cp .t { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
@@ -439,6 +457,7 @@ const days = D.days;
 const seen = days.map((d, i) => i).filter(i => days[i].status !== "future");
 const done = seen.filter(i => days[i].status === "done" || days[i].status === "est");
 const isOff = d => d.type !== "weekday";
+const dayOff = ds => { const d = days.find(x => x.d === ds); return d ? isOff(d) : [0, 6].includes(new Date(ds + "T12:00").getDay()); };
 const TYPE = { weekday: "วันทำงาน", weekend: "เสาร์-อาทิตย์", holiday: "วันหยุดนักขัตฤกษ์" };
 const STATUS = { est: "ประมาณ (ไม่มีภาพของวันนี้)", partial: `ยังไม่จบวัน (ถึง ${D.as_of.time})`, done: "", future: "ยังไม่ถึง" };
 const P = D.projection;
@@ -762,6 +781,7 @@ function drawWin() {
   const planner = PL ? `<div class="wb w-plan"><h3 id="plan-title">วางแผนแซงทีมผู้นำ</h3>` +
     `<div class="pace"><label for="pl-d">แซงภายใน <b id="pl-dv"></b></label>` +
     `<input type="range" id="pl-d" min="0" max="${PLANS.length - 1}" step="1" value="${planIdx()}" aria-describedby="pl-out">` +
+    `<div class="pl-days" aria-hidden="true">${PLANS.map((p, i) => `<i class="${dayOff(p.d) ? "off" : "wk"}" style="left:${(100 * i / Math.max(1, PLANS.length - 1)).toFixed(2)}%"></i>`).join("")}</div>` +
     `<div class="pl-ends" aria-hidden="true"><span>${PLANS[0].dow} ${PLANS[0].label}</span><span>เส้นชัย ${PLANS[PLANS.length - 1].dow} ${PLANS[PLANS.length - 1].label}</span></div>` +
     `<p class="pace-out" id="pl-out" role="status" aria-live="polite"></p></div>` +
     `<div class="legend"><span><i class="line" style="background:${OFF}"></i>ทีมผู้นำ</span><span><i class="line" style="background:${US}"></i>ทีมเรา</span><span><i class="dash" style="color:${INK2}"></i>คาดการณ์ / ตามแผน</span><span><i style="background:${OFF};opacity:.18"></i>ช่วงที่ทีมผู้นำอาจจบ</span></div>` +
@@ -776,7 +796,7 @@ function drawWin() {
   /* block 4: plays */
   const wkIns = D.insights.find(c => c.id === "weekday"), hrIns = D.insights.find(c => c.id === "hours");
   const pl = S.plan || {};
-  const play = (id, head, val, hot, line, btn) => `<article class="play"><h3>${head}<strong class="${hot === true ? "hot" : hot || ""}">${val}</strong></h3><p>${line}</p>${btn}</article>`;
+  const play = (id, head, val, hot, line, btn) => `<article class="play ${hot === true ? "hot" : hot || "us"}"><h3>${head}<strong class="${hot === true ? "hot" : hot || ""}">${val}</strong></h3><p>${line}</p>${btn}</article>`;
   const proofBtn = (act, label = "ดูหลักฐาน", icon = ARROW) => `<button class="proof" type="button" data-act="${act}">${label} ${icon}</button>`;
   const plays = [
     !ahead && cut ? play("p1", "เริ่มเร่งตั้งแต่วันนี้", "+" + kd(PL.need, S.pace_basis_value), false,
@@ -801,7 +821,7 @@ function drawWin() {
     ? `<li class="cp cut" id="win-cut" tabindex="-1"><span class="d">จุดตัด <small>${c.dow}</small>${c.label}</span><span class="t">` +
       `<span class="lead">เดินวันละ ${k(pbv)} ถึงวันนี้ หลังจากนั้นต้อง <b>${k(c.need_after)}</b> ทุกวัน เกือบเท่าวันที่ดีที่สุดของทีมผู้นำ (${k(S.ceiling)})</span>` +
       `<span>เลยวันนี้ไป เป้าหลักคือรักษาอันดับ ${S.us.rank}</span></span></li>`
-    : `<li class="cp${nextCp && c.d === nextCp.d ? " next" : ""}"><span class="d"><small>${c.dow}</small>${c.label}</span><span class="v">${k(c.us_plan)}</span><span class="v keep">${k(c.us_keep)}</span>` +
+    : `<li class="cp${nextCp && c.d === nextCp.d ? " next" : ""}"><span class="d"><small class="${dayOff(c.d) ? "off" : "wk"}">${c.dow}</small>${c.label}</span><span class="v">${k(c.us_plan)}</span><span class="v keep">${k(c.us_keep)}</span>` +
       `<span>${c.status ? `<span class="st ${c.status}">${PILL[c.status]}</span>` : `<span class="st wait">รอแคปภาพ</span>`}</span>` +
       `<span class="t"><span>${TEST[c.kind](c)}</span>${c.status ? `<span class="dec">${DEC[c.status]}</span>` : ""}</span></li>`;
   const cps = `<div class="wb w-cps"><h3>จุดเช็ค${PL ? `<small>ตามแผนแซงภายใน ${PL.dow} ${PL.label}</small>` : ""}</h3><p class="sub" style="margin:-6px 0 12px">เทียบกับหน้า Team Ranking ได้เลย</p>` +
@@ -876,8 +896,8 @@ function wirePlanner(host, PL) {
     txt(s, 34, Y(p.need) + 4, k(p.need), { "text-anchor": "end", "font-size": 11, "font-weight": 600, fill: C("--us-deep") });
     vals.forEach((v, j) => {
       const x = 40 + j * (bw + gap);
-      rise(vbar(s, x, Y(v), bw, Y(0) - Y(v), { fill: j < kk ? US : C("--us-soft") }), j * 40, 450);
-      txt(s, x + bw / 2, Y(v) + 18, k(v), { "text-anchor": "middle", "font-size": 13, "font-weight": 700, "font-style": "italic", fill: j < kk ? "#fff" : C("--us-deep") });   // inside the bar: never under the target line
+      rise(vbar(s, x, Y(v), bw, Y(0) - Y(v), { fill: j < kk ? US : C("--gantry") }), j * 40, 450);
+      txt(s, x + bw / 2, Y(v) + 18, k(v), { "text-anchor": "middle", "font-size": 13, "font-weight": 700, "font-style": "italic", fill: j < kk ? "#fff" : INK });   // inside the bar: never under the target line
       txt(s, x + bw / 2, hh - 6, j < kk ? "เดอะแบก" : "คนอื่น", { "text-anchor": "middle", "font-size": 11, fill: MUTED });
     });
     el("line", { x1: 36, x2: w, y1: Y(0), y2: Y(0), stroke: RULE }, s);
@@ -885,6 +905,9 @@ function wirePlanner(host, PL) {
   const show = i => {
     const p = PLANS[i], ends = g2 => `จบ${g2 >= 0 ? "นำ" : "ตาม"} ${k0(Math.abs(g2))}`;
     $("#pl-dv", host).textContent = `${p.dow} ${p.label}`;
+    range.style.setProperty("--f", last ? i / last : 1);
+    range.closest(".pace").classList.toggle("late", !!p.late);
+    host.querySelectorAll(".pl-days i").forEach((t, j) => t.classList.toggle("on", j === i));
     $("#pl-out", host).innerHTML = `ทั้งทีมเดินเฉลี่ย <b>${k(p.need)}</b> ก้าวต่อคนต่อวัน (เพิ่มจากตอนนี้ +${kd(p.need, S.pace_basis_value)})` +
       (p.late ? ` <em class="warn">เกินวันที่ดีที่สุดของทีมผู้นำ (${k(S.ceiling)})</em>` : "") +
       `<span>${i === last ? "แซงทันที่เส้นชัยพอดี ถ้าทีมผู้นำจบตามคาด" : `${p.cross && p.cross.d !== p.d ? `แซงได้ตั้งแต่ ${p.cross.dow} ${p.cross.label} · ` : ""}${ends(p.end_gap)} ถ้าเดินแบบนี้ถึงเส้นชัย`}` +
@@ -955,6 +978,10 @@ function drawRaceChart(host, pace, cross) {
   el("line", { x1: X(S.now_t), x2: X(S.now_t), y1: T, y2: h - Bm, stroke: INK2, "stroke-dasharray": "2 3" }, s);
   txt(s, X(S.now_t) + 4, T - 8, "ตอนนี้", { "font-size": 11, fill: INK2 });
   const line = (pts, key = "avg") => "M" + pts.map(p => `${X(p.t).toFixed(1)},${Y(p[key]).toFixed(1)}`).join("L");
+  // ours: a soft teal wash under our run and plan, so the two teams read apart at a glance
+  const ug = el("linearGradient", { id: "rusf", x1: 0, x2: 0, y1: 0, y2: 1 }, defs);
+  el("stop", { offset: 0, "stop-color": US, "stop-opacity": .16 }, ug); el("stop", { offset: 1, "stop-color": US, "stop-opacity": 0 }, ug);
+  fade(el("path", { d: line(R.us_actual) + `L${X(S.now_t)},${Y(S.us.avg)}L${X(nd)},${Y(usEnd(nd))}L${X(nd)},${Y(0)}L${X(R.us_actual[0].t)},${Y(0)}Z`, fill: "url(#rusf)" }, s), 300, 600);
   // leader: band low..high, projection mid (dashed), actual (solid)
   const lp = R.lead_path;
   el("path", { d: line(lp, "low") + "L" + [...lp].reverse().map(p => `${X(p.t).toFixed(1)},${Y(p.high).toFixed(1)}`).join("L") + "Z", fill: OFF, opacity: .1 }, s);
