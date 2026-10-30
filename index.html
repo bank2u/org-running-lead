@@ -21,6 +21,8 @@
   --ink: #0f1d33; --ink-2: #44526b; --muted: #5d6a82; --rule: #d6dce6; --rule-2: #e7ebf1;
   --hot: #ff5a1f; --hot-ink: #b83a0c; --hot-bg: #fff0e9;
   --off: #0f1d33; --off-ink: #0f1d33;
+  /* ทีมเรา: deep teal, used only in the ทางชนะ section (navy = them, orange = their weak window) */
+  --us: #0c5c60; --us-2: #137077; --us-ink: #c3e4e2; --us-tint: #eef6f5; --us-band: #dceeec;
   /* member series: fixed per alias (validated: dataviz validate_palette, light, adjacent pairs; relief = direct labels) */
   --m1: #2a78d6; --m2: #e87ba4; --m3: #1baf7a; --m4: #eda100; --m5: #6250d6; --m6: #008300;
   --font: "Kanit", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -161,7 +163,15 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
 
 /* ---------- ทางชนะ: our race against the leader (Team Ranking screenshots; roles only, never a team name) ---------- */
-.win { margin-top: 18px; }
+.win { margin-top: 18px; background: var(--us-tint); box-shadow: 0 1px 2px rgba(12, 92, 96, .08), 0 4px 14px rgba(12, 92, 96, .07); }
+.win .race-head.win-head { background: linear-gradient(90deg, var(--us) 35%, rgba(12, 92, 96, .72) 100%), repeating-linear-gradient(115deg, var(--us) 0 26px, var(--us-2) 26px 30px); }
+.win-head h2, .win-head p { color: var(--us-ink) !important; }
+.win-head h2 b, .win-head p b, .win-head h2 strong { color: #fff !important; }
+.win-head h2 strong small { color: var(--us-ink) !important; }
+.win .wb + .wb, .win .wpair + .wb, .win .wb + .wpair, .win .play + .play, .win .wnote, .win .wpair > .w-chart { border-color: rgba(12, 92, 96, .14); }
+.win .board tr.us td:not(.g), .win .cp.next { background: var(--us-band); }
+.win .board tr.us .tm { color: var(--us); }
+.win .st.on { background: var(--us); }
 .win-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 20px; }
 .win-head h2 { margin: 0; font-weight: 500; font-size: 17px; line-height: 1.35; color: var(--navy-ink); }
 .win-head h2 b { color: #fff; font-weight: 600; }
@@ -610,6 +620,7 @@ const MINI = {
    Teams appear by role only. Formats: per-day, gaps and averages with k (one decimal, like the timing columns);
    projected finish totals with ~k0 (like the race headline and gantry). */
 const S = D.strategy;
+const US = C("--us");
 const fin = v => v == null ? "–" : "~" + k0(v);
 const DOWN = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v9M4.5 8.5 8 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const CHEV = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -633,7 +644,7 @@ function drawWin() {
 
   /* block 1: win head */
   const name = "<b>ทางชนะ</b> · ";
-  const rng = ["rng", `ช่วงประมาณ ${k(S.need.low)} ถึง ${k(S.need.high)} ขึ้นกับว่าทีมผู้นำจะจบที่ ${k0(S.leader.end.low)} ถึง ${k0(S.leader.end.high)}`];
+  const rng = ["rng", `ช่วง ${k(S.need.low)}–${k(S.need.high)} ตามว่าทีมผู้นำจะจบที่ ${k0(S.leader.end.low)}–${k0(S.leader.end.high)}`];
   const slab = ahead
     ? winSlab({ lead: `${name}ทีมเรานำทีมผู้นำ ${k(S.lead)} ก้าว/คน`, fig: S.need.high > 0 ? k(S.need.high) : null, unit: "ก้าวต่อคนต่อวัน",
         lines: [["", S.need.high > 0 ? "เดินวันละเท่านี้ ต่อให้ทีมผู้นำเดินแบบ best case ก็ตามไม่ทัน" : "รักษา pace นี้ไว้ก็พอ"], rng], asof })
@@ -641,12 +652,12 @@ function drawWin() {
     ? winSlab({ lead: `${name}ไล่อันดับ 1 ยากแล้ว`, fig: k(S.need.mid), unit: "ก้าวต่อคนต่อวัน",
         lines: [["", `เกินวันที่ดีที่สุดที่ทีมผู้นำเคยทำ (<b>${k(S.ceiling)}</b>) ยังลุ้นได้ถ้าเขาแผ่วจนจบแถว ${k0(S.leader.end.low)}`], rng], asof })
     : winSlab({ lead: `${name}เหลือ ${S.days_left.toFixed(1)} วัน ตามหลังทีมผู้นำ ${k(S.gap)} ก้าว/คน`, fig: k(S.need.mid), unit: "ก้าวต่อคนต่อวัน",
-        lines: [["", `ตอนนี้ทีมเราเดินวันละ <b>${k(pbv)}</b> ต้องเพิ่มอีก <b>${kd(S.need.mid, pbv)}</b> ต่อคนต่อวัน ถึงจะไล่ทันตอนจบ`], rng], asof });
+        lines: [["", `ตอนนี้เดินวันละ <b>${k(pbv)}</b> ต้องเพิ่มอีก <b>${kd(S.need.mid, pbv)}</b>`], rng], asof });
 
   /* block 2: standings */
   const rows = [
     { cls: "", rk: S.leader.rank, tm: "ทีมผู้นำ", now: S.leader.avg, pace: S.leader.pace, end: S.leader.end.mid, w: [S.leader.end.low, S.leader.end.high], col: INK2 },
-    { cls: "us", rk: S.us.rank, tm: "ทีมเรา", now: S.us.avg, pace: pbv, end: S.us_end_keep, col: OFF },
+    { cls: "us", rk: S.us.rank, tm: "ทีมเรา", now: S.us.avg, pace: pbv, end: S.us_end_keep, col: US },
     ...(B ? [{ cls: "", rk: B.rank, tm: `ทีมอันดับ ${B.rank}`, now: B.avg, pace: bp, end: B.end_keep, col: "#c3cbd8" }] : []),
   ];
   const lmax = niceMax(Math.max(...rows.map(r => r.w ? r.w[1] : r.end)));
@@ -657,7 +668,7 @@ function drawWin() {
     `<i class="end" style="left:${pc(r.end)};background:${r.col}"></i><i class="dot" style="left:${pc(r.now)};background:${r.col}"></i></div></td>`;
   const stand = `<div class="wb w-stand"><h3${over ? ' id="win-title"' : ""}>${over ? "ผลจบ" : "อันดับตอนนี้"}</h3><table class="board"><thead><tr><th class="rk">อันดับ</th><th class="tm">ทีม</th><th class="ln" aria-hidden="true"></th><th>ตอนนี้</th><th>ก้าวเฉลี่ย<br>ต่อวัน</th><th class="g">คาดจบ</th></tr></thead><tbody>` +
     rows.map(r => `<tr class="${r.cls}"><td class="rk">${r.rk}</td><td class="tm">${r.tm}</td>${lane(r)}<td>${k(r.now)}</td><td>${k(r.pace)}</td><td class="g">${fin(r.end)}</td></tr>`).join("") +
-    `</tbody></table><p class="sub">คาดจบของทีมผู้นำมาจาก projection รายคน ${B ? `ของทีมเราและทีมอันดับ ${B.rank} คือถ้าเดินเท่าเดิม` : "ของทีมเราคือถ้าเดินเท่าเดิม"}</p>` +
+    `</tbody></table>` +
     (B && B.changed ? `<span class="wchip">ทีมอันดับ ${B.rank} เป็นทีมใหม่ ไม่ใช่ทีมเดิมจากแคปภาพก่อน</span>` : "") + `</div>`;
 
   if (over) { host.innerHTML = stand; animLanes(host); return; }
@@ -665,8 +676,8 @@ function drawWin() {
   /* block 3: gap chart (drawn after insertion) */
   const cp0 = S.checkpoints[0];
   const chart = `<div class="wb w-chart"><h3>ระยะห่างจากทีมผู้นำ<small>ก้าว/คน</small></h3>` +
-    `<div class="legend"><span><i class="line" style="background:${OFF}"></i>จริง (จากแคปภาพ)</span><span><i class="dash" style="color:${OFF}"></i>ตามแผน</span><span><i class="dash" style="color:${MUTED}"></i>ถ้าเดินเท่าเดิม</span></div>` +
-    `<div id="gapc"></div>` + (ahead ? "" : `<p class="sub ink2">${cp0 && cp0.gap_plan > S.gap ? "ถึงเดินตามแผน ระยะห่างก็ยังถ่างช่วงวันหยุดนี้ เพราะทีมผู้นำแรงวันหยุด แล้วค่อยหดในวันทำงานจนเหลือ 0 ตอนจบ" : "ถ้าเดินตามแผน ระยะห่างจะหดลงจนเหลือ 0 ตอนจบ"}</p>`) + `</div>`;
+    `<div class="legend"><span><i class="line" style="background:${US}"></i>จริง</span><span><i class="dash" style="color:${US}"></i>ตามแผน</span><span><i class="dash" style="color:${MUTED}"></i>ถ้าเดินเท่าเดิม</span></div>` +
+    `<div id="gapc"></div>` + (ahead ? "" : `<p class="sub ink2">${cp0 && cp0.gap_plan > S.gap ? "ตามแผน ระยะจะถ่างช่วงวันหยุดนี้ก่อน แล้วหดในวันทำงานจนไล่ทันตอนจบ" : "ตามแผน ระยะจะหดจนไล่ทันตอนจบ"}</p>`) + `</div>`;
 
   /* block 4: plays */
   const wkIns = D.insights.find(c => c.id === "weekday"), hrIns = D.insights.find(c => c.id === "hours");
@@ -675,13 +686,13 @@ function drawWin() {
   const proofBtn = (act, label = "ดูหลักฐาน", icon = ARROW) => `<button class="proof" type="button" data-act="${act}">${label} ${icon}</button>`;
   const plays = [
     !ahead && cut ? play("p1", "เริ่มเร่งตั้งแต่วันนี้", "+" + kd(S.need.mid, S.pace_basis_value), false,
-      `ทุกวันที่เดินเท่าเดิม เป้าต่อวันจะสูงขึ้น หลัง ${cut.dow} ${cut.label} เป้าจะเกินวันที่ดีที่สุดที่ทีมผู้นำเคยทำ (<b>${k(S.ceiling)}</b>)`, proofBtn("cut", "ดูจุดตัด", DOWN)) : "",
+      `ช้าไปวันไหน เป้าวันที่เหลือก็สูงขึ้น หลัง ${cut.dow} ${cut.label} จะเกินวันที่ดีที่สุดของทีมผู้นำ (${k(S.ceiling)})`, proofBtn("cut", "ดูจุดตัด", DOWN)) : "",
     pl.target_weekday != null ? play("p2", "ทำระยะในวันทำงาน", k(pl.target_weekday), true,
-      `เหลือวันทำงาน ${P.left.weekday} วัน วันทำงานทีมผู้นำเดินน้อยกว่าวันหยุด ${wkIns ? esc(wkIns.value) : "–"} ช่วงหลังเหลือเฉลี่ย ${k(pl.leader_weekday_recent)} เป้าเราวันทำงานคือ <b>${k(pl.target_weekday)}</b>`, proofBtn("daily")) : "",
+      `เหลือ ${P.left.weekday} วัน วันทำงานทีมผู้นำแผ่ว ${wkIns ? esc(wkIns.value) : "–"} ช่วงหลังเหลือ ${k(pl.leader_weekday_recent)}`, proofBtn("daily")) : "",
     pl.target_off != null ? play("p3", "วันหยุดอย่าให้เขาหนีเพิ่ม", k(pl.target_off), false,
-      `เหลือวันหยุด ${P.left.off} วัน วันหยุดทีมผู้นำเดินเฉลี่ย ${k(pl.target_off)} ถ้าเราได้น้อยกว่านี้ ส่วนที่ขาดต้องไปเติมในวันทำงาน`, proofBtn("daily")) : "",
+      `เหลือ ${P.left.off} วัน ได้น้อยกว่านี้ ส่วนที่ขาดต้องไปเติมในวันทำงาน`, proofBtn("daily")) : "",
   ].join("");
-  const note = hrIns && hrIns.mini.hi ? `<div class="wnote"><p>ก้าวของทีมผู้นำมาช่วง ${hrIns.mini.hi[0]} ถึง ${hrIns.mini.hi[1]} น. มากที่สุด ยอดของเขาแต่ละวันจึงยังไม่จบจนดึก อย่าเพิ่งตัดสินผลของวันก่อนช่วงนี้จบ</p>${proofBtn("hours")}</div>` : "";
+  const note = hrIns && hrIns.mini.hi ? `<div class="wnote"><p>ทีมผู้นำเดินหนักช่วง ${hrIns.mini.hi[0]}–${hrIns.mini.hi[1]} น. ตัดสินผลของวันหลังช่วงนี้</p>${proofBtn("hours")}</div>` : "";
   const playsBlock = `<div class="wb w-plays">${late ? `<details><summary>ถ้ายังอยากไล่อันดับ 1${CHEV}</summary>${plays}${note}</details>` : plays + note}</div>`;
 
   /* blocks 5 + 6: checkpoints with the cut-off in date order */
@@ -689,23 +700,23 @@ function drawWin() {
   const items = S.checkpoints.map((c, i) => ({ ...c, kind: i === S.checkpoints.length - 1 ? "last" : i === 0 ? "first" : "mid" }));
   if (cut && !ahead) items.push({ ...cut, kind: "cut" });
   items.sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : a.kind === "cut" ? 1 : -1);
-  const TEST = { first: () => "จบวันหยุดแรก วันที่ทีมผู้นำแรงที่สุด เช็คว่าเราไม่เสียระยะเกินแผน", mid: () => "จบวันหยุดรอบสุดท้าย หลังจากนี้เหลือแต่วันทำงาน", last: c => `เส้นชัย ต้องมีเฉลี่ยเท่าทีมผู้นำ (${k(c.lead_mid)})` };
+  const TEST = { first: () => "จบวันหยุด เช็คว่าไม่เสียระยะเกินแผน", mid: () => "จบวันหยุดสุดท้าย ที่เหลือคือวันทำงาน", last: c => `เส้นชัย (ทีมผู้นำ ~${k0(c.lead_mid)})` };
   const DEC = { on: "คงแรงเท่านี้ถึงจุดเช็คถัดไป", behind: `เป้าต่อวันขึ้นเป็น ${k(S.need.mid)} เร่งวันทำงานก่อนจุดตัด`, late: `เปลี่ยนเป้าเป็นรักษาอันดับ ${S.us.rank}` };
   const PILL = { on: "ตามแผน", behind: "ช้ากว่าแผน", late: "เลยจุดตัด" };
   const cpRow = c => c.kind === "cut"
     ? `<li class="cp cut" id="win-cut" tabindex="-1"><span class="d">จุดตัด <small>${c.dow}</small>${c.label}</span><span class="t">` +
-      `<span class="lead">ถ้ายังเดินวันละ ${k(pbv)} จนจบวันนี้ หลังจากนั้นต้องเดินวันละ <b>${k(c.need_after)}</b> เป็นวันสุดท้ายที่เป้ายังไม่เกินวันที่ดีที่สุดที่ทีมผู้นำเคยทำ (${k(S.ceiling)})</span>` +
-      `<span>ก่อนจุดตัด: เดินให้ได้วันละ ${k(S.need.mid)} แล้วจุดตัดจะเลื่อนออกไป</span><span>หลังจุดตัด: เป้าหลักคือรักษาอันดับ ${S.us.rank} ยังลุ้นอันดับ 1 ได้ถ้าทีมผู้นำแผ่วจนจบแถว ${k0(S.leader.end.low)}</span></span></li>`
+      `<span class="lead">เดินวันละ ${k(pbv)} ถึงวันนี้ หลังจากนั้นต้อง <b>${k(c.need_after)}</b> ทุกวัน เกือบเท่าวันที่ดีที่สุดของทีมผู้นำ (${k(S.ceiling)})</span>` +
+      `<span>เลยวันนี้ไป เป้าหลักคือรักษาอันดับ ${S.us.rank}</span></span></li>`
     : `<li class="cp${nextCp && c.d === nextCp.d ? " next" : ""}"><span class="d"><small>${c.dow}</small>${c.label}</span><span class="v">${k(c.us_plan)}</span><span class="v keep">${k(c.us_keep)}</span>` +
       `<span>${c.status ? `<span class="st ${c.status}">${PILL[c.status]}</span>` : `<span class="st wait">รอแคปภาพ</span>`}</span>` +
       `<span class="t"><span>${TEST[c.kind](c)}</span>${c.status ? `<span class="dec">${DEC[c.status]}</span>` : ""}</span></li>`;
-  const cps = `<div class="wb w-cps"><h3>จุดเช็ค</h3><p class="sub" style="margin:-6px 0 12px">เทียบกับก้าวเฉลี่ยของทีมเราในหน้า Team Ranking ได้เลย</p>` +
+  const cps = `<div class="wb w-cps"><h3>จุดเช็ค</h3><p class="sub" style="margin:-6px 0 12px">เทียบกับหน้า Team Ranking ได้เลย</p>` +
     `<div class="cps-h" aria-hidden="true"><span></span><span>${ahead ? "ควรมีอย่างน้อย" : "ควรมี"}</span><span>ถ้าเท่าเดิม</span><span>สถานะ</span><span></span></div>` +
     `<ol class="cps">${items.map(cpRow).join("")}</ol></div>`;
 
   /* block 7: keep our rank */
   const r2 = B ? `<div class="wb w-r2"><h3>รักษาอันดับ ${S.us.rank}</h3><p>${!B.closing
-      ? `ทีมอันดับ ${B.rank} ตามหลังเรา ${k(B.gap)} เดินวันละ ${k(bp)} ช้ากว่าเรา ถ้าเดินเท่าเดิมเราจบนำ`
+      ? `ทีมอันดับ ${B.rank} ตามเรา ${k(B.gap)} เดินวันละ ${k(bp)} ช้ากว่าเรา`
       : B.catch ? `ทีมอันดับ ${B.rank} เดินวันละ ${k(bp)} เร็วกว่าเรา ถ้าเป็นแบบนี้ต่อจะแซงเราราว <b>${B.catch.dow} ${B.catch.label}</b>`
       : `ทีมอันดับ ${B.rank} เดินเร็วกว่าเรา แต่ถ้าเป็นแบบนี้ต่อจะยังไม่ทันก่อนจบ`}</p></div>` : "";
 
@@ -716,12 +727,12 @@ function drawWin() {
   const duel = dl.length
     ? `<div class="wb w-duel"><h3>ดวลรายช่วง<small>ก้าว/คน</small></h3><table class="duel">${dHead}<tbody>${dl.slice(0, 5).map(duelRow).join("")}</tbody></table>` +
       (dl.length > 5 ? `<details><summary>ดูทั้งหมด (${dl.length} ช่วง)</summary><table class="duel">${dHead}<tbody>${dl.slice(5).map(duelRow).join("")}</tbody></table></details>` : "") + `</div>`
-    : `<div class="wb w-duel"><p class="sub" style="margin:0">แคปภาพ Team Ranking ทุกเช้าเวลาเดิม แล้วตรงนี้จะบอกว่าแต่ละวันเราไล่ได้หรือเสียระยะ</p></div>`;
+    : `<div class="wb w-duel"><p class="sub" style="margin:0">แคป Team Ranking ทุกเช้าเวลาเดิม ตรงนี้จะบอกว่าแต่ละวันเราไล่ได้หรือเสียระยะ</p></div>`;
 
   /* block 9: footer + share */
   const share = `เป้าทีมเรา เดินคนละ ${k(S.need.mid)} ก้าวทุกวัน` + (nextCp ? ` เช็คอีกที ${nextCp.dow} ${nextCp.label} ต้องมีเฉลี่ย ${k(nextCp.us_plan)}` : "");
-  const foot = `<div class="w-foot"><p>ตัวเลขเป็นค่าประมาณ ทีมผู้นำคิดจาก projection รายคน ทีมเราคิดจากแคปภาพ Team Ranking ${S.history.length} ภาพ ` +
-    (S.pace_basis === "recent" ? `pace ของทีมเราคิดจากช่วง ${esc(S.us.pace_recent_from)} ถึง ${S.as_of.label}` : "pace ของทีมเราเฉลี่ยตั้งแต่วันแรก ยังไม่รู้ว่าช่วงหลังเร็วขึ้นหรือช้าลง") +
+  const foot = `<div class="w-foot"><p>ค่าประมาณ จาก Team Ranking ${S.history.length} ภาพ · ` +
+    (S.pace_basis === "recent" ? `แรงเดินทีมเราช่วง ${esc(S.us.pace_recent_from)} ถึง ${S.as_of.label}` : "แรงเดินทีมเราเฉลี่ยตั้งแต่วันแรก") +
     `</p><span><button class="proof" type="button" data-act="share">คัดลอกข้อความส่งทีม ${ARROW}</button> <span class="copied" role="status" aria-live="polite"></span></span></div>`;
 
   // order by state: rank 3 closing in puts block 7 under the head; cut-off passed puts it under the standings
@@ -808,11 +819,11 @@ function drawGap(host) {
   const path = pts => "M" + pts.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("L");
   const start = [S.now_t, S.gap];
   const keep = el("path", { d: path([start, ...cps.map(c => [c.t, c.gap_keep])]), fill: "none", stroke: MUTED, "stroke-width": 1.75, "stroke-dasharray": "5 4" }, s);
-  const plan = el("path", { d: path([start, ...cps.map(c => [c.t, c.gap_plan])]), fill: "none", stroke: OFF, "stroke-width": 2, "stroke-dasharray": "5 4" }, s);
+  const plan = el("path", { d: path([start, ...cps.map(c => [c.t, c.gap_plan])]), fill: "none", stroke: US, "stroke-width": 2, "stroke-dasharray": "5 4" }, s);
   fade(keep, 300, 600); fade(plan, 150, 600);
   cps.forEach((c, i) => {
     fade(el("circle", { cx: X(c.t), cy: Y(c.gap_keep), r: 3.5, fill: "#fff", stroke: MUTED, "stroke-width": 1.5 }, s), 500 + i * 80, 300);
-    fade(el("circle", { cx: X(c.t), cy: Y(c.gap_plan), r: 3.5, fill: "#fff", stroke: OFF, "stroke-width": 1.75 }, s), 400 + i * 80, 300);
+    fade(el("circle", { cx: X(c.t), cy: Y(c.gap_plan), r: 3.5, fill: "#fff", stroke: US, "stroke-width": 1.75 }, s), 400 + i * 80, 300);
     if (c.t < nd) {   // checkpoint flag above the plot (the finish has the gantry)
       const g = el("g", {}, s);
       el("line", { x1: X(c.t), x2: X(c.t), y1: T - 12, y2: T, stroke: INK, "stroke-width": 1.2 }, g);
@@ -823,9 +834,9 @@ function drawGap(host) {
   const kl = cps[cps.length - 1];
   if (kl) txt(s, X(nd) + 12, Y(kl.gap_keep) + 4, k(kl.gap_keep), { "font-size": 11, "font-weight": 600, fill: MUTED });
   // actual: solid navy from the screenshots, newest labelled
-  if (series.length > 1) drawIn(el("path", { d: path(series.map(g => [g.t, g.gap])), fill: "none", stroke: OFF, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }, s), 0, 900);
+  if (series.length > 1) drawIn(el("path", { d: path(series.map(g => [g.t, g.gap])), fill: "none", stroke: US, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }, s), 0, 900);
   series.forEach((g, i) => {
-    const dot = el("circle", { cx: X(g.t), cy: Y(g.gap), r: i === series.length - 1 ? 5.5 : 3.5, fill: OFF, stroke: "#fff", "stroke-width": 2 }, s);
+    const dot = el("circle", { cx: X(g.t), cy: Y(g.gap), r: i === series.length - 1 ? 5.5 : 3.5, fill: US, stroke: "#fff", "stroke-width": 2 }, s);
     fade(dot, series.length > 1 ? 700 : 0, 300);
   });
   const lastG = series[series.length - 1];
