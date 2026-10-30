@@ -163,7 +163,15 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
 
 /* ---------- ทางชนะ: our race against the leader (Team Ranking screenshots; roles only, never a team name) ---------- */
-.win { margin-top: 18px; background: var(--us-tint); box-shadow: 0 1px 2px rgba(12, 92, 96, .08), 0 4px 14px rgba(12, 92, 96, .07); }
+.teaser { appearance: none; width: 100%; margin-top: 18px; border: 0; border-radius: var(--r); cursor: pointer; text-align: left;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 14px 20px; font-size: 15px;
+  color: var(--us-ink); background: linear-gradient(90deg, var(--us) 35%, rgba(12, 92, 96, .72) 100%), repeating-linear-gradient(115deg, var(--us) 0 26px, var(--us-2) 26px 30px); }
+.teaser b { color: #fff; font-weight: 700; font-style: italic; font-size: 17px; }
+.teaser .go { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; white-space: nowrap; }
+.teaser .go svg { width: 14px; height: 14px; transition: transform 200ms cubic-bezier(.16, 1, .3, 1); }
+.teaser:hover .go svg { transform: translateX(3px); }
+.teaser:focus-visible { outline-color: var(--us); }
+.win { background: var(--us-tint); box-shadow: 0 1px 2px rgba(12, 92, 96, .08), 0 4px 14px rgba(12, 92, 96, .07); }
 .win .race-head.win-head { background: linear-gradient(90deg, var(--us) 35%, rgba(12, 92, 96, .72) 100%), repeating-linear-gradient(115deg, var(--us) 0 26px, var(--us-2) 26px 30px); }
 .win-head h2, .win-head p { color: var(--us-ink) !important; }
 .win-head h2 b, .win-head p b, .win-head h2 strong { color: #fff !important; }
@@ -330,6 +338,7 @@ table.duel { width: 100%; border-collapse: collapse; font-size: 14px; }
     <div class="live"><i aria-hidden="true"></i><span>ข้อมูลถึง <b id="asof"></b></span></div>
     <nav class="tabs" role="tablist" aria-label="มุมมอง">
       <button role="tab" id="tab-insight" aria-controls="insight" aria-selected="true">Insight</button>
+      <button role="tab" id="tab-win" aria-controls="wintab" aria-selected="false">How to win</button>
       <button role="tab" id="tab-explore" aria-controls="explore" aria-selected="false">Explore</button>
     </nav>
   </div>
@@ -344,8 +353,12 @@ table.duel { width: 100%; border-collapse: collapse; font-size: 14px; }
       <div class="race-body"><div id="race"></div></div>
       <p class="race-note" id="race-note"></p>
     </div>
-    <section class="panel win" id="win" aria-labelledby="win-title"></section>
+    <div id="win-teaser"></div>
     <div class="ins" id="ins"></div>
+  </section>
+
+  <section id="wintab" role="tabpanel" aria-labelledby="tab-win" hidden>
+    <section class="panel win" id="win" aria-labelledby="win-title"></section>
   </section>
 
   <section id="explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
@@ -629,6 +642,14 @@ function winSlab({ lead, fig, unit, lines = [], asof, only }) {
   return `<div class="race-head win-head${only ? " only" : ""}"><h2 id="win-title">${lead}${fig != null ? `<strong>${fig}<small>${unit}</small></strong>` : ""}</h2>` +
     lines.map(([cls, s]) => `<p class="${cls}">${s}</p>`).join("") +
     (asof ? `<p class="w-asof">จาก Team Ranking <b>${esc(asof)}</b></p>` : "") + `</div>`;
+}
+
+function drawTeaser() {
+  const host = $("#win-teaser");
+  if (!S || !S.ready) { host.innerHTML = ""; return; }
+  const msg = S.gap > 0 ? `ทีมเราตามอยู่ <b>${k(S.gap)}</b> ต้องเดิน <b>${k(S.need.mid)}</b> ก้าวต่อคนต่อวัน` : `ทีมเรานำอยู่ <b>${k(S.lead)}</b> ก้าวต่อคน`;
+  host.innerHTML = `<button type="button" class="teaser"><span class="m">${msg}</span><span class="go">How to win ${ARROW}</span></button>`;
+  host.querySelector("button").onclick = () => go({ tab: "win" });
 }
 
 function drawWin() {
@@ -1079,15 +1100,18 @@ function viewHours(host) {
 const DRAW = { daily: viewDaily, member: viewMember, trend: viewTrend, hours: viewHours };
 
 /* ---------- state, routing ---------- */
+const TABS = ["insight", "win", "explore"];
 function render() {
   const ins = state.tab === "insight";
-  $("#insight").hidden = !ins; $("#explore").hidden = ins;
-  $("#tab-insight").setAttribute("aria-selected", ins); $("#tab-explore").setAttribute("aria-selected", !ins);
-  if (ins) { drawRace(); drawWin(); drawInsights(); }
+  $("#insight").hidden = !ins; $("#wintab").hidden = state.tab !== "win"; $("#explore").hidden = state.tab !== "explore";
+  TABS.forEach(t => $(`#tab-${t}`).setAttribute("aria-selected", state.tab === t));
+  if (ins) { drawRace(); drawTeaser(); drawInsights(); }
+  else if (state.tab === "win") drawWin();
   else { drawControls(); const v = $("#view"); v.classList.remove("view"); void v.offsetWidth; v.classList.add("view"); DRAW[state.view](v); }
 }
 function hashOf() {
   if (state.tab === "insight") return "#insight";
+  if (state.tab === "win") return "#how";
   const q = [state.view];
   if (state.view === "trend") q.push(state.scope, state.mode);
   if (state.focus) q.push("@" + state.focus);
@@ -1103,6 +1127,7 @@ function go(patch) {
 }
 function fromHash() {
   const parts = location.hash.slice(1).split("/").map(decodeURIComponent);
+  if (parts[0] === "how" || parts[0] === "win") { state.tab = "win"; return; }
   if (parts[0] !== "explore") return;
   state.tab = "explore";
   if (DRAW[parts[1]]) state.view = parts[1];
@@ -1112,11 +1137,11 @@ function fromHash() {
     else if (p === "cum" || p === "day") state.mode = p;
   }
 }
-$("#tab-insight").onclick = () => go({ tab: "insight" });
-$("#tab-explore").onclick = () => go({ tab: "explore" });
+TABS.forEach(t => $(`#tab-${t}`).onclick = () => go({ tab: t }));
 $(".tabs").addEventListener("keydown", e => {
   if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-  const t = state.tab === "insight" ? "explore" : "insight"; go({ tab: t }); $(`#tab-${t}`).focus();
+  const i = TABS.indexOf(state.tab), t = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+  go({ tab: t }); $(`#tab-${t}`).focus();
 });
 
 $("#limits").innerHTML = [
@@ -1133,6 +1158,7 @@ $("#limits").innerHTML = [
 
 fromHash();
 render();
+window.scrollTo(0, 0); addEventListener("load", () => window.scrollTo(0, 0));   // a hash like #insight names a section id: never let the browser jump under the sticky header
 let rt, lastW = $(".wrap").clientWidth;
 new ResizeObserver(() => { const w = $(".wrap").clientWidth; if (w === lastW) return; lastW = w; clearTimeout(rt); rt = setTimeout(() => { ANIM = false; render(); }, 120); }).observe($(".wrap"));
 })();
