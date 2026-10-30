@@ -26,7 +26,7 @@
   /* ทีมเรา: deep teal, used only in the ทางชนะ section (navy = them, orange = their weak window) */
   --us: #0c5c60; --us-2: #137077; --us-ink: #c3e4e2; --us-tint: #f2f8f7; --us-band: #ddefec; --us-strap: #dcefec; --us-strap-2: #cfe7e3; --us-deep: #0a4a4e;
   /* Race Plan colour jobs: us-mark = ทีมเรา marks (brighter than --us so it parts from the leader's slate); warn = behind plan / the cut-off; win = a stretch we gained */
-  --us-mark: #0b8178; --us-soft: #bfe3dd; --warn: #b4235a; --warn-bg: #fdedf2; --win-bg: #e1f3ef;
+  --us-mark: #0b8178; --dv-us: #14a396; --dv-ld: #0f1d33; --us-soft: #bfe3dd; --warn: #b4235a; --warn-bg: #fdedf2; --win-bg: #e1f3ef;
   /* member series: fixed per alias (validated: dataviz validate_palette, light, adjacent pairs; relief = direct labels) */
   --m1: #2a78d6; --m2: #e87ba4; --m3: #1baf7a; --m4: #eda100; --m5: #6250d6; --m6: #008300;
   --font: "Kanit", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -313,8 +313,8 @@ table.board { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .dv-read .key i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .dv-read .key i.out { background: transparent; border: 1.5px dashed currentColor; width: 9px; height: 9px; }
 .dv-read .big { font-style: italic; font-weight: 700; font-size: 28px; line-height: 1.15; }
-.dv-read .big.us { color: var(--us-deep); }
-.dv-read .big.ld { color: var(--off-ink); }
+.dv-read .big.us { color: var(--us-mark); }
+.dv-read .big.ld { color: var(--dv-ld); }
 .dv-read .big.none { color: var(--muted); font-style: normal; font-weight: 400; font-size: 17px; line-height: 1.5; }
 .dv-read .big small { font-size: 13px; font-weight: 400; font-style: normal; color: var(--muted); margin-left: 4px; }
 .dv-read .res { text-align: right; }
@@ -342,10 +342,41 @@ table.dv { width: 100%; max-width: 760px; border-collapse: collapse; font-size: 
 .dv td:first-child small { font-weight: 400; color: var(--ink-2); font-size: 13px; margin-right: 4px; }
 .dv td:first-child small.wk { color: var(--hot-ink); }
 .dv td:first-child small.off { color: var(--off-ink); }
-.dv td.us { color: var(--us-deep); font-weight: 600; }
-.dv td.ld { color: var(--off-ink); font-weight: 600; }
+.dv td.us { color: var(--us-mark); font-weight: 600; }
+.dv td.ld { color: var(--dv-ld); font-weight: 600; }
 .dv tr.fut td:not(:first-child) { color: var(--muted); font-weight: 400; font-style: italic; }
 .dv td.lost { color: var(--warn); }
+/* phone form (< 560px): one tappable row per day instead of 23 hairline columns. Two horizontal bars on one scale,
+   our team in bright teal, the leader in deep navy, the window each number covers under the bars. */
+.dv-list { list-style: none; margin: 0; padding: 0; }
+.dv-row { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 6px 12px; width: 100%; padding: 12px 2px; min-height: 56px; border: 0; border-top: 1px solid var(--rule-2); background: none; font: inherit; color: var(--ink); text-align: left; }
+.dv-row .dd { grid-row: 1 / span 2; font-size: 16px; font-weight: 600; line-height: 1.2; }
+.dv-row .dd small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.dv-row .dd i { font-style: normal; font-size: 12px; font-weight: 500; }
+.dv-row .dd i.wk { color: var(--hot-ink); }
+.dv-row .dd i.off { color: var(--off-ink); }
+.dv-row .br { display: grid; grid-template-columns: minmax(0, 1fr) 58px; align-items: center; gap: 8px; }
+.dv-row .br + .br { margin-top: 4px; }
+.dv-row .tr { height: 12px; }
+.dv-row .tr b { display: block; height: 100%; min-width: 3px; border-radius: 0 4px 4px 0; }
+.dv-row .us b { background: var(--dv-us); }
+.dv-row .ld b { background: var(--dv-ld); }
+.dv-row .idle b { background: var(--idle); }
+.dv-row .run b, .dv-row .fut b { background: transparent; border: 1.5px dashed currentColor; border-left: 0; }
+.dv-row .run b { background: color-mix(in oklab, currentColor 30%, transparent); }
+.dv-row .us.run, .dv-row .us.fut { color: var(--dv-us); }
+.dv-row .ld.run, .dv-row .ld.fut { color: var(--dv-ld); }
+.dv-row .br em { font-style: italic; font-weight: 700; font-size: 15px; text-align: right; font-variant-numeric: tabular-nums; }
+.dv-row .us em { color: var(--us-mark); }
+.dv-row .ld em { color: var(--dv-ld); }
+.dv-row .none em { color: var(--muted); font-style: normal; font-weight: 400; font-size: 13px; }
+.dv-row .mt { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; font-size: 12px; color: var(--muted); }
+.dv-row .mt span.pill { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; color: var(--us-deep); background: var(--win-bg); white-space: nowrap; }
+.dv-row .mt span.pill.lost { font-weight: 500; color: var(--warn); background: var(--warn-bg); }
+.dv-row .mt .wn { flex: 1 1 140px; line-height: 1.4; }
+.dv-fold { margin-top: 8px; border-top: 1px solid var(--rule-2); }
+.dv-fold summary { cursor: pointer; padding: 14px 2px; min-height: 44px; font-size: 14px; font-weight: 500; color: var(--ink-2); }
+.dv-fold .dv-row.small { min-height: 44px; padding: 8px 2px; }
 @media (max-width: 640px) {
   .dv-read { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 12px; gap: 10px 16px; }
   .dv-read .when, .dv-read .res { grid-column: 1 / -1; }
@@ -843,7 +874,7 @@ function drawWin() {
   const dayVs = DVM.length
     ? `<div class="wb w-dv"><h3>ทีมเรา vs ทีมอันดับ 1 รายวัน<small>ก้าวเฉลี่ยต่อคนต่อวัน · ${esc(DVM[0].label)} – ${esc(DVM[DVM.length - 1].label)}</small></h3>` +
       `<div class="dv-read" id="dv-read" role="status" aria-live="polite"></div>` +
-      `<div class="legend"><span><i style="background:${US}"></i>ทีมเรา</span><span><i style="background:${OFF}"></i>ทีมอันดับ 1</span>` +
+      `<div class="legend"><span><i style="background:${DVUS}"></i>ทีมเรา</span><span><i style="background:${DVLD}"></i>ทีมอันดับ 1</span>` +
       `<span><i class="out"></i>ยังไม่จบวัน / คาดการณ์</span><span><i class="idle"></i>ผู้นำอย่างเดียว (ไม่มีแคปทีมเรา)</span><span><i class="hatch"></i>ประมาณ</span></div>` +
       `<div id="dv-chart" tabindex="0" role="group" aria-label="เทียบรายวันตลอด campaign แตะหรือกดลูกศรซ้ายขวาเพื่อเลือกวัน"></div>` +
       (DVT.days ? `<p class="dv-sum">สะสม ${DVT.days} วันที่มีแคป: ทีมเรา <b>+${k(DVT.us)}</b> · ทีมอันดับ 1 <b>+${k(DVT.leader)}</b> · ${DVT.diff >= 0 ? "ไล่ได้" : "เสีย"} <b>${k(Math.abs(DVT.diff))}</b> (ไล่ได้ ${DVT.won} จาก ${DVT.days} วัน)</p>` : "") +
@@ -956,6 +987,12 @@ async function copyShare(text, out) {
 /* ---------- ทีมเรา vs ทีมอันดับ 1 รายวัน ---------- */
 let DVSEL = null;   // the selected day (YYYY-MM-DD); survives redraws and plan changes
 const WARN = C("--warn"), IDLE = C("--idle");
+const DVUS = C("--dv-us"), DVLD = C("--dv-ld");   // this section only: bright teal vs deep navy, apart by hue and lightness
+// the window a pair covers, as the viewer should read it: a window that starts at the day's first Team Ranking reading
+// (no reading the evening before) leaves out the steps before it, and says so
+const dvWin = v => v.from.includes(" ")
+  ? `ตั้งแต่ ${esc(v.from)} ถึง ${esc(v.to)} น.`
+  : `นับจาก ${esc(v.from)} ถึง ${esc(v.to)} น. · ไม่รวมก้าวก่อน ${esc(v.from)}`;
 function dvModel(PL) {
   if (!S || !S.day_grid) return [];
   const pl = S.plan || {}, wk = PL ? PL.target_weekday : pl.target_weekday, of = pl.target_off;
@@ -968,17 +1005,17 @@ function dvModel(PL) {
 function dvRead(c) {
   const kd2 = (cls, key, big) => `<div><span class="key">${key}</span><span class="big ${cls}">${big}</span></div>`;
   const dot = col => `<i style="background:${col}"></i>`;
-  const us = `${dot(US)}ทีมเรา`, ld = `${dot(OFF)}ทีมอันดับ 1`;
+  const us = `${dot(DVUS)}ทีมเรา`, ld = `${dot(DVLD)}ทีมอันดับ 1`;
   const tag = c.vs && c.vs.today ? `<span class="tag">วันนี้ ยังไม่จบ</span>` : c.kind === "future" ? `<span class="tag">คาดการณ์</span>` : c.status === "est" ? `<span class="tag">ประมาณ</span>` : "";
   let when = `<b>${c.dow} ${esc(c.label)}</b>${tag}`, mid, res = "";
   if (c.vs) {
     const v = c.vs;
-    when += `<small>ช่วง ${esc(v.from)}–${esc(v.to)} น. ตาม Team Ranking</small>`;
+    when += `<small>${dvWin(v)} ตาม Team Ranking</small>`;
     mid = kd2("us", us, `+${k(v.us_gain)}`) + kd2("ld", ld, `+${k(v.leader_gain)}`);
     res = `<div class="res ${v.diff > 0 ? "" : v.diff < 0 ? "lost" : "even"}"><span>${v.diff > 0 ? `ไล่ได้ ${k(v.diff)}` : v.diff < 0 ? `เสีย ${k(-v.diff)}` : "เท่ากัน"}</span>${v.ratio != null ? `<small>เราเดินได้ ${v.ratio}% ของเขา</small>` : ""}</div>`;
   } else if (c.kind === "future") {
     when += `<small>${c.off ? "วันหยุด" : "วันทำงาน"} ยังไม่ถึง</small>`;
-    mid = kd2("us", `<i class="out" style="color:${US}"></i>ทีมเรา ตามแผนต้อง`, c.usT != null ? `~${k(c.usT)}` : "–") + kd2("ld", `<i class="out" style="color:${OFF}"></i>ทีมอันดับ 1 คาด`, `~${k(c.leader_proj)}`);
+    mid = kd2("us", `<i class="out" style="color:${DVUS}"></i>ทีมเรา ตามแผนต้อง`, c.usT != null ? `~${k(c.usT)}` : "–") + kd2("ld", `<i class="out" style="color:${DVLD}"></i>ทีมอันดับ 1 คาด`, `~${k(c.leader_proj)}`);
     res = `<div class="res plan"><span>คาดการณ์</span></div>`;
   } else if (c.kind === "leader") {
     when += `<small>ไม่มีแคป Team Ranking ของทีมเราวันนั้น</small>`;
@@ -989,17 +1026,51 @@ function dvRead(c) {
   }
   return `<div class="when">${when}</div>${mid}${res}`;
 }
+// phone form: a list of days, newest first. Days with our Team Ranking pair open; the leader-only days and the days
+// to come fold away. Same numbers and scale as the chart, no selection needed: each row carries its own readout.
+function drawDayVsList(box, read, cells) {
+  read.hidden = true;
+  const peak = Math.max(1, ...cells.flatMap(c => [c.vs && c.vs.us_gain, c.vs && c.vs.leader_gain, c.leader_day, c.leader_proj, c.usT].filter(v => v > 0)));
+  const pct = v => v > 0 ? Math.max(1, Math.round(100 * v / peak)) : 0;
+  const bar = (cls, v, txt, st) => `<div class="br ${cls} ${st || ""}"><span class="tr"><b style="width:${pct(v)}%"></b></span><em>${txt}</em></div>`;
+  const none = cls => `<div class="br ${cls} none"><span class="tr"></span><em>ไม่มีแคป</em></div>`;
+  const dd = c => `<div class="dd">${c.label.split(" ")[0]}<small>${c.label.split(" ")[1] || ""}</small><i class="${c.off ? "off" : "wk"}">${c.dow}</i></div>`;
+  const row = c => {
+    const v = c.vs, run = v && v.today;
+    if (v) {
+      const res = v.diff > 0 ? `ไล่ได้ ${k(v.diff)}` : v.diff < 0 ? `เสีย ${k(-v.diff)}` : "เท่ากัน";
+      return `<li><div class="dv-row" role="group" aria-label="${c.dow} ${esc(c.label)}">${dd(c)}<div>` +
+        bar("us", v.us_gain, "+" + k(v.us_gain), run ? "run" : "") + bar("ld", v.leader_gain, "+" + k(v.leader_gain), run ? "run" : "") +
+        `</div><div class="mt"><span class="wn">${dvWin(v)}${run ? " · วันนี้ยังไม่จบ" : ""}</span><span class="pill ${v.diff < 0 ? "lost" : ""}">${res}</span></div></div></li>`;
+    }
+    if (c.kind === "future") {
+      return `<li><div class="dv-row small" role="group" aria-label="${c.dow} ${esc(c.label)} คาดการณ์">${dd(c)}<div>` +
+        (c.usT > 0 ? bar("us", c.usT, "~" + k(c.usT), "fut") : none("us")) + bar("ld", c.leader_proj, "~" + k(c.leader_proj), "fut") + `</div></div></li>`;
+    }
+    if (c.kind === "leader") {
+      return `<li><div class="dv-row small" role="group" aria-label="${c.dow} ${esc(c.label)}">${dd(c)}<div>` +
+        none("us") + bar("ld idle", c.leader_day, k(c.leader_day)) + `</div></div></li>`;
+    }
+    return "";
+  };
+  const pairs = cells.filter(c => c.vs).reverse(), past = cells.filter(c => !c.vs && c.kind === "leader").reverse(), fut = cells.filter(c => c.kind === "future");
+  const fold = (title, rows) => rows.length ? `<details class="dv-fold"><summary>${title} (${rows.length} วัน)</summary><ul class="dv-list">${rows.map(row).join("")}</ul></details>` : "";
+  box.innerHTML = (pairs.length ? `<ul class="dv-list">${pairs.map(row).join("")}</ul>` : `<p class="sub">ยังไม่มีวันที่มีแคป Team Ranking ของทั้งสองทีม</p>`) +
+    fold("วันก่อนหน้า มีแต่ฝั่งผู้นำ", past) + fold("วันที่เหลือ ค่าคาดการณ์", fut);
+}
 function drawDayVs(host) {
   const box = $("#dv-chart", host), read = $("#dv-read", host);
   if (!box || !read) return;
   const cells = dvModel(curPlanOrNull()), n = cells.length;
   const w = W(box), narrow = w < 560;
-  const L = narrow ? 32 : 40, Rm = narrow ? 6 : 10, T = 18, plotH = narrow ? 168 : 232, labH = 44, gapH = narrow ? 64 : 76;
+  if (narrow) return drawDayVsList(box, read, cells);
+  read.hidden = false;
+  const L = 40, Rm = 10, T = 18, plotH = 232, labH = 44, gapH = 76;
   const slot = (w - L - Rm) / n, X = i => L + slot * i;
   const bw = Math.max(4, Math.min(12, slot * .34)), pairW = bw * 2 + 2, bx = i => X(i) + (slot - pairW) / 2;
   const peak = Math.max(1, ...cells.flatMap(c => [c.vs && c.vs.us_gain, c.vs && c.vs.leader_gain, c.leader_day, c.leader_proj, c.usT].filter(v => v > 0))) * 1.04;
-  const raw = peak / (narrow ? 3 : 4), mag = Math.pow(10, Math.floor(Math.log10(raw))), step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw);   // round ticks: 5k, 10k, 20k ...
-  const top = Math.ceil(peak / step) * step, dash = narrow ? "2 2" : "3 3";
+  const raw = peak / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw);   // round ticks: 5k, 10k, 20k ...
+  const top = Math.ceil(peak / step) * step, dash = "3 3";
   const Y = v => T + plotH * (1 - v / top), y0 = T + plotH;
   const sel = DVSEL && cells.some(c => c.d === DVSEL) ? DVSEL : ((cells.filter(c => c.vs).pop() || cells.filter(c => c.kind === "leader").pop() || cells[0]).d);
   DVSEL = sel;
@@ -1007,7 +1078,7 @@ function drawDayVs(host) {
   box.innerHTML = "";
   const h1 = box.appendChild(document.createElement("div")), head = box.appendChild(document.createElement("div")), h2 = box.appendChild(document.createElement("div"));
   const s = svgIn(h1, w, y0 + labH, `เทียบก้าวรายวัน ทีมเรากับทีมอันดับ 1 ตลอด ${n} วัน`);
-  hatch(s, "dvhat", OFF);
+  hatch(s, "dvhat", DVLD);
   const band = (parent, y, h) => el("rect", { x: X(idx()), y, width: slot, height: h, fill: C("--strap"), rx: 3 }, parent);
   cells.forEach((c, i) => { if (c.off) el("rect", { x: X(i), y: T, width: slot, height: plotH, fill: C("--tint") }, s); });
   const band1 = band(s, T, plotH);
@@ -1021,9 +1092,9 @@ function drawDayVs(host) {
   cells.forEach((c, i) => {
     const d = ANIM ? i * 16 : 0, a = bw + 2;
     let nodes = [];
-    if (c.vs) { nodes = [solid(i, 0, c.vs.us_gain, US, c.vs.today), solid(i, a, c.vs.leader_gain, OFF, c.vs.today)]; }
-    else if (c.kind === "future") { nodes = [c.usT > 0 ? outline(i, 0, c.usT, US) : null, outline(i, a, c.leader_proj, OFF)]; }
-    else if (c.kind === "leader") nodes = [vbar(s, bx(i) + a, Y(c.leader_day), bw, y0 - Y(c.leader_day), { fill: c.status === "est" ? "url(#dvhat)" : IDLE, stroke: c.status === "est" ? OFF : null, "stroke-width": c.status === "est" ? 1 : null })];
+    if (c.vs) { nodes = [solid(i, 0, c.vs.us_gain, DVUS, c.vs.today), solid(i, a, c.vs.leader_gain, DVLD, c.vs.today)]; }
+    else if (c.kind === "future") { nodes = [c.usT > 0 ? outline(i, 0, c.usT, DVUS) : null, outline(i, a, c.leader_proj, DVLD)]; }
+    else if (c.kind === "leader") nodes = [vbar(s, bx(i) + a, Y(c.leader_day), bw, y0 - Y(c.leader_day), { fill: c.status === "est" ? "url(#dvhat)" : IDLE, stroke: c.status === "est" ? DVLD : null, "stroke-width": c.status === "est" ? 1 : null })];
     nodes.filter(Boolean).forEach(nd => rise(nd, d, 520));
     // day-type tag and day number under the baseline, as in the other charts
     el("rect", { x: X(i) + 1, y: y0 + 4, width: Math.max(1, slot - 2), height: 3, rx: 1.5, fill: c.off ? OFF : HOT }, s);
@@ -1038,7 +1109,7 @@ function drawDayVs(host) {
   }
   // the daily gap, same x grid: up = we gained on the leader, down = we lost
   head.className = "dv-sub-h";
-  head.innerHTML = `<span>ส่วนต่างรายวัน<small> เรา − ทีมอันดับ 1</small></span><span><i style="background:${US}"></i>ไล่ได้</span><span><i style="background:${WARN}"></i>เสีย</span>`;
+  head.innerHTML = `<span>ส่วนต่างรายวัน<small> เรา − ทีมอันดับ 1</small></span><span><i style="background:${DVUS}"></i>ไล่ได้</span><span><i style="background:${WARN}"></i>เสีย</span>`;
   const pairs = cells.filter(c => c.vs), sMax = Math.max(5000, niceMax(Math.max(0, ...pairs.map(c => Math.abs(c.vs.diff))))), mid = gapH / 2, half = mid - 6;
   const g = svgIn(h2, w, gapH, "ส่วนต่างรายวัน ไล่ได้หรือเสียเทียบกับทีมอันดับ 1");
   const band2 = el("rect", { x: X(idx()), y: 0, width: slot, height: gapH, fill: C("--strap"), rx: 3 }, g);
@@ -1050,7 +1121,7 @@ function drawDayVs(host) {
     if (!c.vs || !c.vs.diff) return;
     const hgt = Math.max(2, Math.min(half, half * Math.abs(c.vs.diff) / sMax)), x = bx(i), r = Math.min(4, pairW / 2, hgt);
     const nd = c.vs.diff > 0
-      ? vbar(g, x, mid - hgt, pairW, hgt, { fill: US, ...(c.vs.today ? { "fill-opacity": .3, stroke: US, "stroke-width": 1.5, "stroke-dasharray": dash } : {}) })
+      ? vbar(g, x, mid - hgt, pairW, hgt, { fill: DVUS, ...(c.vs.today ? { "fill-opacity": .3, stroke: DVUS, "stroke-width": 1.5, "stroke-dasharray": dash } : {}) })
       : el("path", { d: `M${x},${mid}V${mid + hgt - r}Q${x},${mid + hgt} ${x + r},${mid + hgt}H${x + pairW - r}Q${x + pairW},${mid + hgt} ${x + pairW},${mid + hgt - r}V${mid}Z`, fill: WARN }, g);
     if (nd.style) { nd.style.transformBox = "fill-box"; nd.style.transformOrigin = c.vs.diff > 0 ? "50% 100%" : "50% 0%"; run(nd, [{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], ANIM ? i * 16 : 0, 520); }
   });
