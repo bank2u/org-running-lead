@@ -338,7 +338,7 @@ table.duel { width: 100%; border-collapse: collapse; font-size: 14px; }
     <div class="live"><i aria-hidden="true"></i><span>ข้อมูลถึง <b id="asof"></b></span></div>
     <nav class="tabs" role="tablist" aria-label="มุมมอง">
       <button role="tab" id="tab-insight" aria-controls="insight" aria-selected="true">Insight</button>
-      <button role="tab" id="tab-win" aria-controls="wintab" aria-selected="false">How to win</button>
+      <button role="tab" id="tab-win" aria-controls="wintab" aria-selected="false">Race Plan</button>
       <button role="tab" id="tab-explore" aria-controls="explore" aria-selected="false">Explore</button>
     </nav>
   </div>
@@ -648,15 +648,15 @@ function drawTeaser() {
   const host = $("#win-teaser");
   if (!S || !S.ready) { host.innerHTML = ""; return; }
   const msg = S.gap > 0 ? `ทีมเราตามอยู่ <b>${k(S.gap)}</b> ต้องเดิน <b>${k(S.need.mid)}</b> ก้าวต่อคนต่อวัน` : `ทีมเรานำอยู่ <b>${k(S.lead)}</b> ก้าวต่อคน`;
-  host.innerHTML = `<button type="button" class="teaser"><span class="m">${msg}</span><span class="go">How to win ${ARROW}</span></button>`;
+  host.innerHTML = `<button type="button" class="teaser"><span class="m">${msg}</span><span class="go">Race Plan ${ARROW}</span></button>`;
   host.querySelector("button").onclick = () => go({ tab: "win" });
 }
 
 function drawWin() {
   const host = $("#win");
-  if (!S) { host.innerHTML = winSlab({ lead: "<b>How to win</b>", lines: [["", "ยังไม่มีแคปภาพ Team Ranking ใส่ภาพแรกแล้วส่วนนี้จะคำนวณเป้าให้"]], only: true }); return; }
+  if (!S) { host.innerHTML = winSlab({ lead: "<b>Race Plan</b>", lines: [["", "ยังไม่มีแคปภาพ Team Ranking ใส่ภาพแรกแล้วส่วนนี้จะคำนวณเป้าให้"]], only: true }); return; }
   const lastH = S.history[S.history.length - 1];
-  if (!S.ready) { host.innerHTML = winSlab({ lead: "<b>How to win</b>", lines: [["", "อ่านแคปภาพ Team Ranking ไม่ครบ หาแถวทีมเราหรือทีมผู้นำไม่เจอ"]], asof: lastH && `${lastH.label} ${lastH.time}`, only: true }); return; }
+  if (!S.ready) { host.innerHTML = winSlab({ lead: "<b>Race Plan</b>", lines: [["", "อ่านแคปภาพ Team Ranking ไม่ครบ หาแถวทีมเราหรือทีมผู้นำไม่เจอ"]], asof: lastH && `${lastH.label} ${lastH.time}`, only: true }); return; }
 
   const pbv = S.pace_basis_value, B = S.behind, bp = B ? (B.pace_recent ?? B.pace) : null;
   const ahead = S.gap <= 0, late = !ahead && S.late, over = S.days_left <= 0, cut = ahead ? null : S.cutoff;
@@ -664,7 +664,7 @@ function drawWin() {
   const today = lastH.date;
 
   /* block 1: win head */
-  const name = "<b>How to win</b> · ";
+  const name = "<b>Race Plan</b> · ";
   const rng = ["rng", `ช่วง ${k(S.need.low)}–${k(S.need.high)} ตามว่าทีมผู้นำจะจบที่ ${k0(S.leader.end.low)}–${k0(S.leader.end.high)}`];
   const slab = ahead
     ? winSlab({ lead: `${name}ทีมเรานำทีมผู้นำ ${k(S.lead)} ก้าว/คน`, fig: S.need.high > 0 ? k(S.need.high) : null, unit: "ก้าวต่อคนต่อวัน",
