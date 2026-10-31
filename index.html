@@ -24,8 +24,8 @@
   --ld: #1f2633; --ghost: #a3adc1;
   --good: #0b5ea8; --good-soft: #dcefff;
   --shadow: 0 1px 2px rgba(11, 28, 74, .05), 0 14px 32px -18px rgba(11, 28, 74, .28);
-  /* Explore draws the other team: graphite, never our blue; weekday = light tone, off day = dark tone */
-  --hot: #9aa2b4; --hot-ink: #4a5263; --off: #3a4050; --off-ink: #262b36; --idle: #c6cddb;
+  /* Explore draws the other team: never our blue, never alarm red; weekday = teal, off day = plum */
+  --hot: #0e9185; --hot-ink: #0b6760; --off: #8a3a9c; --off-ink: #5b1f6b; --idle: #c6cddb;
   --m1: #2a78d6; --m2: #e87ba4; --m3: #1baf7a; --m4: #eda100; --m5: #6250d6; --m6: #008300;
   --font: "Anuphan", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
   --num: "Archivo", "Anuphan", system-ui, sans-serif;
@@ -832,8 +832,8 @@ function viewDaily(host) {
 function viewMember(host) {
   const cols = seen;
   const mx = Math.max(...M.flatMap(m => cols.map(i => m.daily[i] || 0)));
-  // light ramp only (6–45% navy) so navy numerals stay above 4.5:1 on every cell
-  const shade = v => { const t = Math.min(1, v / mx); return `color-mix(in oklab, ${OFF} ${Math.round(6 + t * 39)}%, #ffffff)`; };
+  // light teal ramp only (8–48%) so navy numerals stay above 4.5:1 on every cell
+  const shade = v => { const t = Math.min(1, v / mx); return `color-mix(in oklab, ${HOT} ${Math.round(8 + t * 40)}%, #ffffff)`; };
   const ink = () => INK;
   const head = cols.map(i => { const d = days[i]; return `<th class="${isOff(d) ? "off" : "wk"}"><b>${d.label.split(" ")[0]}</b>${d.dow}<span class="tag" style="background:${isOff(d) ? OFF : HOT}"></span></th>`; }).join("");
   const rows = M.map(m => {
