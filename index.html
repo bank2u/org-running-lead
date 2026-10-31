@@ -70,7 +70,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .war { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
 .war > *, .sim > * { min-width: 0; }
 .sim .col { display: contents; }
-.sim .s-ctl { order: 1; } .sim .s-scn { order: 2; } .sim .s-squad { order: 3; } .sim .s-cps { order: 4; }
+.sim .s-plan { order: 1; } .sim .s-scn { order: 2; } .sim .s-cps { order: 3; }
 .hero { border-radius: var(--r); padding: 20px 20px 16px; color: #fff; background: linear-gradient(155deg, var(--blue-2), var(--blue) 45%, var(--navy)); box-shadow: 0 18px 36px -20px rgba(11, 28, 74, .7); transition: background 400ms; position: relative; overflow: hidden; }
 .hero .when { font-size: 13px; color: var(--blue-ink); }
 .hero .verb { font-size: 18px; font-weight: 600; margin-top: 12px; }
@@ -168,6 +168,26 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .squad-out div { display: flex; justify-content: space-between; gap: 12px; background: var(--tint); border-radius: 14px; padding: 10px 14px; font-size: 14px; color: var(--ink-2); }
 .squad-out b { font-family: var(--num); font-weight: 800; font-size: 18px; color: var(--ink); white-space: nowrap; }
 .squad-out .no b { color: var(--red); }
+.split { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rule-2); }
+.h.sm { font-size: 15px; margin-bottom: 10px; }
+.squad-out .who-s { display: inline-flex; align-items: baseline; gap: 4px; flex-wrap: wrap; justify-content: flex-end; color: var(--muted); font-size: 13px; }
+.squad-out .who-s b { font-size: 17px; }
+.squad-out .who-s b.hv { color: var(--blue); }
+.squad-out .who-s em { font-style: normal; color: var(--muted); margin: 0 4px; }
+/* phones: the plan's result follows the sliders once the hero has scrolled away */
+.s-dock { display: none; }
+@media (max-width: 899px) {
+  .s-dock { position: fixed; z-index: 24; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(var(--nav-h) + 10px + env(safe-area-inset-bottom, 0px));
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 18px; border-radius: 999px; color: #fff; font-size: 13px;
+    background: linear-gradient(155deg, var(--blue), var(--navy)); box-shadow: 0 10px 24px -10px rgba(11, 28, 74, .6);
+    opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 200ms cubic-bezier(.16, 1, .3, 1), transform 200ms cubic-bezier(.16, 1, .3, 1), background 400ms; }
+  .s-dock.on { opacity: 1; transform: none; }
+  .s-dock.bad { background: linear-gradient(155deg, var(--red), var(--red-deep)); box-shadow: 0 10px 24px -10px rgba(94, 11, 20, .6); }
+  .s-dock b { font-family: var(--num); font-stretch: 104%; font-weight: 800; font-size: 16px; }
+  .s-dock span { color: var(--blue-ink); }
+  .s-dock.bad span { color: var(--red-ink); }
+  #sim { padding-bottom: 56px; }
+}
 .note-s { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
 
 /* ---------- EXPLORE (incumbent views, restyled through the tokens) ---------- */
@@ -506,8 +526,8 @@ function drawWar() {
   const good = T.us >= T.rival;
   host.className = "war" + (good ? "" : " bad");
   const moved = WR.base.gap - WR.gap;                    // + = good for us (the gap closed, or our lead grew)
-  const since = WR.base.night ? "ตั้งแต่เมื่อคืน" : `ตั้งแต่ ${WR.base.time}`;
-  const dtext = chase ? (moved >= 0 ? `แคบลง <span class="n">${full(moved)}</span> ${since}` : `ห่างขึ้น <span class="n">${full(-moved)}</span> ${since}`)
+  const since = WR.base.night ? "เทียบกับเมื่อวาน" : `ตั้งแต่ ${WR.base.time}`;
+  const dtext = chase ? (moved >= 0 ? `ระยะห่างแคบลง <span class="n">${full(moved)}</span> ${since}` : `ระยะห่างขยับขึ้น <span class="n">${full(-moved)}</span> ${since}`)
     : (moved >= 0 ? `นำเพิ่ม <span class="n">${full(moved)}</span> ${since}` : `นำลดลง <span class="n">${full(-moved)}</span> ${since}`);
   const alarm = chase ? `วันนี้${rv} เดินมากกว่าเรา ${full(T.rival - T.us)} ก้าวต่อคน` : `วันนี้${rv} ไล่เข้ามา ${full(T.rival - T.us)} ก้าวต่อคน`;
   const heavy = WR.heavy, now = T.now;
@@ -658,13 +678,15 @@ function drawToday(host, good) {
 /* ================= SIMULATOR =================
    Inputs come from tools/build_lead.py (D.sim): the remaining days, what the other team walks on each (low / usual /
    high from its own past days), today's share still to come. The page only adds them up: gap_end = gap_now −
-   Σ (ours × share of the day − theirs). The squad split ("เดอะแบก") is the plan's team average spread over the team. */
-const SIMK = "rwr-sim";
+   Σ (ours × share of the day − theirs). The split ("ใครเดินเท่าไร") never moves the result: it only spreads the same
+   team average over the team, k people walking x more than the rest (rest = avg − k·x/n), so the two always agree. */
+const SIMK = "rwr-sim2";
 const simState = (() => {
-  const d = SM ? { wk: SM.default.weekday, off: SM.default.off, scn: 1, k: 2, s: 30000 } : {};
+  const d = SM ? { wk: SM.default.weekday, off: SM.default.off, scn: 1, k: 0, x: 8000 } : {};
   try { return { ...d, ...JSON.parse(localStorage.getItem(SIMK) || "{}") }; } catch (e) { return d; }
 })();
 const saveSim = () => { try { localStorage.setItem(SIMK, JSON.stringify(simState)); } catch (e) { /* private mode */ } };
+let simDockObs = null;   // scroll handler that shows the phone result bar, added once
 
 function simRun() {
   let g = SM.g0, cross = null, cum = WR ? WR.us.avg : 0;
@@ -685,31 +707,35 @@ function drawSim() {
   const scn = SM.scenarios ? [["แผ่ว", 0], ["ปกติ", 1], ["แรง", 2]] : [];
   host.innerHTML = `
     <div class="col">
-    <section class="hero" aria-live="polite"><div class="verb" style="margin-top:0">ถ้าทีมเราเดินตามแผนข้างล่าง</div><div class="big" id="s-v"></div><div class="sub" id="s-end"></div><div class="rule" id="s-chart"></div></section>
-    <section class="panel pad s-squad">
-      <div class="h">ถ้าให้บางคนเดินเยอะ<span>คนอื่นเดินเท่าไรก็พอ</span></div>
-      <div class="pills row" style="--n:${n - 1}" role="group" aria-label="จำนวนคนที่เดินเยอะ">${Array.from({ length: n - 1 }, (_, i) => i + 1).map(i => `<button type="button" data-k="${i}" aria-pressed="${simState.k === i}">${i} คน</button>`).join("")}</div>
-      <div class="ctl" style="margin-top:14px"><div class="lab"><label for="s-s">คนที่เดินเยอะ เดินคนละ</label><b id="o-s"></b></div><input id="s-s" type="range" min="15000" max="45000" step="1000"></div>
-      <div class="squad-out" id="s-out"></div>
-      <p class="note-s">ก้าวเฉลี่ยทั้งทีมยังเท่าแผนข้างบน ทีมเรามี ${n} คน</p>
-    </section>
+    <section class="hero" id="s-hero" aria-live="polite"><div class="verb" style="margin-top:0">ถ้าทีมเราเดินตามแผนนี้</div><div class="big" id="s-v"></div><div class="sub" id="s-end"></div><div class="rule" id="s-chart"></div></section>
+    <section class="panel pad s-cps"><div class="h">เช็คระหว่างทาง<span>ถ้าเดินตามแผนนี้ ก้าวเฉลี่ยต่อคน</span></div><div class="kv" id="s-cps"></div></section>
     </div><div class="col">
-    <section class="panel pad s-ctl">
-      <div class="h">ทีมเราจะเดินคนละเท่าไร<span>ก้าวต่อวัน ลากแล้วเส้นขาวด้านบนขยับ</span></div>
+    <section class="panel pad s-plan">
+      <div class="h">ทีมเราจะเดินคนละเท่าไร<span>ต่อคนต่อวัน</span></div>
+      <div class="pills stack" role="group" aria-label="แผนสำเร็จรูป">${SM.presets.map(p => `<button type="button" data-p="${p.id}" aria-pressed="false">${esc(p.label)} <small>${k(p.weekday)} / ${k(p.off)}</small></button>`).join("")}</div>
+      <p class="note-s" style="margin:6px 0 16px">เลือกแผนแล้วลากปรับต่อได้ เส้นขาวในกราฟขยับตาม ตัวเลขคือวันทำงาน / วันหยุด</p>
       <div class="ctl"><div class="lab"><label for="s-wk">วันทำงาน</label><b id="o-wk"></b></div><input id="s-wk" type="range" min="10000" max="40000" step="500"><div class="hint"><span>${rv} เดินราว ${k(SM.rival_rates.weekday[1])}</span><span>เราช่วงหลัง ${k(SM.us_pace)}</span></div></div>
       <div class="ctl"><div class="lab"><label for="s-off">วันหยุด</label><b id="o-off"></b></div><input id="s-off" type="range" min="10000" max="40000" step="500"><div class="hint"><span>${rv} เดินราว ${k(SM.rival_rates.off[1])}</span><span id="s-hot"></span></div></div>
-      <div class="pills stack" style="margin-top:16px" role="group" aria-label="แผนสำเร็จรูป">${SM.presets.map(p => `<button type="button" data-p="${p.id}" aria-pressed="false">${esc(p.label)} <small>${k(p.weekday)} / ${k(p.off)}</small></button>`).join("")}</div>
-      <p class="note-s">ตัวเลขคือวันทำงาน / วันหยุด</p>
+      <div class="split">
+        <div class="h sm">ถ้าให้บางคนเดินเยอะ<span>ค่าเฉลี่ยทั้งทีมเท่าเดิม กราฟไม่ขยับ</span></div>
+        <div class="pills" role="group" aria-label="จำนวนคนที่เดินเยอะ">${Array.from({ length: n }, (_, i) => i).map(i => `<button type="button" data-k="${i}" aria-pressed="${simState.k === i}">${i ? i + " คน" : "ทุกคนเท่ากัน"}</button>`).join("")}</div>
+        <div class="ctl" id="s-xw" style="margin-top:14px"><div class="lab"><label for="s-x">คนที่เดินเยอะ เดินมากกว่าคนอื่นวันละ</label><b id="o-x"></b></div><input id="s-x" type="range" min="1000" max="20000" step="500"></div>
+        <div class="squad-out" id="s-out"></div>
+      </div>
     </section>
     ${scn.length ? `<section class="panel pad s-scn"><div class="h">${rv} จะเดินแค่ไหน<span>เดาจากวันที่ผ่านมาของเขา</span></div>
       <div class="pills row two" style="--n:3" role="group" aria-label="${rv} จะเดินแบบไหน">${scn.map(([l, j]) => `<button type="button" data-s="${j}" aria-pressed="${simState.scn === j}">${l} <small>${k(SM.rival_rates.weekday[j])} / ${k(SM.rival_rates.off[j])}</small></button>`).join("")}</div>
       <p class="note-s">ตัวเลขคือวันทำงาน / วันหยุด ต่อคน แผ่ว = เดินน้อยเท่าวันที่แย่สุดของเขา แรง = เดินเท่าวันที่ดีสุด</p></section>` : ""}
-    <section class="panel pad s-cps"><div class="h">เช็คระหว่างทาง<span>ถ้าเดินตามแผนนี้ ก้าวเฉลี่ยต่อคน</span></div><div class="kv" id="s-cps"></div></section>
-    </div>`;
-  const wk = $("#s-wk"), off = $("#s-off"), ss = $("#s-s");
-  wk.value = simState.wk; off.value = simState.off; ss.value = simState.s;
-  const upd = () => { simState.wk = +wk.value; simState.off = +off.value; simState.s = +ss.value; saveSim(); simPaint(); };
-  [wk, off, ss].forEach(x => x.addEventListener("input", upd));
+    </div>
+    <div class="s-dock" id="s-dock" aria-hidden="true"><b id="d-v"></b><span id="d-e"></span></div>`;
+  const wk = $("#s-wk"), off = $("#s-off"), sx = $("#s-x");
+  wk.value = simState.wk; off.value = simState.off; sx.value = simState.x;
+  // each slider writes only its own value, so a preset's exact numbers survive dragging the other slider
+  [[wk, "wk"], [off, "off"], [sx, "x"]].forEach(([el_, key]) => el_.addEventListener("input", () => { simState[key] = +el_.value; saveSim(); simPaint(); }));
+  // phones: the hero scrolls away while you drag, so a small result bar follows you
+  if (!simDockObs) { simDockObs = () => { const hero = $("#s-hero"), dock = $("#s-dock"); if (hero && dock) dock.classList.toggle("on", hero.getBoundingClientRect().bottom < 60); };
+    addEventListener("scroll", simDockObs, { passive: true }); }
+  simDockObs();
   host.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => {
     const p = SM.presets.find(x => x.id === b.dataset.p); simState.wk = p.weekday; simState.off = p.off;
     wk.value = p.weekday; off.value = p.off; saveSim(); simPaint();
@@ -724,15 +750,20 @@ function simPaint() {
   const win = r.end <= 0, dd = i => `${SM.days[i].dow} ${SM.days[i].label}`;
   host.className = "sim" + (win ? "" : " bad");
   host.querySelectorAll('input[type="range"]').forEach(x => x.style.setProperty("--p", ((x.value - x.min) / (x.max - x.min) * 100).toFixed(1) + "%"));
-  $("#o-wk").textContent = full(simState.wk); $("#o-off").textContent = full(simState.off); $("#o-s").textContent = full(simState.s);
+  $("#o-wk").textContent = full(simState.wk); $("#o-off").textContent = full(simState.off); $("#o-x").textContent = "+" + full(simState.x);
   host.querySelectorAll("[data-p]").forEach(b => { const p = SM.presets.find(x => x.id === b.dataset.p); b.setAttribute("aria-pressed", p.weekday === simState.wk && p.off === simState.off); });
   $("#s-hot").className = SM.ceiling && simState.off > SM.ceiling ? "hot" : "";
   $("#s-hot").textContent = SM.ceiling ? (simState.off > SM.ceiling ? `เกินวันที่ดีที่สุดของ${rv} (${full(SM.ceiling)})` : `วันที่ดีที่สุดของ${rv} (${full(SM.ceiling)})`) : "";
   const ourL = [WR ? WR.us.avg : 0, ...r.ours], rvL = ourL.map((v, i) => v + r.pts[i]);   // both lines are average steps per person: up = more steps
-  const endTxt = `จบ ${dd(last)}: เรา ${full(ourL[last + 1])} vs ${rv} ${full(rvL[last + 1])}<br>${win ? "เรานำ" : "เราตามหลัง"}ราว ${k(Math.abs(r.end))} ก้าวต่อคน`;
+  // short of the line: the same extra on every remaining day (today counts only its share still to come)
+  const need = win ? 0 : r.end / SM.days.reduce((a, d) => a + d.frac, 0);
+  const endTxt = `จบ ${dd(last)}: เรา ${full(ourL[last + 1])} vs ${rv} ${full(rvL[last + 1])}<br>${win ? `เรานำราว ${k(Math.abs(r.end))} ก้าวต่อคน` : `ตามหลังราว ${k(r.end)} ก้าวต่อคน<br>ต้องเดินเพิ่มอีกคนละราว ${full(Math.ceil(need / 100) * 100)} ทุกวัน`}`;
   if (chase) $("#s-v").textContent = win ? (r.cross === 0 ? "แซงวันนี้" : `แซง ${dd(r.cross)}`) : "ยังไม่ทัน";
   else { const lost = r.pts.findIndex((g, i) => i && g > 0); $("#s-v").textContent = win ? "รักษาอันดับ 1" : `โดนแซง ${dd(lost - 1)}`; }
   $("#s-end").innerHTML = endTxt;
+  $("#s-dock").className = "s-dock" + ($("#s-dock").classList.contains("on") ? " on" : "") + (win ? "" : " bad");
+  $("#d-v").textContent = $("#s-v").textContent;
+  $("#d-e").textContent = win ? `จบนำ ${k(Math.abs(r.end))}` : `ขาดวันละ ${k(need)} ต่อคน`;
   // two lines of average steps per person: ours (white, solid) vs rival (dashed). Walk more = our line climbs toward / past theirs
   const c = $("#s-chart"), w = Math.max(260, Math.min(c.clientWidth || 320, 640)), h = 190, L = 4, R = w - 96, top = 14, bot = h - 22;
   const lo = Math.min(...ourL, ...rvL), hi = Math.max(...ourL, ...rvL), pad = (hi - lo) * .06 || 1000;
@@ -751,10 +782,15 @@ function simPaint() {
   txt(s, R + 9, yr + 4, `${rv} ${k(rvL[last + 1])}`, { "font-size": 12, fill: "#fff", "fill-opacity": .85 });
   const marks = [[0, "วันนี้"], ...SM.checkpoints.map(i => [i + 1, SM.days[i].label])];
   marks.filter(([i], j) => j === 0 || X(i) - X(0) > 46).forEach(([i, l], j) => txt(s, X(i), h - 4, l, { "text-anchor": j === 0 ? "start" : i === ourL.length - 1 ? "end" : "middle", "font-size": 10, fill: "#fff", "fill-opacity": .8 }));
-  // squad
-  const kk = simState.k, sv = simState.s, rest = v => Math.round((n * v - kk * sv) / (n - kk));
-  $("#s-out").innerHTML = [["วันทำงาน", simState.wk], ["วันหยุด", simState.off]].map(([l, v]) => { const x = rest(v);
-    return `<div class="${x <= 0 ? "" : x > (SM.ceiling || 1e9) ? "no" : ""}"><span>${l}: อีก ${n - kk} คน เดินคนละ</span><b>${x <= 0 ? "เท่าที่ไหว" : full(x)}</b></div>`; }).join("");
+  // split: same team average, k people walk x more than the other n − k
+  const kk = simState.k, xx = simState.x;
+  host.querySelectorAll("[data-k]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.k === kk));
+  $("#s-xw").hidden = !kk;
+  $("#s-out").innerHTML = [["วันทำงาน", simState.wk], ["วันหยุด", simState.off]].map(([l, v]) => {
+    if (!kk) return `<div><span>${l}</span><span class="who-s"><b>${full(v)}</b> × ${n} คน</span></div>`;
+    const rest = Math.max(0, Math.round(v - kk * xx / n)), heavy = Math.round((n * v - (n - kk) * rest) / kk);
+    return `<div><span>${l}</span><span class="who-s"><b class="hv">${full(heavy)}</b> × ${kk} คน<em>+</em><b>${full(rest)}</b> × ${n - kk} คน</span></div>`;
+  }).join("") + `<p class="note-s" style="margin:2px 0 0">${kk ? `รวมแล้วเฉลี่ยคนละ ${full(simState.wk)} / ${full(simState.off)} เท่าแผนข้างบน ผลในกราฟจึงเหมือนเดิม` : `ทีมเรามี ${n} คน เลือกจำนวนคนด้านบนเพื่อแบ่งให้บางคนเดินเยอะขึ้น`}</p>`;
   // checkpoints
   $("#s-cps").innerHTML = SM.checkpoints.map(i => { const g = r.pts[i + 1];
     return `<div><span>สิ้นวัน ${dd(i)}<br><small style="color:var(--muted)">เรา ${full(ourL[i + 1])} vs ${rv} ${full(rvL[i + 1])}</small></span><b class="${g > 0 ? "no" : "ok"}">${g > 0 ? "ตามหลัง " + full(g) : "นำ " + full(-g)}</b></div>`; }).join("");
