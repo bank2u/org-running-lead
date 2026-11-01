@@ -771,7 +771,9 @@ function drawToday(host, d, isToday, good) {
     const a = Math.max(x0, d.heavy.from * 60), b = Math.min(x1, d.heavy.to * 60);
     if (b > a) {
       el("rect", { x: X(a), y: top - 2, width: X(b) - X(a), height: bot - top + 2, fill: C("--sky"), "fill-opacity": .14 }, s);
-      txt(s, (X(a) + X(b)) / 2, top - 10, "ช่วงเวลาคู่แข่งเดินเยอะ", { "text-anchor": "middle", "font-size": 10, "font-weight": 600, fill: C("--sky-ink") });
+      // the "now" label sits right-aligned above the now line; when the band's label would run into it, tuck the label inside the band instead
+      const hx = (X(a) + X(b)) / 2, hit = isToday && hx + 58 > X(now) - 4 - 70;
+      txt(s, hx, hit ? top + 12 : top - 10, "ช่วงเวลาคู่แข่งเดินเยอะ", { "text-anchor": "middle", "font-size": 10, "font-weight": 600, fill: C("--sky-ink") });
     }
   }
   el("line", { x1: L, x2: X(x1), y1: bot, y2: bot, stroke: C("--rule"), "stroke-width": 1.5 }, s);
