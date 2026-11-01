@@ -661,7 +661,10 @@ function drawRace() {
     const rows = d.slots.map(s => s.state === "ok"
       ? `<div class="rb-row"><span><span class="rb-at">${s.at}</span></span><span class="rb-g">${gapTxt(s.gap)}</span>${chg(s.change)}</div>`
       : `<div class="rb-row"><span><span class="rb-at">${s.at}</span></span><span class="rb-msg">${s.state === "wait" ? "ยังไม่ถึงเวลา" : "ไม่มีภาพช่วงนี้"}</span></div>`);
-    if (d.now) rows.push(`<div class="rb-row"><span><span class="rb-at">${d.today ? "ตอนนี้" : "ปิดวัน"}</span><small>${d.now.time}</small></span><span class="rb-g">${gapTxt(d.now.gap)}</span>${chg(d.now.change)}</div>`);
+    if (d.now) {   // by clock time (user, 2026-11-01): 10:25 sits between 09:00 and 15:00; before 09:00 it comes first
+      const at = d.slots.findIndex(s => s.at > d.now.time), i = at < 0 ? rows.length : at;
+      rows.splice(i, 0, `<div class="rb-row"><span><span class="rb-at">${d.today ? "ตอนนี้" : "ปิดวัน"}</span><small>${d.now.time}</small></span><span class="rb-g">${gapTxt(d.now.gap)}</span>${chg(d.now.change)}</div>`);
+    }
     return `<div class="rb-slots">${rows.join("")}</div>`;
   };
   const row = d => {
