@@ -142,7 +142,6 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .wa-bar i.rest { background: var(--idle); }
 .wa-lg { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
 .wa-lg > span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.wa-lg .k { color: var(--muted); }
 .wa-lg i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .wa-lg i.rest { background: var(--idle); }
 .wa-lg b { font-family: var(--num); font-weight: 700; color: var(--ink); }
@@ -666,7 +665,7 @@ function whoStrip(w) {
     (rs ? `<span><i class="rest"></i>อีก ${rest.length} คน <b>+${k(rs)}</b></span>` : "");
   const say = named.map(([a, v]) => `${a} ${full(v)}`).concat(rs ? [`อีก ${rest.length} คน ${full(rs)}`] : []).join(", ");
   return `<span class="wa" role="img" aria-label="ก้าวที่${rvName(WR.rival.rank)}เพิ่มมาจาก ${esc(say)}"><span class="wa-bar" aria-hidden="true">${bar}</span>` +
-    `<span class="wa-lg" aria-hidden="true"><span class="k">มาจาก</span>${lg}</span></span>`;
+    `<span class="wa-lg" aria-hidden="true">${lg}</span></span>`;
 }
 
 // the vs panel for one day (user, 2026-11-01): today by default, chevrons step back to earlier days with captures
@@ -1352,7 +1351,7 @@ $("#limits").innerHTML = [
   "War Room: ตัวเลขของสองทีมมาจากภาพ Team Ranking (ก้าวเฉลี่ยต่อคนของทั้งทีม) \"เมื่อคืน\" คือภาพสุดท้ายของเมื่อวาน ก้าวที่เดินหลังภาพนั้นนับเป็นของวันนี้",
   "เส้นจุด \"ปกติ\" ในกราฟวันนี้ และจุด \"ควรได้ถึงตอนนี้\" ใช้จังหวะเดินรายชั่วโมงของทีมที่วิเคราะห์ในวันประเภทเดียวกัน (วันทำงาน / วันหยุด) จากวันที่จบแล้ว",
   "เป้าวันนี้: เดินมากกว่าวันปกติของทีมข้างหน้าเท่ากันทุกวันที่เหลือ จนจบเท่ากันพอดีวันสุดท้าย วันหยุดเป้าจึงสูงกว่าวันทำงาน",
-  "แถบ \"มาจาก\" ใต้เหตุการณ์สำคัญและใต้แต่ละช่วงเวลาในระยะห่างรายวัน: ก้าวที่สมาชิกแต่ละคนของทีมที่วิเคราะห์เพิ่มขึ้นระหว่างภาพก่อนหน้ากับภาพนั้น เป็นก้าวรวมของคนนั้นเอง (ไม่ใช่ต่อคนของทีม) อ่านจากภาพ leaderboard ที่แคปพร้อม Team Ranking ช่วงไหนไม่มีภาพรายคนจะไม่แสดง ก้าวที่ app เพิ่ง sync อาจเดินมาก่อนช่วงนั้น",
+  "แถบสีแบ่งตามคน ใต้เหตุการณ์สำคัญและใต้แต่ละช่วงเวลาในระยะห่างรายวัน: ก้าวที่สมาชิกแต่ละคนของทีมที่วิเคราะห์เพิ่มขึ้นระหว่างภาพก่อนหน้ากับภาพนั้น เป็นก้าวรวมของคนนั้นเอง (ไม่ใช่ต่อคนของทีม) อ่านจากภาพ leaderboard ที่แคปพร้อม Team Ranking ช่วงไหนไม่มีภาพรายคนจะไม่แสดง ก้าวที่ app เพิ่ง sync อาจเดินมาก่อนช่วงนั้น",
   "Simulator: ตารางคือก้าวที่แต่ละคนต้องเดินทุกวันที่เหลือ เพื่อไปถึงเส้นของอีกทีมพอดี เผื่อว่าเขาเดินแบบปกติ (ค่าเฉลี่ยของแต่ละคน) หรือแรง (วันที่ดีที่สุด) เดอะแบกแค่แบ่งค่าเฉลี่ยเดิมใหม่ กราฟจึงไม่ขยับ วันนี้นับเฉพาะส่วนของวันที่ยังเหลือ",
   ...(M.some(m => m.nosync.length) ? [`ถ้ายอดของใครไม่ขยับเลยทั้งวัน (วันนี้นับหลัง 18:00) ถือว่ายังไม่ sync แสดงเป็น "ยังไม่ sync" ไม่นับเป็น 0 และไม่รวมในค่าเฉลี่ยกับอัตราเดินของคนนั้น ก้าวที่ sync มาทีหลังจะไปอยู่ในวันถัดไป (มี * ในคำอธิบาย): ${M.filter(m => m.nosync.length).map(m => `${m.alias} ${m.nosync.map(x => days.find(d => d.d === x).label).join(", ")}`).join(" · ")}`] : []),
   ...M.flatMap(m => m.moved.map(x => `${m.alias} ${days.find(d => d.d === x.d).label}: ยอด ${full(x.steps)} ก้าว sync เข้ามาตอน ${x.at} ถือเป็นก้าวของ ${days.find(d => d.d === x.d).label} (ตามที่ผู้ดูแลระบุ) แสดงด้วย *`)),
