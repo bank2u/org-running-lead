@@ -742,7 +742,9 @@ function drawRace() {
     return d.today ? `<div class="rb-day rb-today"><div class="rb-row">${head}</div>${slots(d)}</div>`
       : `<details class="rb-day"><summary class="rb-row">${head}</summary>${slots(d)}</details>`;
   };
-  const hidden = Math.max(0, R.days.length - R.show), shown = raceAll ? R.days : R.days.slice(hidden);
+  // newest day first (user, 2026-11-02): the list is built oldest-first in build_lead.py, shown reversed here
+  const newest = R.days.slice().reverse();
+  const hidden = Math.max(0, newest.length - R.show), shown = raceAll ? newest : newest.slice(0, R.show);
   host.innerHTML = `<div class="h">ระยะห่างรายวัน<span>ก้าวต่อคน · เรา vs ${rv}</span></div>` +
     (hidden ? `<div class="rb-more"><button type="button" aria-expanded="${raceAll}">${raceAll ? `ย่อเหลือ ${R.show} วันล่าสุด` : `ดูทั้งหมด ${R.days.length} วัน`}</button></div>` : "") +
     `<div class="rb-list">${shown.map(row).join("")}</div>` +
