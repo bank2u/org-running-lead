@@ -1358,7 +1358,7 @@ function drawHourBoard(host) {
     `<div class="view-tools"><div class="seg sm" id="hbm"><button type="button" data-m="avg" aria-pressed="${!today}">เฉลี่ย</button><button type="button" data-m="today" aria-pressed="${today}">วันนี้</button></div>` +
     (today ? "" : `<div class="seg sm" id="hbt"><button type="button" data-t="weekday" aria-pressed="${typ === "weekday"}">วันทำงาน</button><button type="button" data-t="off" aria-pressed="${typ === "off"}">วันหยุด</button></div>`) + `</div>` +
     `<div class="legend">${today ? `<span><i style="border:1.5px dashed ${INK}"></i>ช่วงที่ปกติเดินเยอะ</span><span><i class="nodata"></i>ไม่มีภาพหน้าจอช่วงนั้น</span><span><i class="line" style="background:${INK}"></i>ตอนนี้</span>` : ""}</div>` +
-    `<div id="hbc"></div><p class="sub" style="margin-top:8px">ช่องแรกคือรวมก่อน 0${B.from}:00 · "รวม" นับเฉพาะก้าวที่บอกชั่วโมงได้ จึงอาจน้อยกว่ายอดทั้งวัน · แตะชื่อเพื่อดูทีละคน</p>`;
+    `<div id="hbc"></div><p class="sub" style="margin-top:8px">ช่องแรกคือรวมก่อน 0${B.from}:00 · "รวม" คือยอดทั้งวัน เท่ากับหน้ารายคน · แตะชื่อเพื่อดูทีละคน</p>`;
   host.querySelectorAll("#hbm button").forEach(b => b.onclick = () => go({ hb: b.dataset.m }));
   host.querySelectorAll("#hbt button").forEach(b => b.onclick = () => go({ hbType: b.dataset.t }));
 
@@ -1398,7 +1398,9 @@ function drawHourBoard(host) {
           : `<div class="r"><span>${today ? "วันนี้" : `เฉลี่ย${TL[typ]}`}</span><b>${full(v.v)}</b></div>${v.part ? `<div>ชั่วโมงนี้ยังไม่จบ</div>` : ""}`) +
         (today && usual != null ? `<div class="r"><span>ปกติ (${TL[typ]})</span><b>${full(usual)}</b></div>` : ""));
     });
-    txt(g, w - 2, y + rh / 2 + 4, k(tot), { "text-anchor": "end", "font-size": 12, "font-weight": 600, fill: INK });
+    // "รวม" = the same day total as ก้าวรายคนต่อวัน (today) or its usual day (เฉลี่ย), not only the steps placed in an hour
+    const di = days.findIndex(d => d.d === B.today.d), dayTot = today ? byAlias[r.alias].daily[di] : (P.members[r.alias] || {})[typ];
+    txt(g, w - 2, y + rh / 2 + 4, k(dayTot != null ? dayTot : tot), { "text-anchor": "end", "font-size": 12, "font-weight": 600, fill: INK });
     const p = today && r.peak[typ];
     if (p) {
       const j0 = cols.findIndex(hs => hs.includes(p[0])), j1 = cols.findIndex(hs => hs.includes(p[1] - 1));
