@@ -1105,7 +1105,7 @@ function drawKnow() {
 /* ================= EXPLORE ================= */
 const VIEWS =[["daily", "ก้าวต่อวัน"], ["member", "รายคน"], ["trend", "แนวโน้ม"], ["hours", "ช่วงเวลา"]];
 const ANL = WR && WR.rival.analysed ? `ทีมอันดับ ${WR.rival.rank}` : "ทีมที่วิเคราะห์";
-const state = { tab: "war", view: "daily", focus: null, scope: "team", mode: "cum", hourType: "all", hb: "avg", hbType: null, hbDay: null };
+const state = { tab: "war", view: "daily", focus: null, scope: "team", mode: "cum", hourType: "all", hb: "avg", hbType: null, hbDay: null, tday: null };
 
 function drawControls() {
   $("#views").innerHTML = VIEWS.map(([id, l]) => `<button type="button" data-v="${id}" aria-pressed="${state.view === id}">${l}</button>`).join("");
@@ -1205,15 +1205,112 @@ function teamPath() {
   return out;
 }
 
+// days the trend can be opened on: every day with readings (not the estimated first day)
+const trendDays = seen.filter(i => days[i].status !== "est");
+function trendTools(host, scope, inDay) {
+  const di = state.tday ? days.findIndex(d => d.d === state.tday) : -1;
+  return `<div class="view-tools"><div class="seg sm" id="tscope"><button type="button" data-s="team" aria-pressed="${scope === "team"}">ทั้งทีม</button><button type="button" data-s="member" aria-pressed="${scope === "member"}">รายคน</button></div>` +
+    `<div class="seg sm" id="tmode"><button type="button" data-m="cum" aria-pressed="${state.mode === "cum"}">${inDay ? "สะสมในวัน" : "สะสม"}</button><button type="button" data-m="day" aria-pressed="${state.mode === "day"}">${inDay ? "รายชั่วโมง" : "รายวัน"}</button></div></div>` +
+    `<div class="view-tools"><div class="seg sm" id="tday" aria-label="เลือกวัน"><button type="button" data-d="" aria-pressed="${di < 0}">ทุกวัน</button>` +
+    trendDays.map(i => `<button type="button" data-d="${days[i].d}" aria-pressed="${di === i}" title="${days[i].dow} ${days[i].label}">${days[i].label.split(" ")[0]}</button>`).join("") + `</div></div>`;
+}
+function wireTrend(host) {
+  $("#tscope", host).querySelectorAll("button").forEach(b => b.onclick = () => go({ scope: b.dataset.s, focus: b.dataset.s === "team" ? null : state.focus }));
+  $("#tmode", host).querySelectorAll("button").forEach(b => b.onclick = () => go({ mode: b.dataset.m }));
+  $("#tday", host).querySelectorAll("button").forEach(b => b.onclick = () => go({ tday: b.dataset.d || null }));
+}
+
+// one day up close: x = 00:00-24:00 of that day; cumulative since the previous day's close, or steps per hour
+function viewTrendDay(host, i) {
+  const f = state.focus, scope = f ? "member" : state.scope, d = days[i], cum = state.mode === "cum";
+  const isToday = d.status === "partial";
+  host.innerHTML = `<h2>${cum ? "ก้าวสะสมในวัน" : "ก้าวรายชั่วโมง"} ${d.dow} ${d.label}${scope === "team" ? " (เฉลี่ยต่อคน)" : " รายคน"}</h2>` +
+    `<p class="sub">${cum ? "นับจากยอดปิดของวันก่อน ยิ่งชันยิ่งเดินเร็ว ช่วงแบนคือไม่เดิน (หรือยังไม่ sync) ก้าวระหว่างสองภาพลากเป็นเส้นตรง" : "ก้าวระหว่างสองภาพเฉลี่ยลงแต่ละนาที ช่วงที่ภาพห่างเกิน 3 ชม. ไม่ลงชั่วโมง"}</p>` +
+    trendTools(host, scope, true) + `<div class="legend" id="tl"></div><div id="c"></div>`;
+  wireTrend(host);
+  const c = $("#c", host), w = W(c), h = w < 560 ? 260 : 340, L = 44, R = w < 560 ? 52 : 72, T = 14, B = 34;
+  const X = mnt => L + (w - L - R) * mnt / 1440, t0 = i * 1440;
+  const nowMin = isToday ? asofAbs - t0 : null;
+  // per member: [minute of day, steps since the previous day's close]
+  const dayPts = m => {
+    const before = m.trace.filter(p => p[0] <= t0), base = before.length ? before[before.length - 1][1] : 0;
+    return [[0, 0], ...m.trace.filter(p => p[0] > t0 && p[0] <= t0 + 1440).map(p => [p[0] - t0, p[1] - base])];
+  };
+  const at = (pts, t) => {   // linear between readings, flat after the last one
+    if (t >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
+    const j = pts.findIndex(p => p[0] > t), a = pts[j - 1], b = pts[j];
+    return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+  };
+  const hourly = m => { const hs = m.hours[d.d]; return Array.from({ length: 24 }, (_, hh) => hs && (!m.cover || !m.cover[d.d] || m.cover[d.d][hh]) && (!isToday || hh * 60 < nowMin) ? hs[hh] : null); };
+  const series = [];
+  if (cum) {
+    const per = M.map(m => ({ m, pts: dayPts(m) }));
+    if (scope === "team") {
+      const ts = [...new Set(per.flatMap(x => x.pts.map(p => p[0])))].sort((a, b) => a - b);
+      series.push({ alias: "ทั้งทีม", col: OFF, w: 3, pts: ts.map(t => [t, mean(per.map(x => at(x.pts, t)))]) });
+    } else per.forEach(x => series.push({ alias: x.m.alias, col: hue[x.m.alias], w: 2, pts: x.pts }));
+  } else {
+    const per = M.map(m => ({ m, hs: hourly(m) }));
+    const toPts = hs => hs.map((v, hh) => [hh * 60 + 30, v]).filter(p => p[1] != null);
+    if (scope === "team") {
+      const hs = Array.from({ length: 24 }, (_, hh) => { const vs = per.map(x => x.hs[hh]); return vs.some(v => v == null) ? null : mean(vs); });
+      series.push({ alias: "ทั้งทีม", col: OFF, w: 3, pts: toPts(hs) });
+    } else per.forEach(x => series.push({ alias: x.m.alias, col: hue[x.m.alias], w: 2, pts: toPts(x.hs) }));
+  }
+  const vmax = Math.max(1, ...series.flatMap(x => x.pts.map(p => p[1])));
+  const max = niceMax(vmax * 1.1), Y = v => T + (h - T - B) * (1 - v / max);
+  const s = svgIn(c, w, h, `${cum ? "ก้าวสะสมในวัน" : "ก้าวรายชั่วโมง"} ${d.dow} ${d.label}`);
+  const every = w < 560 ? 6 : 3;
+  for (let hh = 0; hh <= 24; hh += every) {
+    el("line", { x1: X(hh * 60), x2: X(hh * 60), y1: T, y2: h - B, stroke: RULE }, s);
+    txt(s, X(hh * 60), h - B + 16, `${String(hh).padStart(2, "0")}:00`, { "text-anchor": hh === 0 ? "start" : hh === 24 ? "end" : "middle", "font-size": 11, fill: INK2 });
+  }
+  for (const v of ticks(max)) { el("line", { x1: L, x2: w - R, y1: Y(v), y2: Y(v), stroke: v ? RULE2 : RULE }, s); txt(s, L - 6, Y(v) + 4, v ? k(v).replace(".0k", "k") : "0", { "text-anchor": "end", "font-size": 11, fill: MUTED }); }
+  if (isToday) { el("line", { x1: X(nowMin), x2: X(nowMin), y1: T, y2: h - B, stroke: INK2, "stroke-dasharray": "2 3" }, s); txt(s, X(nowMin) + 4, T + 10, "ตอนนี้", { "font-size": 11, fill: INK2 }); }
+  const ordered = [...series].sort((a, b) => (a.alias === f) - (b.alias === f)), ends = [];
+  for (const x of ordered) {
+    if (!x.pts.length) continue;
+    const dim = f && x.alias !== f, g = el("g", { opacity: dim ? .18 : 1 }, s);
+    // per hour: break the line where an hour has no placed steps
+    const runs = cum ? [x.pts] : x.pts.reduce((a, p) => { const r = a[a.length - 1]; if (r && p[0] - r[r.length - 1][0] === 60) r.push(p); else a.push([p]); return a; }, []);
+    for (const r of runs) drawIn(el("path", { d: "M" + r.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("L"), fill: "none", stroke: x.col, "stroke-width": x.alias === f ? 3 : x.w, "stroke-linejoin": "round", "stroke-linecap": "round" }, g), 0, 900);
+    x.pts.forEach(p => { if (!cum || p[0] > 0) el("circle", { cx: X(p[0]), cy: Y(p[1]), r: cum ? 2.5 : 3.5, fill: x.col, stroke: "#fff", "stroke-width": 1.5 }, g); });
+    const last = x.pts[x.pts.length - 1];
+    if (!dim) ends.push({ x: X(cum ? Math.max(last[0], 0) : last[0]) + 4, y: Y(cum ? last[1] : last[1]) + 4, s: cum ? k(last[1]) : x.alias, col: x.col });
+  }
+  ends.sort((a, b) => a.y - b.y).forEach((e, j, a) => { if (j && e.y - a[j - 1].y < 13) e.y = a[j - 1].y + 13; });
+  for (const e of ends) txt(s, e.x + 4, e.y, e.s, { "font-size": 11, "font-weight": 600, fill: INK });
+  $("#tl", host).innerHTML = series.map(x => `<span><i class="line" style="background:${x.col}"></i>${esc(x.alias)}</span>`).join("");
+  if (!series.some(x => x.pts.length > (cum ? 1 : 0))) txt(s, (L + w - R) / 2, (T + h - B) / 2, "ยังไม่มีภาพของวันนี้พอจะวาด", { "text-anchor": "middle", "font-size": 13, fill: MUTED });
+  const cross = el("line", { y1: T, y2: h - B, stroke: INK, "stroke-width": 1, opacity: 0 }, s);
+  const hit = el("rect", { x: L, y: T, width: w - L - R, height: h - T - B, fill: "transparent" }, s);
+  const move = e => {
+    const r = s.getBoundingClientRect(), px = (e.clientX - r.left) * (w / r.width);
+    const t = Math.max(0, Math.min(1439, (px - L) / (w - L - R) * 1440));
+    const hh = Math.floor(t / 60), tm = cum ? Math.round(t) : hh * 60 + 30;
+    cross.setAttribute("x1", X(tm)); cross.setAttribute("x2", X(tm)); cross.setAttribute("opacity", .25);
+    const val = x => {
+      if (!cum) { const p = x.pts.find(p => p[0] === hh * 60 + 30); return p ? p[1] : null; }
+      if (isToday && t > nowMin) return null;
+      return x.pts.length ? at(x.pts, t) : null;
+    };
+    const rows = series.map(x => [x, val(x)]).filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
+    const when = cum ? `${String(hh).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}` : `${String(hh).padStart(2, "0")}:00–${String(hh + 1).padStart(2, "0")}:00`;
+    showTip(e, `<b>${d.dow} ${d.label} · ${when}</b>` + (rows.length ? rows.map(([x, v]) => `<div class="r"><span><i style="background:${x.col}"></i>${esc(x.alias)}</span><b>${full(v)}</b></div>`).join("") : `<div>ไม่มีข้อมูลช่วงนี้</div>`));
+  };
+  hit.addEventListener("pointermove", move); hit.addEventListener("pointerenter", move);
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+}
+
 function viewTrend(host) {
+  const di = state.tday ? days.findIndex(d => d.d === state.tday) : -1;
+  if (di >= 0 && trendDays.includes(di)) return viewTrendDay(host, di);
   const f = state.focus;
   const scope = f ? "member" : state.scope;
   host.innerHTML = `<h2>${state.mode === "cum" ? "ยอดสะสม" : "ก้าวต่อวัน"}${scope === "team" ? " (เฉลี่ยต่อคน)" : " รายคน"}</h2>` +
-    `<p class="sub">${state.mode === "cum" ? "ยิ่งชันยิ่งเดินเร็ว ช่วงแบนคือช่วงที่ไม่เดิน (หรือยังไม่ sync) เส้นประคือคาดการณ์ถึง 13 พ.ย." : "เทียบแรงรายวัน แถบพื้นเทาคือวันหยุด"}</p>` +
-    `<div class="view-tools"><div class="seg sm" id="tscope"><button type="button" data-s="team" aria-pressed="${scope === "team"}">ทั้งทีม</button><button type="button" data-s="member" aria-pressed="${scope === "member"}">รายคน</button></div>` +
-    `<div class="seg sm" id="tmode"><button type="button" data-m="cum" aria-pressed="${state.mode === "cum"}">สะสม</button><button type="button" data-m="day" aria-pressed="${state.mode === "day"}">รายวัน</button></div></div><div class="legend" id="tl"></div><div id="c"></div>`;
-  $("#tscope", host).querySelectorAll("button").forEach(b => b.onclick = () => go({ scope: b.dataset.s, focus: b.dataset.s === "team" ? null : state.focus }));
-  $("#tmode", host).querySelectorAll("button").forEach(b => b.onclick = () => go({ mode: b.dataset.m }));
+    `<p class="sub">${state.mode === "cum" ? "ยิ่งชันยิ่งเดินเร็ว ช่วงแบนคือช่วงที่ไม่เดิน (หรือยังไม่ sync) เส้นประคือคาดการณ์ถึง 13 พ.ย." : "เทียบแรงรายวัน แถบพื้นเทาคือวันหยุด"} · แตะวันในกราฟเพื่อดูละเอียดทั้งวัน</p>` +
+    trendTools(host, scope, false) + `<div class="legend" id="tl"></div><div id="c"></div>`;
+  wireTrend(host);
   const c = $("#c", host), w = W(c), h = w < 560 ? 260 : 340, L = 44, R = w < 560 ? 52 : 72, T = 14, B = 34;
   const nd = days.length, X = mnt => L + (w - L - R) * mnt / (nd * 1440);
   const asofMin = days.findIndex(d => d.d === D.as_of.date) * 1440 + (+D.as_of.time.slice(0, 2)) * 60 + (+D.as_of.time.slice(3));
@@ -1285,6 +1382,12 @@ function viewTrend(host) {
   };
   hit.addEventListener("pointermove", move); hit.addEventListener("pointerenter", move);
   hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+  hit.style.cursor = "pointer";
+  hit.addEventListener("click", e => {
+    const r = s.getBoundingClientRect(), px = (e.clientX - r.left) * (w / r.width);
+    const i = Math.max(0, Math.min(nd - 1, Math.floor((px - L) / (X(1440) - X(0)))));
+    if (trendDays.includes(i)) { hideTip(); go({ tday: days[i].d }); }
+  });
 }
 
 function viewHours(host) {
@@ -1450,7 +1553,7 @@ function render() {
 function hashOf() {
   if (state.tab !== "explore") return "#" + state.tab;
   const q = [state.view];
-  if (state.view === "trend") q.push(state.scope, state.mode);
+  if (state.view === "trend") { q.push(state.scope, state.mode); if (state.tday) q.push("on" + state.tday); }
   if (state.view === "hours") { if (state.hb === "today") { q.push("today"); if (state.hbDay) q.push(state.hbDay); } else if (state.hbType) q.push(state.hbType); }
   if (state.focus) q.push("@" + state.focus);
   return "#explore/" + q.map(encodeURIComponent).join("/");
@@ -1475,6 +1578,7 @@ function fromHash() {
     else if (p === "team" || p === "member") state.scope = p;
     else if (p === "cum" || p === "day") state.mode = p;
     else if (p === "today") state.hb = p;
+    else if (/^on\d{4}-\d{2}-\d{2}$/.test(p)) state.tday = p.slice(2);   // the trend opened on one day
     else if (/^\d{4}-\d{2}-\d{2}$/.test(p)) { state.hb = "today"; state.hbDay = p; }   // a past day on the hour board
     else if (p === "weekday" || p === "off") state.hbType = p;
   }
