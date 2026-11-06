@@ -524,12 +524,22 @@ function showTip(ev, html) {
   tip.style.left = Math.min(window.innerWidth - r.width - 8, Math.max(8, x + 14)) + "px";
   tip.style.top = (y - r.height - 14 < 8 ? y + 18 : y - r.height - 14) + "px";
 }
-function hideTip() { tip.hidden = true; }
+let clearCross = null;   // the crosshair of the chart whose tooltip is open, cleared together with it
+function hideTip() { tip.hidden = true; if (clearCross) { clearCross(); clearCross = null; } }
+// chart hit area: mouse = hover, finger = drag sideways to scrub (vertical swipes still scroll the page); on touch the
+// tooltip stays after the finger lifts and closes on a tap elsewhere or a scroll
+function bindHit(hit, cross, move) {
+  hit.dataset.hit = "1"; hit.style.touchAction = "pan-y";
+  const on = e => { clearCross = () => cross.setAttribute("opacity", 0); move(e); };
+  hit.addEventListener("pointerenter", on); hit.addEventListener("pointermove", on);
+  hit.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hideTip(); });
+}
+document.addEventListener("pointerdown", e => { if (e.pointerType === "touch" && !(e.target.dataset && e.target.dataset.hit)) hideTip(); });
 function hover(node, html) {
-  node.style.cursor = "default";
+  node.style.cursor = "default"; node.dataset.hit = "1";
   node.addEventListener("pointerenter", e => showTip(e, html()));
   node.addEventListener("pointermove", e => showTip(e, html()));
-  node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") hideTip(); });
 }
 document.addEventListener("scroll", hideTip, { passive: true });
 
@@ -1294,12 +1304,11 @@ function viewTrendDay(host, i) {
       if (isToday && t > nowMin) return null;
       return x.pts.length ? at(x.pts, t) : null;
     };
-    const rows = series.map(x => [x, val(x)]).filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
+    const rows = series.filter(x => !f || x.alias === f).map(x => [x, val(x)]).filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
     const when = cum ? `${String(hh).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}` : `${String(hh).padStart(2, "0")}:00–${String(hh + 1).padStart(2, "0")}:00`;
     showTip(e, `<b>${d.dow} ${d.label} · ${when}</b>` + (rows.length ? rows.map(([x, v]) => `<div class="r"><span><i style="background:${x.col}"></i>${esc(x.alias)}</span><b>${full(v)}</b></div>`).join("") : `<div>ไม่มีข้อมูลช่วงนี้</div>`));
   };
-  hit.addEventListener("pointermove", move); hit.addEventListener("pointerenter", move);
-  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+  bindHit(hit, cross, move);
 }
 
 function viewTrend(host) {
@@ -1308,7 +1317,7 @@ function viewTrend(host) {
   const f = state.focus;
   const scope = f ? "member" : state.scope;
   host.innerHTML = `<h2>${state.mode === "cum" ? "ยอดสะสม" : "ก้าวต่อวัน"}${scope === "team" ? " (เฉลี่ยต่อคน)" : " รายคน"}</h2>` +
-    `<p class="sub">${state.mode === "cum" ? "ยิ่งชันยิ่งเดินเร็ว ช่วงแบนคือช่วงที่ไม่เดิน (หรือยังไม่ sync) เส้นประคือคาดการณ์ถึง 13 พ.ย." : "เทียบแรงรายวัน แถบพื้นเทาคือวันหยุด"} · แตะวันในกราฟเพื่อดูละเอียดทั้งวัน</p>` +
+    `<p class="sub">${state.mode === "cum" ? "ยิ่งชันยิ่งเดินเร็ว ช่วงแบนคือช่วงที่ไม่เดิน (หรือยังไม่ sync) เส้นประคือคาดการณ์ถึง 13 พ.ย." : "เทียบแรงรายวัน แถบพื้นเทาคือวันหยุด"} · แตะวันในกราฟเพื่อดูตัวเลข แตะซ้ำเพื่อดูละเอียดทั้งวัน</p>` +
     trendTools(host, scope, false) + `<div class="legend" id="tl"></div><div id="c"></div>`;
   wireTrend(host);
   const c = $("#c", host), w = W(c), h = w < 560 ? 260 : 340, L = 44, R = w < 560 ? 52 : 72, T = 14, B = 34;
@@ -1377,15 +1386,16 @@ function viewTrend(host) {
       if (x.alias === "ทั้งทีม") { const p = x.pts.filter(p => p[0] <= (i + 1) * 1440).pop(); return p ? p[1] : null; }
       const p = x.pts.filter(p => p[0] <= (i + 1) * 1440).pop(); return p ? p[1] : null;
     };
-    const rows = series.map(x => [x, val(x)]).filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
+    const rows = series.filter(x => !f || x.alias === f).map(x => [x, val(x)]).filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
     showTip(e, `<b>${d.dow} ${d.label}</b> · ${TYPE[d.type]}` + (rows.length ? rows.map(([x, v]) => `<div class="r"><span><i style="background:${x.col}"></i>${esc(x.alias)}</span><b>${k(v)}</b></div>`).join("") : `<div>ยังไม่ถึงวันนี้</div>`) + (d.status === "est" ? `<div>${STATUS.est}</div>` : ""));
   };
-  hit.addEventListener("pointermove", move); hit.addEventListener("pointerenter", move);
-  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+  bindHit(hit, cross, move);
   hit.style.cursor = "pointer";
+  let tapped = -1;
   hit.addEventListener("click", e => {
     const r = s.getBoundingClientRect(), px = (e.clientX - r.left) * (w / r.width);
     const i = Math.max(0, Math.min(nd - 1, Math.floor((px - L) / (X(1440) - X(0)))));
+    if (e.pointerType === "touch" && tapped !== i) { tapped = i; return; }   // touch: first tap shows the numbers, the second opens the day
     if (trendDays.includes(i)) { hideTip(); go({ tday: days[i].d }); }
   });
 }
@@ -1418,7 +1428,7 @@ function viewHours(host) {
   const mv = e => { const r = s.getBoundingClientRect(), px = (e.clientX - r.left) * (w / r.width), hr = Math.max(0, Math.min(23, Math.floor((px - L) / (X(1) - X(0)))));
     cross.setAttribute("x1", X(hr + .5)); cross.setAttribute("x2", X(hr + .5)); cross.setAttribute("opacity", .25);
     showTip(e, `<b>${String(hr).padStart(2, "0")}:00–${String(hr + 1).padStart(2, "0")}:00</b><div class="r"><span><i style="background:${HOT}"></i>วันทำงาน</span><b>${full(wk.vals[hr])}</b></div><div class="r"><span><i style="background:${OFF}"></i>วันหยุด</span><b>${full(of.vals[hr])}</b></div>`); };
-  hit.addEventListener("pointermove", mv); hit.addEventListener("pointerenter", mv); hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+  bindHit(hit, cross, mv);
 
   // day x hour heat
   const hm = $("#hm", host), hw = W(hm), rows = seen.filter(i => who.some(m => m.hours[days[i].d]));
