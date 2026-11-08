@@ -1402,33 +1402,8 @@ function viewTrend(host) {
 
 function viewHours(host) {
   const f = state.focus, who = f ? [byAlias[f]] : M;
-  const ds = done.filter(i => days[i].status === "done");
-  const per = (type) => {
-    const sel = ds.filter(i => type === "all" || (type === "off") === isOff(days[i]));
-    const out = Array(24).fill(0); let n = 0;
-    for (const i of sel) for (const m of who) { const hs = m.hours[days[i].d]; if (hs) { hs.forEach((v, h) => out[h] += v); } n++; }
-    return { vals: out.map(v => n ? v / n : 0), n: sel.length };
-  };
-  const wk = per("weekday"), of = per("off");
-  host.innerHTML = `<div id="hb"></div><h2 style="margin-top:28px">${f ? `ช่วงเวลาที่ ${esc(f)} เดิน` : `ช่วงเวลาที่${ANL} เดิน`}</h2><p class="sub">ก้าวเฉลี่ยต่อคนในแต่ละชั่วโมง แยกวันทำงาน (${wk.n} วัน) กับวันหยุด (${of.n} วัน) ใช้เฉพาะวันที่จบแล้ว</p>` +
-    `<div class="legend"><span><i class="line" style="background:${HOT}"></i>วันทำงาน</span><span><i class="line" style="background:${OFF}"></i>วันหยุด</span></div><div id="c"></div>` +
+  host.innerHTML = `<div id="hb"></div>` +
     `<h2 style="margin-top:22px;font-size:16px">รายวัน × ชั่วโมง</h2><p class="sub">ยิ่งเข้มยิ่งเดินมาก ช่องว่างคือไม่มีภาพหน้าจอช่วงนั้นพอจะบอกเวลาได้</p><div id="hm"></div>`;
-  const c = $("#c", host), w = W(c), h = w < 560 ? 220 : 260, L = 40, R = 10, T = 14, B = 26;
-  const max = niceMax(Math.max(...wk.vals, ...of.vals) * 1.1), X = hr => L + (w - L - R) * hr / 24, Y = v => T + (h - T - B) * (1 - v / max);
-  const s = svgIn(c, w, h, "ก้าวรายชั่วโมง");
-  for (const v of ticks(max)) { el("line", { x1: L, x2: w - R, y1: Y(v), y2: Y(v), stroke: v ? RULE2 : RULE }, s); txt(s, L - 6, Y(v) + 4, v ? (v >= 1000 ? k(v).replace(".0k", "k") : Math.round(v)) : "0", { "text-anchor": "end", "font-size": 11, fill: MUTED }); }
-  for (let hr = 0; hr <= 24; hr += 3) txt(s, X(hr), h - 8, String(hr).padStart(2, "0"), { "text-anchor": "middle", "font-size": 11, fill: INK2 });
-  for (const [ser, col] of [[of, OFF], [wk, HOT]]) {
-    const pts = ser.vals.map((v, hr) => [X(hr + .5), Y(v)]);
-    el("path", { d: `M${X(.5)},${Y(0)}L` + pts.map(p => p.join(",")).join("L") + `L${X(23.5)},${Y(0)}Z`, fill: col, opacity: .08 }, s);
-    drawIn(el("path", { d: "M" + pts.map(p => p.join(",")).join("L"), fill: "none", stroke: col, "stroke-width": 2.5, "stroke-linejoin": "round" }, s), 0, 1000);
-  }
-  const cross = el("line", { y1: T, y2: h - B, stroke: INK, opacity: 0 }, s);
-  const hit = el("rect", { x: L, y: T, width: w - L - R, height: h - T - B, fill: "transparent" }, s);
-  const mv = e => { const r = s.getBoundingClientRect(), px = (e.clientX - r.left) * (w / r.width), hr = Math.max(0, Math.min(23, Math.floor((px - L) / (X(1) - X(0)))));
-    cross.setAttribute("x1", X(hr + .5)); cross.setAttribute("x2", X(hr + .5)); cross.setAttribute("opacity", .25);
-    showTip(e, `<b>${String(hr).padStart(2, "0")}:00–${String(hr + 1).padStart(2, "0")}:00</b><div class="r"><span><i style="background:${HOT}"></i>วันทำงาน</span><b>${full(wk.vals[hr])}</b></div><div class="r"><span><i style="background:${OFF}"></i>วันหยุด</span><b>${full(of.vals[hr])}</b></div>`); };
-  bindHit(hit, cross, mv);
 
   // day x hour heat
   const hm = $("#hm", host), hw = W(hm), rows = seen.filter(i => who.some(m => m.hours[days[i].d]));
