@@ -1556,52 +1556,46 @@ function drawHourBoard(host) {
 }
 
 // our team (user, 2026-11-09): only Team Ranking screenshots exist for us, so one average per person per day from
-// 30 Oct, drawn in our blue (The Blue Is Us Rule) with the rival's same day as a graphite tick. Partial days (first
-// day from 08:47, today, a night without a late screenshot) are dashed and left out of the summary. Numbers from
-// build_lead.py strategy.day_vs / day_vs_type.
+// 30 Oct. Whole days only (the first day, today and nights without a late screenshot are left out, user 2026-11-09).
+// Ours in blue (weekday) / navy (off day), the analysed team beside it in orange, the one warm colour of the page
+// (blue/orange also stay apart for colour-blind readers). Numbers from build_lead.py strategy.day_vs / day_vs_type.
 function viewUs(host) {
-  const S = D.strategy || {}, V = S.day_vs || [], T = S.day_vs_type || {};
-  const US_WK = C("--blue-2"), US_OFF = C("--navy"), LD = C("--ld");
-  host.innerHTML = `<h2>ก้าวเฉลี่ยต่อคนต่อวัน (ทีมเรา)</h2>` +
-    `<p class="sub">จากภาพอันดับทีม มีตั้งแต่ 30 ต.ค. จึงไม่มีรายคน · ขีดสีเทาคือ${ANL} ในวันเดียวกัน · กรอบประคือวันที่นับได้ไม่ครบวัน</p>` +
-    `<div class="legend"><span><i style="background:${US_WK}"></i>วันทำงาน</span><span><i style="background:${US_OFF}"></i>วันหยุด</span><span><i class="line" style="background:${LD}"></i>${ANL}</span><span><i style="border:1.5px dashed ${US_WK}"></i>ไม่ครบวัน</span></div><div id="c"></div><div class="halves us-halves" id="halves"></div>`;
+  const S = D.strategy || {}, V = (S.day_vs || []).filter(x => x.whole), T = S.day_vs_type || {};
+  const US_WK = C("--blue-2"), US_OFF = C("--navy"), RV = C("--off");
+  host.innerHTML = `<h2>ก้าวเฉลี่ยต่อคนต่อวัน เราเทียบ${ANL}</h2>` +
+    `<div class="legend"><span><i style="background:${US_WK}"></i>เรา วันทำงาน</span><span><i style="background:${US_OFF}"></i>เรา วันหยุด</span><span><i style="background:${RV}"></i>${ANL}</span></div><div id="c"></div><div class="halves us-halves" id="halves"></div>`;
   const c = $("#c", host);
-  if (!V.length) { c.innerHTML = `<p class="sub">ยังไม่มีภาพอันดับทีมพอจะนับเป็นวัน</p>`; return; }
+  if (!V.length) { c.innerHTML = `<p class="sub">ยังไม่มีวันที่นับได้ครบวัน</p>`; return; }
   const w = W(c), narrow = w < 560, h = narrow ? 240 : 280, L = 40, R = 8, Tp = 22, B = 40;
   const max = niceMax(Math.max(...V.flatMap(x => [x.us_gain, x.leader_gain])) * 1.08);
-  const n = V.length, slot = (w - L - R) / n, bw = Math.max(6, Math.min(44, slot - (narrow ? 6 : 14)));
+  const n = V.length, slot = (w - L - R) / n, bw = Math.max(8, Math.min(34, (slot - 8) / 2)), gap = 2;
   const Y = v => Tp + (h - Tp - B) * (1 - Math.max(0, v) / max);
   const s = svgIn(c, w, h, "ก้าวเฉลี่ยต่อคนต่อวันของทีมเรา เทียบ" + ANL);
   for (const v of ticks(max)) { el("line", { x1: L, x2: w - R, y1: Y(v), y2: Y(v), stroke: v ? RULE2 : RULE }, s); txt(s, L - 6, Y(v) + 4, v ? k(v).replace(".0k", "k") : "0", { "text-anchor": "end", "font-size": 11, fill: MUTED }); }
   V.forEach((d, i) => { if (d.type !== "weekday") el("rect", { x: L + i * slot, y: Tp - 8, width: slot, height: h - Tp - B + 8, fill: C("--tint") }, s); });
+  const lab = v => narrow ? (v / 1000).toFixed(1).replace(".0", "") : k(v).replace(".0k", "k");
   V.forEach((d, i) => {
-    const off = d.type !== "weekday", col = off ? US_OFF : US_WK, cx = L + i * slot + slot / 2, x = cx - bw / 2, v = d.us_gain;
-    txt(s, cx, h - B + 16, d.today ? "วันนี้" : d.label.split(" ")[0], { "text-anchor": "middle", "font-size": 11, fill: INK2, "font-weight": d.today ? 600 : 400 });
+    const off = d.type !== "weekday", col = off ? US_OFF : US_WK, cx = L + i * slot + slot / 2, g = el("g", {}, s);
+    txt(s, cx, h - B + 16, d.label.split(" ")[0], { "text-anchor": "middle", "font-size": 11, fill: INK2 });
     txt(s, cx, h - B + 30, d.dow, { "text-anchor": "middle", "font-size": 10, fill: off ? INK : MUTED, "font-weight": off ? 600 : 400 });
-    const g = el("g", {}, s);
-    rise(vbar(g, x, Y(v), bw, Y(0) - Y(v), d.whole ? { fill: col } : { fill: "none", stroke: col, "stroke-dasharray": "3 3", "stroke-width": 1.5 }), i * 40);
-    // the rival's same day: a tick a little wider than the bar, white-edged so it reads on a navy bar too
-    const ty = Y(d.leader_gain), tw = bw + (narrow ? 6 : 10);
-    fade(el("line", { x1: cx - tw / 2, x2: cx + tw / 2, y1: ty, y2: ty, stroke: "#fff", "stroke-width": 5, "stroke-linecap": "round" }, g), i * 40 + 450, 300);
-    fade(el("line", { x1: cx - tw / 2, x2: cx + tw / 2, y1: ty, y2: ty, stroke: LD, "stroke-width": 2.5, "stroke-linecap": "round" }, g), i * 40 + 450, 300);
-    // phone: thousands without the "k" (the axis carries it) so 11 labels fit their slots
-    const lab = v < 1000 ? full(v) : narrow ? (v / 1000).toFixed(1).replace(".0", "") : k(v).replace(".0k", "k");
-    fade(txt(s, cx, Math.min(Y(v), ty) - 6, lab, { "text-anchor": "middle", "font-size": narrow ? 10 : 11, "font-weight": 700, fill: d.whole ? (off ? US_OFF : C("--blue")) : INK2 }), i * 40 + 350, 300);
+    const bars = [[cx - gap / 2 - bw, d.us_gain, col, off ? US_OFF : C("--blue")], [cx + gap / 2, d.leader_gain, RV, C("--off-ink")]];
+    bars.forEach(([x, v, fill, ink], j) => {
+      rise(vbar(g, x, Y(v), bw, Y(0) - Y(v), { fill }), i * 40 + j * 60);
+      if (!narrow || j === 0) fade(txt(s, x + bw / 2, Y(v) - 5, lab(v), { "text-anchor": "middle", "font-size": narrow ? 10 : 11, "font-weight": 700, fill: ink }), i * 40 + 350, 300);
+    });
     const diff = d.us_gain - d.leader_gain;
     hover(el("rect", { x: L + i * slot, y: Tp - 8, width: slot, height: h - Tp - B + 8, fill: "transparent" }, g), () =>
-      `<b>${d.dow} ${d.label}</b> · ${TYPE[d.type] || ""}<div class="r"><span><i style="background:${col}"></i>ทีมเรา</span><b>${full(d.us_gain)}</b></div>` +
-      `<div class="r"><span><i style="background:${LD}"></i>${ANL}</span><b>${full(d.leader_gain)}</b></div>` +
-      `<div class="r"><span>${diff >= 0 ? "เราเดินมากกว่า" : "เราเดินน้อยกว่า"}</span><b style="color:${diff >= 0 ? C("--good") : C("--red")}">${full(Math.abs(diff))}</b></div>` +
-      (d.whole ? "" : `<div>นับได้ไม่ครบวัน (${esc(d.from)} – ${esc(d.to)})</div>`));
+      `<b>${d.dow} ${d.label}</b> · ${TYPE[d.type] || ""}<div class="r"><span><i style="background:${col}"></i>เรา</span><b>${full(d.us_gain)}</b></div>` +
+      `<div class="r"><span><i style="background:${RV}"></i>${ANL}</span><b>${full(d.leader_gain)}</b></div>` +
+      `<div class="r"><span>${diff >= 0 ? "เรามากกว่า" : "เราน้อยกว่า"}</span><b style="color:${diff >= 0 ? C("--good") : C("--red")}">${full(Math.abs(diff))}</b></div>`);
   });
-  const LEFT = { weekday: P.left.weekday, off: P.left.off };
   const half = (typ, lab, col) => {
     const t = T[typ];
-    if (!t) return `<div><h3><i style="background:${col}"></i>${lab}</h3><p class="sub">ยังไม่มี${lab}ที่นับได้ครบวัน</p></div>`;
+    if (!t) return `<div><h3><i style="background:${col}"></i>${lab}</h3><p class="sub">ยังไม่มีวันที่ครบ</p></div>`;
     const diff = t.us - t.leader;
     return `<div><h3><i style="background:${col}"></i>${lab}</h3><div class="big" style="color:${typ === "off" ? US_OFF : C("--blue")}">${k(t.us)}<small>ก้าว/คน/วัน</small></div>` +
-      `<p class="vsl"><span>${ANL} ${k(t.leader)}</span><b class="${diff >= 0 ? "ok" : "no"}">${diff >= 0 ? "มากกว่า" : "น้อยกว่า"} ${k(Math.abs(diff))}</b></p>` +
-      `<dl><dt>ชนะเขา</dt><dd>${t.won}/${t.n} วัน</dd><dt>ดีที่สุด</dt><dd>${k(t.best)}</dd><dt>น้อยที่สุด</dt><dd>${k(t.low)}</dd><dt>เหลือ</dt><dd>${LEFT[typ]} วัน</dd></dl></div>`;
+      `<p class="vsl"><span style="color:${C("--off-ink")}">${ANL} <b>${k(t.leader)}</b></span><b class="${diff >= 0 ? "ok" : "no"}">${diff >= 0 ? "เรามากกว่า" : "เราน้อยกว่า"} ${k(Math.abs(diff))}</b></p>` +
+      `<p class="vsl"><span>ชนะ ${t.won} จาก ${t.n} วัน</span></p></div>`;
   };
   $("#halves", host).innerHTML = half("weekday", "วันทำงาน", US_WK) + half("off", "วันหยุด", US_OFF);
 }
