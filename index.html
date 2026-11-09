@@ -1556,6 +1556,54 @@ function drawHourBoard(host) {
   }
 }
 
+// the gap between the two teams at every day's close (user, 2026-11-09): average steps per person, ours minus theirs,
+// from the first night with both teams' screenshots, plus "now". Up = we lead (Team Blue), down = we trail (Alarm
+// Red). The race board's own numbers (war.race.days, build_lead.py): the page only flips the sign so up is good.
+function drawGap(c) {
+  const days_ = ((WR && WR.race && WR.race.days) || []).filter(x => x.gap != null);
+  if (days_.length < 2) { c.innerHTML = `<p class="sub">ยังไม่มีข้อมูลพอ</p>`; return; }
+  const P_ = days_.map(d => ({ d, v: -d.gap })), n = P_.length, last = P_[n - 1], live = last.d.today;
+  const BLUE = C("--blue-2"), RED = C("--red-2");
+  const w = W(c), narrow = w < 560, h = narrow ? 230 : 270, L = narrow ? 38 : 44, R = 12, Tp = 26, B = 40;
+  const vs = P_.map(p => p.v), lo = Math.min(0, ...vs), hi = Math.max(0, ...vs), pad = (hi - lo) * .14;
+  const step = [2500, 5000, 10000, 20000].find(st => (hi - lo) / st <= 5) || 20000;
+  const y0 = lo - pad, y1 = hi + pad, Y = v => Tp + (h - Tp - B) * (y1 - v) / (y1 - y0);
+  const X = i => L + 10 + (w - L - R - 20) * i / (n - 1), zy = Y(0);
+  const s = svgIn(c, w, h, "ช่องว่างก้าวเฉลี่ยต่อคนระหว่างทีมเรากับ" + ANL + " ณ สิ้นแต่ละวัน");
+  for (let v = Math.ceil(y0 / step) * step; v <= y1; v += step) {
+    if (v) el("line", { x1: L, x2: w - R, y1: Y(v), y2: Y(v), stroke: RULE2 }, s);
+    txt(s, L - 6, Y(v) + 4, v ? `${v < 0 ? "−" : "+"}${Math.abs(v) / 1000}k` : "0", { "text-anchor": "end", "font-size": 11, fill: MUTED });
+  }
+  // area to the zero line: blue where above it, red where below (one polygon, two clips)
+  const line = P_.map((p, i) => `${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`);
+  const area = `M${X(0).toFixed(1)},${zy.toFixed(1)} L${line.join(" L")} L${X(n - 1).toFixed(1)},${zy.toFixed(1)} Z`;
+  const defs = el("defs", {}, s);
+  el("rect", { x: L, y: 0, width: w - L, height: zy }, el("clipPath", { id: "gcu" }, defs));
+  el("rect", { x: L, y: zy, width: w - L, height: h - zy }, el("clipPath", { id: "gcd" }, defs));
+  fade(el("path", { d: area, fill: BLUE, "fill-opacity": .16, "clip-path": "url(#gcu)" }, s), 300, 500);
+  fade(el("path", { d: area, fill: RED, "fill-opacity": .14, "clip-path": "url(#gcd)" }, s), 300, 500);
+  el("line", { x1: L, x2: w - R, y1: zy, y2: zy, stroke: INK2, "stroke-width": 1.5 }, s);
+  txt(s, L + 4, zy - 6, "เรานำ", { "font-size": 11, "font-weight": 600, fill: C("--blue") });
+  txt(s, L + 4, zy + 15, "ตามหลัง", { "font-size": 11, "font-weight": 600, fill: C("--red") });
+  const solid = live ? line.slice(0, -1) : line;
+  drawIn(el("path", { d: "M" + solid.join(" L"), fill: "none", stroke: C("--navy"), "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }, s), 0, 900);
+  if (live) fade(el("path", { d: `M${line[n - 2]} L${line[n - 1]}`, fill: "none", stroke: C("--navy"), "stroke-width": 2.5, "stroke-dasharray": "2 5", "stroke-linecap": "round" }, s), 900, 300);
+  const sg = v => (v > 0 ? "+" : v < 0 ? "−" : "") + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(1).replace(".0", "") + (narrow ? "" : "k") : Math.abs(v));
+  P_.forEach((p, i) => {
+    const x = X(i), y = Y(p.v), col = p.v >= 0 ? BLUE : RED, now = live && i === n - 1, g = el("g", {}, s);
+    fade(el("circle", { cx: x, cy: y, r: now ? 6 : 5, fill: now ? "#fff" : col, stroke: now ? col : "#fff", "stroke-width": now ? 3 : 2 }, g), 700 + i * 50, 250);
+    // phone: only the points that tell the story carry a number (first, the two latest, best, worst); the rest in the tooltip
+    const key = !narrow || i === 0 || i >= n - 2 || p.v === lo || p.v === hi;
+    if (key) fade(txt(g, x, p.v >= 0 ? y - 10 : y + 19, sg(p.v), { "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", "font-size": narrow ? 10 : 12, "font-weight": 700, fill: p.v >= 0 ? C("--blue") : C("--red") }), 800 + i * 50, 250);
+    if (!narrow || i % 2 === 0 || i === n - 1) txt(s, x, h - B + 16, now ? "ตอนนี้" : p.d.label.split(" ")[0], { "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", "font-size": 11, fill: INK2, "font-weight": now ? 600 : 400 });
+    if (!narrow || i % 2 === 0 || i === n - 1) txt(s, x, h - B + 29, p.d.dow, { "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", "font-size": 10, fill: MUTED });
+    const slot = (w - L - R - 20) / (n - 1);
+    hover(el("rect", { x: x - slot / 2, y: Tp - 10, width: slot, height: h - Tp + 10, fill: "transparent" }, g), () =>
+      `<b>${p.d.dow} ${p.d.label}</b> · ${now ? "ตอนนี้ " + esc(p.d.time) : "สิ้นวัน"}<div class="r"><span>${p.v >= 0 ? "เรานำ" : "เราตามหลัง"}</span><b style="color:${col}">${full(Math.abs(p.v))}</b></div>` +
+      (p.d.change == null ? "" : `<div class="r"><span>${now ? "วันนี้ถึงตอนนี้" : "ทั้งวัน"} เรา${p.d.change >= 0 ? "เดินมากกว่า" : "เดินน้อยกว่า"}เขา</span><b>${full(Math.abs(p.d.change))}</b></div>`));
+  });
+}
+
 // our team (user, 2026-11-09): only Team Ranking screenshots exist for us, so one average per person per day from
 // 30 Oct, whole days only. One vertical bar per day in our blue (one blue: off days are a tinted column), the analysed
 // team's same day as a thick orange marker with a white edge (orange on blue reads at a glance, also for colour-blind
@@ -1565,7 +1613,9 @@ function viewUs(host) {
   const S = D.strategy || {}, V = (S.day_vs || []).filter(x => x.whole), T = S.day_vs_type || {};
   const US = C("--blue-2"), RV = C("--off"), GOOD = C("--good"), BAD = C("--red");
   host.innerHTML = `<h2>ก้าวเฉลี่ยต่อคนต่อวัน เราเทียบ${ANL}</h2>` +
-    `<div class="legend"><span><i style="background:${US}"></i>เรา</span><span><i class="line" style="background:${RV};height:4px"></i>${ANL}</span></div><div id="c"></div><div class="halves us-halves" id="halves"></div>`;
+    `<div class="legend"><span><i style="background:${US}"></i>เรา</span><span><i class="line" style="background:${RV};height:4px"></i>${ANL}</span></div><div id="c"></div>` +
+    `<h2 style="margin-top:26px;font-size:16px">ช่องว่างระหว่างสองทีม</h2><p class="sub">ก้าวเฉลี่ยต่อคน ณ สิ้นวัน เหนือเส้น = เรานำ ใต้เส้น = เราตามหลัง</p><div id="gc"></div><div class="halves us-halves" id="halves"></div>`;
+  drawGap($("#gc", host));
   const c = $("#c", host);
   if (!V.length) { c.innerHTML = `<p class="sub">ยังไม่มีวันที่นับได้ครบวัน</p>`; return; }
   const w = W(c), narrow = w < 560, h = narrow ? 270 : 310, L = 36, R = 6, Tp = 22, B = 58;
