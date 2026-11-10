@@ -385,6 +385,10 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
 .heat tr.dim { opacity: .28; }
 .heat .who { display: inline-flex; align-items: center; gap: 8px; }
 .heat .gap { width: 10px; padding: 0; }
+.heat-more { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.heat-more button { appearance: none; border: 1px solid var(--rule); background: var(--panel); color: var(--blue); border-radius: 999px; padding: 6px 14px; min-height: 36px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.heat-more button:hover { border-color: var(--blue); }
+.heat-more button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 .limits { margin-top: 18px; }
 .limits summary { cursor: pointer; padding: 16px 20px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; color: var(--ink-2); }
@@ -1207,7 +1211,7 @@ function drawKnow() {
 /* ================= EXPLORE ================= */
 const VIEWS =[["daily", "ก้าวต่อวัน"], ["member", "รายคน"], ["trend", "แนวโน้ม"], ["hours", "ช่วงเวลา"], ["us", "ทีมเรา"]];
 const ANL = WR && WR.rival.analysed ? `ทีมอันดับ ${WR.rival.rank}` : "ทีมที่วิเคราะห์";
-const state = { tab: "war", view: "daily", focus: null, scope: "team", mode: "cum", hourType: "all", hb: "avg", hbType: null, hbDay: null, tday: null };
+const state = { tab: "war", view: "daily", heatAll: false, focus: null, scope: "team", mode: "cum", hourType: "all", hb: "avg", hbType: null, hbDay: null, tday: null };
 
 function drawControls() {
   $("#views").innerHTML = VIEWS.map(([id, l]) => `<button type="button" data-v="${id}" aria-pressed="${state.view === id}">${l}</button>`).join("");
@@ -1266,8 +1270,11 @@ function viewDaily(host) {
   $("#halves", host).innerHTML = half("วันทำงาน", HOT, grp.weekday, P.left.weekday) + half("วันหยุด", OFF, grp.off, P.left.off);
 }
 
+// older day columns fold away (user, 2026-11-10): phones show the last 4 days, wider screens more; one tap shows all
+function heatKeep() { const w = $(".wrap").clientWidth; return w < 560 ? 4 : w < 900 ? 7 : 12; }
 function viewMember(host) {
-  const cols = seen;
+  const keep = heatKeep(), fold = seen.length > keep + 1;
+  const cols = fold && !state.heatAll ? seen.slice(-keep) : seen;
   // a day still running is never "weak" yet: under 15k it stays the lightest blue, not red
   const shade = (v, d) => dayCell(v, d && d.status === "partial").bg;
   const ink = (v, d) => dayCell(v, d && d.status === "partial").ink;
@@ -1279,9 +1286,12 @@ function viewMember(host) {
       `<td class="gap sumcol"></td><td class="sum sumcol" style="color:${C("--hot-ink")}">${k(p.weekday)}</td><td class="sum sumcol">${k(p.off)}</td><td class="sum sumcol">${k(m.latest)}</td></tr>`;
   }).join("");
   host.innerHTML = `<h2>ก้าวรายคนต่อวัน</h2><p class="sub">สีเดียวกัน = ช่วงก้าวเดียวกันทุกวัน · สีแดงอ่อนคือวันที่เดินไม่ถึง 15k · ลายทแยงคือค่าประมาณ · กรอบประคือวันที่ยังไม่จบ</p><div class="legend">${dayKey()}</div>` +
+    (fold ? `<div class="heat-more"><span>${state.heatAll ? `ทุกวัน ${seen.length} วัน` : `${keep} วันล่าสุด จาก ${seen.length} วัน`}</span><button type="button" aria-expanded="${state.heatAll}">${state.heatAll ? `ย่อเหลือ ${keep} วันล่าสุด` : `ดูทุกวัน (อีก ${seen.length - keep} วัน)`}</button></div>` : "") +
     `<div class="scroll"><table class="heat"><thead><tr><th></th>${head}<th class="gap sumcol"></th><th class="sumcol">ก้าวเฉลี่ย<br>วันทำงาน</th><th class="sumcol">ก้าวเฉลี่ย<br>วันหยุด</th><th class="sumcol">ยอดรวม</th></tr></thead><tbody>${rows}</tbody></table></div>` +
     `<table class="heat sumtable"><thead><tr><th></th><th>ก้าวเฉลี่ย<br>วันทำงาน</th><th>ก้าวเฉลี่ย<br>วันหยุด</th><th>ยอดรวม</th></tr></thead><tbody>` +
     M.map(m => { const p = P.members[m.alias]; return `<tr class="${state.focus && state.focus !== m.alias ? "dim" : ""}"><th><span class="who"><span class="chip" style="padding:0;border:0;background:none"><span class="bib" style="background:${hue[m.alias]};color:${bibInk(hue[m.alias])}">${m.pos}</span></span>${esc(m.alias)}</span></th><td class="sum" style="color:${C("--hot-ink")}">${k(p.weekday)}</td><td class="sum">${k(p.off)}</td><td class="sum">${k(m.latest)}</td></tr>`; }).join("") + `</tbody></table>`;
+  const mb = $(".heat-more button", host);
+  if (mb) mb.onclick = () => { go({ heatAll: !state.heatAll }); const sc = $("#view .scroll"); if (sc && state.heatAll) sc.scrollLeft = sc.scrollWidth; $("#view .heat-more button")?.focus({ preventScroll: true }); };
   host.querySelectorAll("td[data-i]").forEach(td => {
     const m = byAlias[td.dataset.a], i = +td.dataset.i, d = days[i];
     hover(td, () => `<b>${esc(m.alias)}</b> · ${d.dow} ${d.label}<div class="r"><span>${TYPE[d.type]}</span><b>${full(m.daily[i])}</b></div>${STATUS[d.status] ? `<div>${STATUS[d.status]}</div>` : ""}${m.catchup.includes(d.d) ? `<div>รวมก้าวของวันก่อนที่ sync มาช้า</div>` : ""}${movedAt(m, d.d) ? `<div>รวมก้าวที่ sync เข้ามา ${movedAt(m, d.d).at} (เป็นของวันนี้)</div>` : ""}`);
