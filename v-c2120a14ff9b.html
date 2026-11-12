@@ -120,17 +120,17 @@ html.anim .bars.in .bar:nth-child(3) .fill{transition-delay:.4s}
    line, our glass rides the head of the gap line: below it while we trail, above once we lead. Pixel sprites are the
    same two mascots redrawn on a coarse grid; numbers on the screen use the pixel face, Thai stays in Anuphan. */
 .race{position:relative}
-.fig{position:sticky;top:0;height:100svh;z-index:1;padding:calc(var(--safe-t) + 12px) calc(var(--safe-r) + 12px) 0 calc(var(--safe-l) + 12px);pointer-events:none;overflow:hidden}
-.fig-in{max-width:980px;margin:0 auto}
+.fig{position:sticky;top:0;height:100svh;z-index:1;padding:calc(var(--safe-t) + 12px) calc(var(--safe-r) + 12px) calc(var(--safe-b) + 14px) calc(var(--safe-l) + 12px);pointer-events:none;overflow:hidden}
+.fig-in{max-width:980px;margin:0 auto;height:100%;display:flex;flex-direction:column}
 .legend{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding-right:96px;font:600 13px/1.5 var(--th)}
 .legend span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
 .legend i{width:10px;height:10px;flex:none}
 .legend .us{color:var(--us-ink)} .legend .us i{background:var(--us);box-shadow:inset 0 0 0 2px var(--us-deep)}
 .legend .rival{color:var(--rv-ink)} .legend .rival i{background:var(--rv)}
-/* phones: the screen takes everything between the top row and the resting story card (--card = tallest card, set by JS) */
+/* phones: the screen takes everything between the top row and the message window docked under it */
 .chart{position:relative;margin-top:8px;border-radius:12px;background:var(--screen);border:4px solid var(--ink);
   box-shadow:0 14px 30px -18px rgba(50,22,95,.7);
-  height:clamp(240px,calc(100svh - var(--safe-t) - var(--safe-b) - 106px - var(--card,210px)),580px)}
+  flex:1 1 auto;min-height:200px;max-height:580px}
 .chart::after{content:"";position:absolute;inset:0;border-radius:8px;pointer-events:none;z-index:4;
   background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
 .chart svg.plot{position:absolute;inset:0;width:100%;height:100%;overflow:visible;shape-rendering:crispEdges}
@@ -165,8 +165,26 @@ html.anim .chart:not(.moving) .run.bag .bob{animation-delay:-1.3s}
 html.anim .peak .pulse{animation:pulse 1.2s steps(5,end) infinite}
 @keyframes pulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(2.8);opacity:0}}
 
-.steps{position:relative;z-index:2;margin-top:-100svh}
-.step{min-height:100svh;display:flex;align-items:flex-end;padding:0 calc(var(--safe-r) + 14px) calc(var(--safe-b) + 22px) calc(var(--safe-l) + 14px)}
+/* phones: the story is a message window docked under the screen. It never moves and never covers the race; swiping
+   only changes which scene it shows (the steps below are empty scroll distance). Desktop keeps cards in the left column. */
+.talk{position:relative;flex:none;margin-top:10px;display:grid;background:var(--paper);border:4px solid var(--ink);border-radius:12px;
+  box-shadow:0 14px 30px -18px rgba(50,22,95,.7)}
+.talk .card{grid-area:1/1;align-self:start;max-width:none;background:none;box-shadow:none;border-radius:0;padding:14px 16px 30px;
+  opacity:0;transform:translateY(8px);transition:opacity .18s linear,transform .4s var(--ease)}
+.talk .card.on{opacity:1;transform:none;transition-delay:.14s}
+.talk .card h2.t{font-size:clamp(1.3rem,5.4vw,1.7rem)}
+.talk .card .txt{margin-top:6px}
+.talk .card .big{font-size:clamp(2.2rem,11vw,3.2rem)}
+.talk .nights{height:44px;margin-top:18px}
+.dots{position:absolute;left:16px;bottom:11px;display:flex;gap:5px}
+.dots i{width:7px;height:7px;background:var(--ink);opacity:.18}
+.dots i.on{opacity:1;background:var(--us-deep)}
+.more{position:absolute;right:14px;bottom:10px;width:14px;height:9px;background:var(--ink);clip-path:polygon(0 0,100% 0,100% 33%,72% 33%,72% 66%,57% 66%,57% 100%,43% 100%,43% 66%,28% 66%,28% 33%,0 33%)}
+html.anim .more{animation:more .9s steps(2,jump-none) infinite alternate}
+.more.end{visibility:hidden}
+@keyframes more{from{transform:translateY(-3px)}to{transform:translateY(1px)}}
+.steps{position:relative;z-index:2;margin-top:-100svh;padding-bottom:60svh;pointer-events:none}
+.step{min-height:80svh}
 .card{width:100%;max-width:560px;margin:0 auto;background:var(--paper);border-radius:22px;padding:20px 20px 22px;
   box-shadow:0 18px 40px -22px rgba(50,22,95,.45),0 2px 6px -2px rgba(50,22,95,.12);will-change:opacity}
 .card h2.t{font-size:clamp(1.45rem,6vw,2.1rem)}
@@ -266,24 +284,27 @@ html.anim .cheers.in .spark{opacity:1}
   .race{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);column-gap:48px;max-width:1320px;margin:0 auto;
     padding:0 max(32px,var(--safe-r)) 0 max(32px,var(--safe-l))}
   .fig{grid-column:2;grid-row:1;padding:0;display:flex;align-items:center}
-  .fig-in{width:100%}
-  .steps{grid-column:1;grid-row:1;margin-top:0}
-  .step{align-items:center;padding:0}
+  .fig-in{width:100%;height:auto;display:block}
+  .talk{display:none}
+  .steps{grid-column:1;grid-row:1;margin-top:0;padding-bottom:0;pointer-events:auto}
+  .step{min-height:100svh;display:flex;align-items:center}
   .legend{padding-right:0;min-height:0;flex-direction:row;justify-content:flex-start;gap:18px;font-size:14px}
   .runner{width:96px;height:108px;margin:-100px 0 0 -48px}
   .hud{left:14px;right:14px;top:12px}
   .hud .d{font-size:15px}
   .hud .v{font-size:19px}
   .hud .v .px{font-size:18px}
-  .chart{height:min(580px,64vh)}
+  .chart{height:min(580px,64vh);max-height:none}
   .card{padding:26px 28px 28px}
   .names{grid-template-columns:repeat(3,1fr);row-gap:44px}
   .cheers{width:190px;height:122px}
 }
 @media (max-height:700px) and (max-width:959px){
   .runner{width:48px;height:54px;margin:-50px 0 0 -24px}
-  .card{padding:16px 16px 18px}
-  .card .txt{font-size:15px}
+  .talk .card{padding:12px 14px 28px}
+  .card .txt{font-size:15px;line-height:1.5}
+  .talk .card h2.t{font-size:1.25rem}
+  .talk .nights{height:34px;margin-top:14px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -683,7 +704,6 @@ html.anim .cheers.in .spark{opacity:1}
 
     var sec = el("section", "race");
     var fig = el("div", "fig"), inner = el("div", "fig-in");
-    fig.setAttribute("aria-hidden", "true");
     var readout = el("div", "hud");
     var rd = el("span", "d"), rv = el("span", "v");
     readout.appendChild(rd); readout.appendChild(rv);
@@ -699,7 +719,13 @@ html.anim .cheers.in .spark{opacity:1}
     runR.innerHTML = DUST + bagSVG("run"); runU.innerHTML = DUST + glassSVG("run");
     var glass = function () { return runU.lastElementChild; };
     chart.appendChild(svg); chart.appendChild(readout); chart.appendChild(runR); chart.appendChild(runU);
-    inner.appendChild(legend); inner.appendChild(chart);
+    legend.setAttribute("aria-hidden", "true"); chart.setAttribute("aria-hidden", "true");
+    // phones: message window under the screen (cards are moved into it by layout)
+    var talk = el("div", "talk"), dots = el("div", "dots"), more = el("i", "more");
+    dots.setAttribute("aria-hidden", "true"); more.setAttribute("aria-hidden", "true");
+    list.forEach(function () { dots.appendChild(el("i")); });
+    talk.appendChild(dots); talk.appendChild(more);
+    inner.appendChild(legend); inner.appendChild(chart); inner.appendChild(talk);
     // pixel sprites replace the vector mascots once both frames of the walk are drawn (the vector ones stay if that fails)
     var SC = 32, SR = 36, fno = 0;
     [[runU, glassSVG("run")], [runR, bagSVG("run")]].forEach(function (a) {
@@ -749,13 +775,11 @@ html.anim .cheers.in .spark{opacity:1}
     var G = {}, desk = false, A = [];
     function layout() {
       desk = window.innerWidth >= 960;
-      if (desk) fig.style.removeProperty("--card");
-      else {
-        // room for the story card under the screen; one much taller card (the nights chart) may overlap the date axis instead
-        var hs = steps.map(function (st) { return st.card.offsetHeight; }).sort(function (a, b) { return b - a; });
-        var mh = hs.length > 1 && hs[0] - hs[1] > 30 ? hs[1] + 12 : hs[0];
-        if (mh) fig.style.setProperty("--card", mh + "px");
-      }
+      // cards live in the left column on desktop, in the docked message window on phones
+      steps.forEach(function (st) {
+        if (desk) { if (st.card.parentNode !== st.node) st.node.appendChild(st.card); }
+        else if (st.card.parentNode !== talk) talk.insertBefore(st.card, dots);
+      });
       var W = chart.clientWidth, H = chart.clientHeight;
       if (!W || !H) return;
       if (G.X && W === G.W && H === G.H) { measure(); last = {}; update(true); return; }   // only the browser bar moved
@@ -836,10 +860,10 @@ html.anim .cheers.in .spark{opacity:1}
     function measure() {
       var vh = window.innerHeight, sy = window.scrollY;
       A = steps.map(function (st) {
+        // anchor: desktop = the scroll position where this card sits mid-viewport; phones = the top of its scroll step
+        if (!desk) return st.node.getBoundingClientRect().top + sy;
         var r = st.card.getBoundingClientRect();
-        // anchor: the scroll position where this card sits at its resting place in the viewport
-        var restTop = desk ? vh / 2 - r.height / 2 : vh - r.height - (st.node.getBoundingClientRect().bottom - r.bottom);
-        return r.top + sy - restTop;
+        return r.top + sy - (vh / 2 - r.height / 2);
       });
     }
 
@@ -852,8 +876,7 @@ html.anim .cheers.in .spark{opacity:1}
 
     // a short burst of confetti from one point of the chart
     function popAt(x, y) {
-      var fr = fig.getBoundingClientRect(), cr = chart.getBoundingClientRect();
-      pop(fig, cr.left - fr.left + x, cr.top - fr.top + y);
+      pop(chart, x, y);   // stays inside the screen, never over the message window
     }
 
     // scroll sets the goal; the drawn time eases after it, so the runners keep a little momentum
@@ -861,9 +884,9 @@ html.anim .cheers.in .spark{opacity:1}
     function update(force) {
       if (!G.X) return;
       var y = window.scrollY, vh = window.innerHeight, n = steps.length;
-      // active scene: the last one whose card has reached the focus band
+      // active scene: desktop = the last card that reached the focus band; phones = switches halfway through the travel
       act = 0;
-      for (var i = 0; i < n; i++) if (y >= A[i] - vh * .3) act = i;
+      for (var i = 0; i < n; i++) if (y >= A[i] - (desk || !i ? vh * .3 : (A[i] - A[i - 1]) * .5)) act = i;
       // chart time: hold on each scene's mark, travel to the next one between scenes
       var t;
       if (RM || n === 1) t = steps[act].target;
@@ -878,15 +901,16 @@ html.anim .cheers.in .spark{opacity:1}
       if (force || RM || cur == null) { cur = goal; draw(true); }
       else if (!raf && cur !== goal) raf = requestAnimationFrame(tick);
       else if (cur === goal) draw(false);
-      // phones: a card fades as it scrolls up over the pinned race
-      if (!desk) steps.forEach(function (s2, i) {
-        var o = 1 - clamp((y - A[i] - vh * .12) / (vh * .28), 0, 1);
-        if (s2._o !== o) { s2._o = o; s2.card.style.opacity = o; }
-      });
-      else steps.forEach(function (s2) { if (s2._o !== 1) { s2._o = 1; s2.card.style.opacity = ""; } });
+      // the active card: shown in the message window on phones; its bars grow on both layouts
+      if (force || act !== last.shown) {
+        last.shown = act;
+        steps.forEach(function (s2, i) { s2.card.classList.toggle("on", i === act); dots.children[i].classList.toggle("on", i <= act); });
+        steps[act].card.classList.add("in");
+        more.classList.toggle("end", act === n - 1);
+      }
       // count-ups fire when their scene becomes active
       var st = steps[act];
-      if (!st.counted && st.card._count && y >= A[act] - vh * .3) { st.counted = true; st.card._count(); }
+      if (!st.counted && st.card._count && y >= A[0] - vh * .3) { st.counted = true; st.card._count(); }
     }
     function tick() {
       raf = 0;
@@ -957,9 +981,6 @@ html.anim .cheers.in .spark{opacity:1}
         if (party && !force) popAt(hx, hy - 30);
       }
     }
-
-    // night card bars + other per-card reveals
-    steps.forEach(function (st) { watch(st.card, null, .3); });
 
     var ticking = false;
     function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; update(false); }); } }
