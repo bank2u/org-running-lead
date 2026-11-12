@@ -2,6 +2,30 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<script>
+/* Victory gate (docs/victory-plan.md, tools/build_victory.py): from open_ms on, this link shows the victory page.
+   ?war=1 (the page's "skip" link) keeps the War Room for this browser session and adds a pill back to the page. */
+(function () {
+  var G = {"open_ms": 1794589500000, "page": "v-c2120a14ff9b.html"};
+  if (!G) return;
+  var stay = false, left = G.open_ms - Date.now();
+  try {
+    if (new URLSearchParams(location.search).has("war")) sessionStorage.setItem("war", "1");
+    stay = sessionStorage.getItem("war") === "1";
+  } catch (e) { stay = /[?&]war\b/.test(location.search); }
+  if (!stay) {
+    if (left <= 0) location.replace(G.page);
+    else if (left < 2e9) setTimeout(function () { location.replace(G.page); }, left);
+    return;
+  }
+  if (left <= 0) document.addEventListener("DOMContentLoaded", function () {
+    var a = document.createElement("a");
+    a.href = G.page; a.textContent = "🎉 กลับหน้าขอบคุณ";
+    a.style.cssText = "position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:99;padding:10px 16px;border-radius:999px;background:#0b1c4a;color:#fff;font:600 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 8px 24px -8px rgba(11,28,74,.5)";
+    document.body.appendChild(a);
+  });
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Running War Room</title>
 <meta name="description" content="ห้องติดตามการแข่งเดินกับทีมข้างหน้า: วันนี้ไล่ทันหรือโดนทิ้ง วางแผนด้วย Simulator และเจาะข้อมูลใน Explore">

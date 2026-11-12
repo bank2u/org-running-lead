@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ขอบคุณทุกคน</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#4a2585">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23075a55%22/%3E%3Cpath d=%22M18 14h28l-4 36H22z%22 fill=%22%23fff%22/%3E%3Cpath d=%22M20 30h24l-2.3 20H22.3z%22 fill=%22%238edfe9%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400..700&family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+/* Victory page: its own world, not the War Room. Beer amber (yellow leaning orange) = our team, red = the other team
+   (after its logo; user 2026-11-12). Deep purple fields open and close the story (hero, thanks) as the nod to the
+   company's purple + gold CI; the race in between runs on a pale lilac ground. Amber never carries text on light:
+   --us-ink does, and amber fills get a --us-deep edge. Archivo wide carries numbers and names, Anuphan carries Thai. */
+:root{
+  --ink:#221636; --muted:#5a4f6e; --ground:#f6f3fb; --paper:#fff; --line:#e0d8ee;
+  --stage:#4a2585; --stage-night:#32165f; --stage-soft:#e4d9f7;
+  --us:#f8a91f; --us-deep:#c47600; --us-ink:#7a4a00; --us-soft:#ffe7a8; --us-pale:#fff6dc;
+  --water:#f8a91f; --on-deep:#dccdf5;
+  --rv:#e5383b; --rv-ink:#a3161a; --rv-soft:#ffd9d6; --coin:#f6c443;
+  --pop:#ff7eb6; --lime:#ffd76a;
+  --th:"Anuphan",system-ui,sans-serif; --num:"Archivo","Anuphan",system-ui,sans-serif;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px); --safe-r:env(safe-area-inset-right,0px);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scrollbar-color:var(--stage) var(--ground)}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 17px/1.6 var(--th);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--us-soft);color:var(--ink)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--us-deep);outline-offset:3px;border-radius:12px}
+h1,h2,h3,p{margin:0}
+h1,h2{overflow-wrap:anywhere}
+.ck{display:inline-block;max-width:100%}
+.num{font-family:var(--num);font-stretch:125%;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* fixed chrome */
+.skip{position:fixed;z-index:50;top:calc(var(--safe-t) + 12px);right:calc(var(--safe-r) + 12px);min-height:44px;min-width:44px;
+  display:inline-flex;align-items:center;gap:6px;padding:0 14px 0 18px;border-radius:999px;background:rgba(255,255,255,.94);
+  color:var(--ink);text-decoration:none;font:600 15px/1 var(--th);box-shadow:0 4px 14px -4px rgba(50,22,95,.35)}
+.skip svg{width:18px;height:18px}
+.skip:hover{background:#fff}
+.skip:active{transform:scale(.97)}
+.preview{position:fixed;z-index:50;top:calc(var(--safe-t) + 20px);right:calc(var(--safe-r) + 102px);padding:6px 12px;border-radius:999px;
+  background:var(--us-soft);color:#4a3200;font:600 13px/1.2 var(--th);box-shadow:0 3px 10px -4px rgba(74,50,0,.4)}
+
+/* reveal: visible by default, hidden only when motion is allowed and JS runs */
+html.anim .rv{opacity:0;transform:translate3d(0,28px,0);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+html.anim .rv.in{opacity:1;transform:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:100svh;padding:calc(var(--safe-t) + 74px) calc(var(--safe-r) + 22px) calc(var(--safe-b) + 104px) calc(var(--safe-l) + 22px);
+  background:var(--stage);color:#fff;overflow:hidden;display:flex;flex-direction:column}
+.hero::before{content:"";position:absolute;inset:-20%;pointer-events:none;opacity:.5;
+  background:repeating-radial-gradient(circle at 78% 30%,transparent 0 46px,rgba(248,169,31,.16) 46px 48px)}
+.hero>*{position:relative}
+.hero .mast{font:500 15px/1.4 var(--th);color:var(--on-deep);max-width:16em}
+.hero .mast{order:0}.hero .buddy{order:1}.hero .stage{order:2}.hero .tail{order:3;margin-bottom:auto}
+.hero .stage{display:flex;flex-direction:column;gap:4px;padding:10px 0 4px}
+.hero .buddy{width:min(44vw,190px);align-self:flex-end;margin:auto 4px 0 0}
+.hero h1{font:700 clamp(2.05rem,9vw,3.6rem)/1.25 var(--th);letter-spacing:-.01em;max-width:11em;text-wrap:balance}
+.hero .big{font-size:clamp(3.3rem,16.5vw,7rem);line-height:1.05;margin-top:10px;color:#fff}
+.hero .unit{font:600 1.15rem/1.4 var(--th);color:var(--on-deep);margin-top:2px}
+.hero .say{font:500 1.15rem/1.5 var(--th);margin-top:18px;max-width:22em}
+.stamp{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 14px 8px 10px;border-radius:999px;
+  background:#ffe7a8;color:#4a3200;font:600 14px/1.35 var(--th);align-self:flex-start;max-width:100%}
+.stamp svg{width:18px;height:18px;flex:none}
+.cue{position:absolute;left:50%;bottom:calc(var(--safe-b) + 34px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;
+  font:500 13px/1.2 var(--th);color:var(--on-deep);text-decoration:none;min-height:44px;min-width:88px;justify-content:center}
+.cue svg{width:22px;height:22px}
+html.anim .cue svg{animation:cue 1.8s var(--ease) infinite}
+@keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:34px;display:block}
+.hero .wave path{fill:var(--ground)}
+.confetti{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+/* the quieter ending */
+.hero.calm{background:var(--us-pale);color:var(--ink)}
+.hero.calm::before{opacity:.8;background:repeating-radial-gradient(circle at 78% 30%,transparent 0 46px,rgba(196,118,0,.1) 46px 48px)}
+.hero.calm .mast,.hero.calm .unit,.hero.calm .cue{color:var(--muted)}
+.hero.calm h1{color:var(--us-ink)}
+.hero.calm .big{color:var(--us-ink)}
+.hero.calm .buddy{width:min(52vw,230px);display:flex;gap:6px;align-items:flex-end}
+.hero.calm .buddy svg{flex:1}
+
+/* ---------- shared scene type ---------- */
+.ki{display:block;font:600 .62em/1.45 var(--th);color:var(--us-ink);margin-bottom:.3em;letter-spacing:0}
+h2.t{font:700 clamp(1.6rem,6.6vw,2.5rem)/1.3 var(--th);letter-spacing:-.005em;text-wrap:balance}
+.txt{color:var(--muted);margin-top:12px;max-width:34em;text-wrap:pretty}
+
+/* ---------- plan ---------- */
+.plan{min-height:100svh;display:flex;align-items:center;padding:12vh calc(var(--safe-r) + 22px) 12vh calc(var(--safe-l) + 22px)}
+.plan .in-w{width:100%;max-width:680px;margin:0 auto}
+.bars{margin-top:30px;display:grid;gap:20px}
+.bar .lab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 12px;margin-bottom:7px}
+.bar .lab b{font:600 16px/1.35 var(--th)}
+.bar .lab .num{font-size:17px;font-weight:700}
+.bar .trk{height:30px;border-radius:15px;background:rgba(34,22,54,.05);overflow:hidden}
+.bar .fill{height:100%;border-radius:15px;transform-origin:0 50%}
+.bar.k-plan .fill{background:repeating-linear-gradient(-45deg,#d2cade 0 6px,#ebe6f3 6px 12px);box-shadow:inset 0 0 0 2px #aaa0bd}
+.bar.k-plan .lab b,.bar.k-plan .lab .num{color:var(--muted)}
+.bar.k-us .fill{background:var(--us);box-shadow:inset 0 0 0 2px var(--us-deep)}
+.bar.k-us .lab b,.bar.k-us .lab .num{color:var(--us-ink)}
+.bar.k-rival .fill{background:var(--rv)}
+.bar.k-rival .lab b,.bar.k-rival .lab .num{color:var(--rv-ink)}
+html.anim .bars .fill{transform:scaleX(0);transition:transform 1.4s var(--ease)}
+html.anim .bars.in .fill{transform:scaleX(1)}
+html.anim .bars.in .bar:nth-child(2) .fill{transition-delay:.25s}
+html.anim .bars.in .bar:nth-child(3) .fill{transition-delay:.4s}
+.plan .txt{margin-top:28px;font-size:18px;color:var(--ink)}
+
+/* ---------- race ---------- */
+.race{position:relative}
+.fig{position:sticky;top:0;height:100svh;z-index:1;padding:calc(var(--safe-t) + 14px) calc(var(--safe-r) + 16px) 0 calc(var(--safe-l) + 16px);pointer-events:none}
+.fig-in{max-width:980px;margin:0 auto}
+.readout{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding-right:96px}
+.readout .d{font:500 13px/1.3 var(--th);color:var(--muted)}
+.readout .v{font:700 22px/1.25 var(--th);display:flex;gap:8px;align-items:baseline}
+.readout .v .num{font-size:22px}
+.readout.up .v{color:var(--us-ink)} .readout.down .v{color:var(--rv-ink)}
+.track{position:relative;margin-top:8px;border-radius:16px;background:#e6e0f0;overflow:hidden}
+.lane{position:relative;height:82px}
+.lane+.lane{border-top:2px dashed rgba(255,255,255,.95)}
+.finish{position:absolute;top:0;bottom:0;right:14px;width:10px;
+  background:conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/10px 10px;opacity:.75}
+.runner{position:absolute;left:0;bottom:5px;display:flex;flex-direction:column;align-items:center;will-change:transform}
+.runner svg{width:54px;height:60px;display:block;overflow:visible}
+.tag{margin-top:-3px;padding:1px 8px;border-radius:999px;background:#fff;font:600 12px/1.45 var(--th);white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
+.runner.us .tag{color:var(--us-ink)} .runner.rival .tag{color:var(--rv-ink)}
+.chart{position:relative;margin-top:10px;height:clamp(150px,calc(100svh - 590px),300px)}
+.chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.chart text{font:500 11px var(--th);fill:var(--muted)}
+.chart .side-up{fill:var(--us-ink);font-weight:700;font-size:12px}
+.chart .side-dn{fill:var(--rv-ink);font-weight:700;font-size:12px}
+.callout{position:absolute;left:0;top:0;padding:5px 10px;border-radius:10px;background:var(--paper);box-shadow:0 6px 18px -8px rgba(50,22,95,.45);
+  white-space:nowrap;opacity:0;transition:opacity .3s;will-change:transform}
+.callout.on{opacity:1}
+.callout .d{display:block;font:500 11px/1.3 var(--th);color:var(--muted)}
+.callout .v{display:block;font:700 15px/1.3 var(--th)}
+.callout .v .num{font-size:15px}
+.callout.up .v{color:var(--us-ink)} .callout.down .v{color:var(--rv-ink)}
+.pulse{transform-box:fill-box;transform-origin:center}
+html.anim .peak .pulse{animation:pulse 1.4s var(--ease) infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+
+.steps{position:relative;z-index:2;margin-top:-100svh}
+.step{min-height:100svh;display:flex;align-items:flex-end;padding:0 calc(var(--safe-r) + 14px) calc(var(--safe-b) + 22px) calc(var(--safe-l) + 14px)}
+.card{width:100%;max-width:560px;margin:0 auto;background:var(--paper);border-radius:22px;padding:20px 20px 22px;
+  box-shadow:0 18px 40px -22px rgba(50,22,95,.45),0 2px 6px -2px rgba(50,22,95,.12);will-change:opacity}
+.card h2.t{font-size:clamp(1.45rem,6vw,2.1rem)}
+.card .txt{margin-top:8px;font-size:16px;line-height:1.6}
+.card .big{font-size:clamp(2.6rem,13vw,4.2rem);line-height:1.05;color:var(--us-ink);margin:2px 0 4px}
+.card.lose-end .big{color:var(--ink)}
+/* nights mini chart */
+.nights{position:relative;height:96px;margin-top:30px;display:flex;gap:4px}
+.nights .c{position:relative;flex:1;height:100%}
+.nights .b{position:absolute;left:0;right:0;border-radius:4px;transform-origin:50% 100%}
+.nights .b.neg{transform-origin:50% 0;background:var(--rv)}
+.nights .b.pos{background:var(--us);box-shadow:inset 0 0 0 1.5px var(--us-deep)}
+.nights .b.top{background:var(--us-deep)}
+.nights .val{position:absolute;left:50%;transform:translateX(-50%);font:700 12px/1 var(--num);font-stretch:110%;color:var(--us-ink);white-space:nowrap;margin-bottom:4px}
+.nights .zero{position:absolute;left:0;right:0;height:1.5px;background:var(--ink);opacity:.5}
+.nlab{position:relative;height:18px;margin-top:5px}
+.nlab span{position:absolute;top:0;transform:translateX(-50%);font:500 11px/1.4 var(--th);color:var(--muted);white-space:nowrap}
+html.anim .nights .b{transform:scaleY(0);transition:transform .9s var(--ease)}
+html.anim .card.in .nights .b{transform:scaleY(1)}
+
+/* ---------- thanks ---------- */
+.thanks{position:relative;background:var(--stage-night);color:#fff;text-align:center;
+  padding:clamp(90px,16vh,160px) calc(var(--safe-r) + 22px) calc(var(--safe-b) + 64px) calc(var(--safe-l) + 22px);min-height:100svh}
+.thanks .wave{top:-1px;bottom:auto;transform:scaleY(-1)}
+.thanks .wave path{fill:var(--ground)}
+.cheers{width:150px;height:96px;margin:0 auto 18px;display:block;overflow:visible}
+.thanks h2{font:700 clamp(2rem,8.6vw,4.4rem)/1.28 var(--th);max-width:12em;margin:0 auto}
+.names{list-style:none;margin:clamp(40px,7vh,72px) auto 0;padding:0;display:grid;gap:clamp(18px,3.4vh,30px);max-width:980px}
+.names li{display:flex;flex-direction:column;align-items:center}
+.names .num{font-size:clamp(2.3rem,11.5vw,4.2rem);line-height:1.1;letter-spacing:.01em;color:#fff}
+.names .note{margin-top:4px;font:400 16px/1.5 var(--th);color:var(--on-deep);max-width:22em}
+html.anim .names li{opacity:0;transform:translate3d(0,34px,0);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+html.anim .names.in li{opacity:1;transform:none}
+.sign{margin-top:clamp(36px,6vh,60px);font:600 1.1rem/1.45 var(--th);color:var(--on-deep)}
+.back{display:inline-flex;align-items:center;gap:10px;margin-top:40px;min-height:52px;padding:0 24px 0 28px;border-radius:999px;
+  background:#fff;color:var(--stage-night);text-decoration:none;font:700 17px/1.2 var(--th);box-shadow:0 10px 26px -12px rgba(0,0,0,.5);transition:transform .2s var(--ease)}
+.back svg{width:20px;height:20px}
+.back:hover{transform:translateY(-2px)}
+.back:active{transform:scale(.98)}
+.thanks .back{margin-top:44px}
+
+/* standalone story card (unknown scene id, or a race scene when the race cannot be drawn) */
+.solo{min-height:70svh;display:flex;align-items:center;padding:8vh calc(var(--safe-r) + 14px) 8vh calc(var(--safe-l) + 14px)}
+
+/* ---------- mascots ---------- */
+.m-ink{stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
+.leg,.arm,.bob,.water,.coin{transform-box:view-box}
+.running .run .bob{animation:bob .25s ease-in-out infinite alternate}
+.running .run.glass .la{animation:legA .5s ease-in-out infinite alternate}
+.running .run.glass .lb{animation:legA .5s ease-in-out infinite alternate-reverse}
+.running .run.glass .aa{animation:armA .5s ease-in-out infinite alternate}
+.running .run.glass .ab{animation:armA .5s ease-in-out infinite alternate-reverse}
+.running .run.glass .water{animation:slosh .5s ease-in-out infinite alternate}
+.running .run.bag .bob{animation:bob2 .13s ease-in-out infinite alternate}
+.running .run.bag .la{animation:legB .26s linear infinite alternate}
+.running .run.bag .lb{animation:legB .26s linear infinite alternate-reverse}
+.running .run.bag .coin{animation:coin 1.3s ease-in infinite}
+.running .run.bag .coin.c2{animation-delay:.65s}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes bob2{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+@keyframes legA{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+@keyframes legB{from{transform:rotate(-17deg)}to{transform:rotate(17deg)}}
+@keyframes armA{from{transform:rotate(-26deg)}to{transform:rotate(22deg)}}
+@keyframes slosh{from{transform:translateX(-6px) rotate(-5deg)}to{transform:translateX(0) rotate(5deg)}}
+@keyframes coin{0%{transform:translate(0,0);opacity:0}12%{opacity:1}80%{opacity:1}100%{transform:translate(-14px,15px);opacity:0}}
+.coin{opacity:0}
+.hop{animation:hop .6s var(--ease)}
+@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-14px)}100%{transform:translateY(0)}}
+html.anim .cheer .bob{animation:cheer 1.1s var(--ease) infinite}
+.cheer .ab{transform:rotate(95deg)} .cheer .aa{transform:rotate(-12deg)}
+html.anim .cheer .aa{animation:waveR .55s ease-in-out infinite alternate}
+html.anim .cheer .ab{animation:waveL .55s ease-in-out infinite alternate}
+html.anim .cheer .water{animation:slosh .55s ease-in-out infinite alternate}
+@keyframes cheer{0%,100%{transform:translateY(0)}30%{transform:translateY(-12px)}55%{transform:translateY(0)}}
+@keyframes waveR{from{transform:rotate(-24deg)}to{transform:rotate(4deg)}}
+@keyframes waveL{from{transform:rotate(84deg)}to{transform:rotate(112deg)}}
+html.anim .idle .bob{animation:idle 2.6s ease-in-out infinite}
+html.anim .idle.bag .bob{animation-delay:-1.3s}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+html.anim .cheers .gl{transition:transform 1s var(--ease)}
+html.anim .cheers .gl.l{transform:translate(-14px,6px) rotate(-4deg)}
+html.anim .cheers .gl.r{transform:translate(14px,6px) rotate(4deg)}
+html.anim .cheers.in .gl.l{transform:rotate(12deg)}
+html.anim .cheers.in .gl.r{transform:rotate(-12deg)}
+html.anim .cheers .spark{opacity:0;transition:opacity .4s .7s}
+html.anim .cheers.in .spark{opacity:1}
+
+/* ---------- desktop ---------- */
+@media (min-width:960px){
+  body{font-size:18px}
+  .hero{padding-left:max(48px,calc((100vw - 1180px)/2));padding-right:max(48px,calc((100vw - 1180px)/2));
+    display:grid;grid-template-columns:1fr 360px;grid-template-rows:auto 1fr auto auto 1.2fr;column-gap:40px}
+  .hero .mast{grid-column:1/-1;grid-row:1}
+  .hero .stage{grid-column:1;grid-row:3}
+  .hero .buddy{grid-column:2;grid-row:2/6;width:260px;align-self:center;justify-self:center;margin:0}
+  .hero.calm .buddy{width:340px}
+  .hero .tail{grid-column:1;grid-row:4;margin:0}
+  .hero .big{font-size:clamp(5rem,9vw,7.5rem)}
+  .race{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);column-gap:48px;max-width:1320px;margin:0 auto;
+    padding:0 max(32px,var(--safe-r)) 0 max(32px,var(--safe-l))}
+  .fig{grid-column:2;grid-row:1;padding:0;display:flex;align-items:center}
+  .fig-in{width:100%}
+  .steps{grid-column:1;grid-row:1;margin-top:0}
+  .step{align-items:center;padding:0}
+  .readout{padding-right:0}
+  .readout .v,.readout .v .num{font-size:28px}
+  .lane{height:104px}
+  .runner svg{width:66px;height:74px}
+  .tag{font-size:13px}
+  .chart{height:min(360px,42vh)}
+  .card{padding:26px 28px 28px}
+  .names{grid-template-columns:repeat(3,1fr);row-gap:44px}
+  .cheers{width:190px;height:122px}
+}
+@media (max-height:700px) and (max-width:959px){
+  .lane{height:70px}
+  .runner svg{width:42px;height:47px}
+  .chart{height:140px}
+  .card{padding:16px 16px 18px}
+  .card .txt{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="index.html?war=1">ข้าม<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></a>
+<main id="app"></main>
+<script>
+(function () {
+  "use strict";
+  // build_victory.py swaps the token for the data object; the array keeps both the built and the raw file valid JS
+  var V = [{"open":"2026-11-14T00:05:00+07:00","open_ms":1794589500000,"war":"index.html?war=1","outcome":"win","final":false,"as_of":{"label":"12 พ.ย.","time":"08:08"},"us":{"name":"ก้าวคนละแก้ว","avg":543737,"rank":1},"rival":{"name":"เดินสับรับทรัพย์","avg":532880,"rank":2},"lead":10857,"members":["BEN","RABBIT","BANK","TOP","ARM","BAS"],"lines":{},"thanks":"ขอบคุณทุกคนมาก ๆ ครับ","plan":{"week":100000,"weeks":3,"total":300000,"us":543737,"rival":532880,"us_week":181246},"race":{"t0":7.366,"t1":22,"points":[[7.366,-25761],[7.366,-25761],[7.402,-25890],[7.424,-25740],[7.458,-26120],[7.5,-26953],[7.536,-26861],[7.546,-26540],[7.57,-26621],[7.583,-24903],[7.603,-24730],[7.617,-25129],[7.641,-25161],[7.658,-23670],[7.681,-23616],[7.705,-23666],[7.71,-23972],[7.725,-24098],[7.752,-24252],[7.769,-25199],[7.792,-25308],[7.805,-24858],[7.809,-24858],[7.835,-24884],[7.845,-24815],[7.877,-24911],[7.887,-20718],[7.892,-20981],[7.906,-20424],[7.922,-22588],[7.926,-21180],[7.931,-21181],[7.94,-17938],[7.956,-21209],[7.97,-20765],[7.978,-20832],[7.986,-21008],[7.99,-21286],[7.996,-21550],[8.0,-21899],[8.0,-21899],[8.207,-22339],[8.275,-22345],[8.331,-21633],[8.342,-21674],[8.347,-21027],[8.372,-14694],[8.379,-14107],[8.447,-15566],[8.457,-15566],[8.467,-15648],[8.493,-15615],[8.508,-15789],[8.517,-15704],[8.531,-15973],[8.565,-16276],[8.595,-16214],[8.618,-16417],[8.636,-16314],[8.678,-17611],[8.687,-17913],[8.694,-18091],[8.728,-19201],[8.738,-19220],[8.766,-20781],[8.795,-21073],[8.806,-18552],[8.813,-17677],[8.846,-18795],[8.855,-17983],[8.867,-18069],[8.881,-19649],[8.892,-13101],[8.9,-13341],[8.912,-13747],[8.919,-13451],[8.927,-12773],[8.927,-12773],[8.94,-12411],[8.954,-12942],[8.959,-17018],[8.968,-14058],[9.0,-13668],[9.286,-13756],[9.303,-13801],[9.312,-13803],[9.337,-14549],[9.378,-14560],[9.382,-13150],[9.402,-12057],[9.417,-12462],[9.434,-11696],[9.458,-12116],[9.464,-11515],[9.535,-16502],[9.56,-16951],[9.574,-16726],[9.599,-16994],[9.624,-17202],[9.666,-20222],[9.679,-20022],[9.751,-21727],[9.768,-21944],[9.819,-16256],[9.837,-16878],[9.86,-19585],[9.876,-20294],[9.932,-16246],[9.938,-11208],[9.953,-11550],[9.961,-13471],[9.983,-16054],[10.0,-15461],[10.305,-14503],[10.33,-15611],[10.349,-16285],[10.353,-16285],[10.385,-16101],[10.411,-15091],[10.45,-15120],[10.49,-17529],[10.532,-17578],[10.556,-18850],[10.581,-16360],[10.622,-16422],[10.659,-16417],[10.681,-17116],[10.729,-17083],[10.744,-17223],[10.753,-17318],[10.768,-18321],[10.806,-20301],[10.821,-21008],[10.849,-20425],[10.868,-21591],[10.892,-22795],[10.905,-24931],[10.907,-24431],[10.92,-23850],[10.928,-24608],[10.942,-19907],[10.959,-20332],[10.967,-12694],[10.973,-12961],[10.973,-12961],[10.976,-14681],[10.976,-14681],[10.98,-14813],[10.981,-14908],[10.988,-15173],[10.993,-15369],[10.994,-15413],[11.263,-15477],[11.303,-16626],[11.34,-20319],[11.348,-20285],[11.368,-20857],[11.375,-20873],[11.395,-21231],[11.431,-21099],[11.464,-21313],[11.498,-21637],[11.542,-22801],[11.565,-22317],[11.573,-22266],[11.653,-22177],[11.691,-22408],[11.704,-22346],[11.751,-23135],[11.762,-23820],[11.776,-24487],[11.792,-24651],[11.814,-22817],[11.829,-22869],[11.845,-23286],[11.87,-24082],[11.878,-25644],[11.881,-26115],[11.894,-25434],[11.906,-26905],[11.921,-27499],[11.933,-26347],[11.938,-22164],[11.945,-22928],[11.949,-23085],[11.96,-23306],[11.965,-23359],[11.969,-23448],[11.974,-18417],[11.979,-14361],[11.985,-14825],[11.996,-14963],[11.999,-12191],[12.0,-13008],[12.247,-13128],[12.247,-13128],[12.268,-13254],[12.272,-13358],[12.3,-12568],[12.326,-13093],[12.374,-14580],[12.403,-14174],[12.442,-15062],[12.469,-15551],[12.499,-15576],[12.537,-16268],[12.551,-15553],[12.598,-14599],[12.619,-15394],[12.651,-15688],[12.714,-16905],[12.769,-18794],[12.794,-20697],[12.794,-20697],[12.826,-20892],[12.842,-25147],[12.858,-25309],[12.899,-20213],[12.91,-23617],[12.924,-24061],[12.931,-24243],[12.933,-24836],[12.951,-20424],[12.954,-16254],[12.973,-13171],[12.976,-13289],[12.983,-13657],[12.994,-9201],[12.999,-9343],[13.0,-11480],[13.253,-11769],[13.33,-13751],[13.347,-14142],[13.363,-15524],[13.369,-15821],[13.385,-15872],[13.42,-16192],[13.444,-16358],[13.444,-16358],[13.469,-17083],[13.505,-19673],[13.521,-20037],[13.546,-21371],[13.583,-22384],[13.618,-23536],[13.64,-23767],[13.654,-23767],[13.711,-24160],[13.753,-24699],[13.77,-25346],[13.788,-25917],[13.795,-25595],[13.838,-28611],[13.856,-29985],[13.874,-31220],[13.894,-32208],[13.9,-32388],[13.925,-33780],[13.94,-28022],[13.947,-23445],[13.957,-23789],[13.964,-25639],[13.97,-21498],[13.981,-20502],[13.992,-20667],[14.247,-19889],[14.308,-20414],[14.328,-21139],[14.368,-23639],[14.414,-23639],[14.418,-25101],[14.442,-27163],[14.466,-27098],[14.49,-27643],[14.522,-28311],[14.544,-28775],[14.564,-29124],[14.582,-29398],[14.605,-29576],[14.64,-30057],[14.665,-30547],[14.677,-31680],[14.703,-32119],[14.722,-32217],[14.751,-33037],[14.762,-33240],[14.822,-33469],[14.851,-39306],[14.885,-40163],[14.9,-36716],[14.91,-38063],[14.928,-32743],[14.937,-33005],[14.963,-31277],[14.969,-25786],[14.979,-21189],[14.987,-21144],[14.99,-23299],[14.997,-23374],[15.0,-23374],[15.292,-24358],[15.331,-24858],[15.367,-23096],[15.393,-23973],[15.428,-25772],[15.448,-25957],[15.494,-28022],[15.504,-28471],[15.536,-29296],[15.569,-30038],[15.573,-30130],[15.604,-30164],[15.655,-31210],[15.697,-31645],[15.731,-32832],[15.796,-33043],[15.822,-33910],[15.849,-34969],[15.859,-35177],[15.879,-41120],[15.892,-33239],[15.9,-35270],[15.913,-33332],[15.924,-33326],[15.942,-25253],[15.952,-23847],[15.964,-24221],[15.97,-24460],[15.972,-16281],[15.977,-8627],[15.978,-8664],[15.99,-9038],[15.997,-9301],[16.31,-10569],[16.335,-10966],[16.354,-11008],[16.387,-11347],[16.401,-11347],[16.41,-11589],[16.479,-12408],[16.508,-12979],[16.541,-14228],[16.587,-17938],[16.615,-24423],[16.633,-24673],[16.644,-25032],[16.703,-25695],[16.744,-27904],[16.765,-28561],[16.795,-31456],[16.819,-32818],[16.83,-33292],[16.866,-34349],[16.876,-34614],[16.908,-35006],[16.929,-36871],[16.954,-22370],[16.963,-18190],[16.969,3870],[16.978,4165],[16.988,4259],[17.0,3984],[17.257,3330],[17.304,2832],[17.332,548],[17.348,329],[17.358,108],[17.358,108],[17.376,-812],[17.376,-812],[17.403,-344],[17.413,-562],[17.424,-518],[17.463,-561],[17.481,-1238],[17.498,-1958],[17.52,-2333],[17.547,-2428],[17.574,-3087],[17.608,-3524],[17.654,-3773],[17.667,-4461],[17.711,-4368],[17.748,-5047],[17.765,-5337],[17.793,-5609],[17.81,-5966],[17.822,-7167],[17.834,-7195],[17.853,-8799],[17.876,-8729],[17.929,-15218],[17.936,-14619],[17.953,-10925],[17.964,-129],[17.983,11631],[17.994,8480],[18.001,8393],[18.251,5544],[18.26,5474],[18.311,5251],[18.337,5189],[18.372,3881],[18.423,4005],[18.46,3356],[18.481,3355],[18.504,3039],[18.54,3103],[18.549,2713],[18.568,2713],[18.582,2618],[18.61,3663],[18.623,2686],[18.652,2478],[18.687,2447],[18.7,2380],[18.727,2274],[18.743,3714],[18.762,3714],[18.774,2466],[18.828,6067],[18.842,6067],[18.874,837],[18.887,-4135],[18.935,-5340],[18.939,-8874],[18.964,-2022],[18.965,2370],[18.981,13295],[18.996,9596],[19.007,9633],[19.249,9162],[19.309,7695],[19.361,7390],[19.39,6080],[19.44,6119],[19.483,6015],[19.539,6139],[19.572,6041],[19.588,6889],[19.615,6972],[19.687,6979],[19.754,7179],[19.791,6872],[19.826,3802],[19.844,3616],[19.873,2990],[19.881,2990],[19.914,2622],[19.926,2614],[19.94,487],[19.957,6070],[19.981,6436],[19.985,11505],[19.999,29505],[20.0,21086],[20.247,12196],[20.302,11322],[20.339,10857]],"days":[{"t":7,"label":"30 ต.ค."},{"t":8,"label":"31 ต.ค."},{"t":9,"label":"1 พ.ย."},{"t":10,"label":"2 พ.ย."},{"t":11,"label":"3 พ.ย."},{"t":12,"label":"4 พ.ย."},{"t":13,"label":"5 พ.ย."},{"t":14,"label":"6 พ.ย."},{"t":15,"label":"7 พ.ย."},{"t":16,"label":"8 พ.ย."},{"t":17,"label":"9 พ.ย."},{"t":18,"label":"10 พ.ย."},{"t":19,"label":"11 พ.ย."},{"t":20,"label":"12 พ.ย."}],"changes":[{"t":16.969,"to":"us","label":"8 พ.ย.","time":"23:15"},{"t":17.376,"to":"rival","label":"9 พ.ย.","time":"09:02"},{"t":17.983,"to":"us","label":"9 พ.ย.","time":"23:36"},{"t":18.887,"to":"rival","label":"10 พ.ย.","time":"21:17"},{"t":18.965,"to":"us","label":"10 พ.ย.","time":"23:10"}],"marks":[{"id":"first","t":7.366,"lead":-25761,"label":"30 ต.ค.","time":"08:47"},{"id":"max_behind","t":15.879,"lead":-41120,"label":"7 พ.ย.","time":"21:06"},{"id":"max_lead","t":19.999,"lead":29505,"label":"11 พ.ย.","time":"23:59"},{"id":"last","t":20.339,"lead":10857,"label":"12 พ.ย.","time":"08:08"},{"id":"overtake","t":16.969,"lead":3870,"label":"8 พ.ย.","time":"23:15"},{"id":"narrow","t":19.94,"lead":487,"label":"11 พ.ย.","time":"22:34"}]},"scenes":{"win":[{"id":"hero","kicker":"Step Challenge 23 ต.ค. ถึง 13 พ.ย.","title":"ก้าวคนละแก้ว นำอยู่","num":543737,"unit":"ก้าวเฉลี่ยต่อคน","text":"นำ เดินสับรับทรัพย์ 10,857 ก้าว","stamp":"ผล ณ 12 พ.ย. 08:08 ยังไม่ใช่ผลสุดท้าย"},{"id":"plan","kicker":"ตอนแรกเราคิดกันว่า","title":"คนละ 100,000 ก้าวต่อวีค ก็น่าจะชนะแล้ว","text":"แข่งจริงโหดกว่านั้นเยอะ เราเดินกันเฉลี่ยคนละ 181,246 ก้าวต่อวีค","bars":[{"label":"แผน 3 วีค","value":300000,"kind":"plan"},{"label":"ก้าวคนละแก้ว","value":543737,"kind":"us"},{"label":"เดินสับรับทรัพย์","value":532880,"kind":"rival"}]},{"id":"behind","mark":"first","kicker":"30 ต.ค. วันแรกที่เราจดสกอร์","title":"ตามอยู่ 25,761 ก้าว","text":"ช่วง 23 ถึง 29 ต.ค. เรายังไม่ได้แคปภาพอันดับทีมไว้ เรื่องเลยเริ่มเล่าจากตรงนี้"},{"id":"far","mark":"max_behind","kicker":"7 พ.ย. 21:06","title":"ห่างที่สุด 41,120 ก้าว","text":"ไล่เท่าไรเขาก็ยังหนี เป็นตัวเลขที่น่าถอดใจที่สุดของทั้งรายการ"},{"id":"night","kicker":"ทีมสายดึก","title":"หลัง 3 ทุ่ม เราไล่ได้ทุกคืน","text":"กลางวันเขาเดินหนี ตกดึกเราไล่คืน ครบทั้ง 12 คืนที่จดไว้","nights":[{"label":"30 ต.ค.","gain":3012},{"label":"31 ต.ค.","gain":5981},{"label":"1 พ.ย.","gain":4833},{"label":"2 พ.ย.","gain":6178},{"label":"4 พ.ย.","gain":13829},{"label":"5 พ.ย.","gain":10553},{"label":"6 พ.ย.","gain":16789},{"label":"7 พ.ย.","gain":31819},{"label":"8 พ.ย.","gain":38598},{"label":"9 พ.ย.","gain":17209},{"label":"10 พ.ย.","gain":8759},{"label":"11 พ.ย.","gain":18096}]},{"id":"overtake","mark":"overtake","kicker":"8 พ.ย. 23:15","title":"แซงขึ้นที่ 1 ครั้งแรก","text":"21:02 ยังตามอยู่ 34,614 พอปิดวันกลายเป็นนำ 3,984 คืนเดียวไล่ได้ 38,598 ก้าว"},{"id":"tug","mark":"narrow","kicker":"ยังไม่จบง่าย ๆ","title":"สลับกันนำ 5 ครั้ง","text":"เราขึ้นนำรอบสุดท้าย 10 พ.ย. 23:10 แล้วไม่หลุดอีก ใกล้สุดเหลือนำแค่ 487 ก้าว (11 พ.ย. 22:34)"},{"id":"finish","mark":"last","kicker":"ล่าสุด 12 พ.ย. 08:08","title":"นำ 10,857 ก้าวต่อคน","num":10857,"text":"ขอบคุณ เดินสับรับทรัพย์ ที่สู้กันสนุกจนวันสุดท้าย ถ้าไม่มีคู่แข่งแบบนี้ เราคงไม่ได้เดินกันขนาดนี้"},{"id":"thanks","kicker":"ทีม ก้าวคนละแก้ว","title":"ขอบคุณทุกคนมาก ๆ ครับ","members":["BEN","RABBIT","BANK","TOP","ARM","BAS"],"lines":{}}],"lose":[{"id":"hero","kicker":"Step Challenge 23 ต.ค. ถึง 13 พ.ย.","title":"ก้าวคนละแก้ว สู้จนวันสุดท้าย","num":543737,"unit":"ก้าวเฉลี่ยต่อคน","text":"ตาม เดินสับรับทรัพย์ 10,857 ก้าว","stamp":"ผล ณ 12 พ.ย. 08:08 ยังไม่ใช่ผลสุดท้าย"},{"id":"plan","kicker":"ตอนแรกเราคิดกันว่า","title":"คนละ 100,000 ก้าวต่อวีค ก็น่าจะชนะแล้ว","text":"แข่งจริงโหดกว่านั้นเยอะ เราเดินกันเฉลี่ยคนละ 181,246 ก้าวต่อวีค","bars":[{"label":"แผน 3 วีค","value":300000,"kind":"plan"},{"label":"ก้าวคนละแก้ว","value":543737,"kind":"us"},{"label":"เดินสับรับทรัพย์","value":532880,"kind":"rival"}]},{"id":"behind","mark":"first","kicker":"30 ต.ค. วันแรกที่เราจดสกอร์","title":"ตามอยู่ 25,761 ก้าว","text":"ช่วง 23 ถึง 29 ต.ค. เรายังไม่ได้แคปภาพอันดับทีมไว้ เรื่องเลยเริ่มเล่าจากตรงนี้"},{"id":"far","mark":"max_behind","kicker":"7 พ.ย. 21:06","title":"ห่างที่สุด 41,120 ก้าว","text":"ไล่เท่าไรเขาก็ยังหนี เป็นตัวเลขที่น่าถอดใจที่สุดของทั้งรายการ"},{"id":"night","kicker":"ทีมสายดึก","title":"หลัง 3 ทุ่ม เราไล่ได้ทุกคืน","text":"กลางวันเขาเดินหนี ตกดึกเราไล่คืน ครบทั้ง 12 คืนที่จดไว้","nights":[{"label":"30 ต.ค.","gain":3012},{"label":"31 ต.ค.","gain":5981},{"label":"1 พ.ย.","gain":4833},{"label":"2 พ.ย.","gain":6178},{"label":"4 พ.ย.","gain":13829},{"label":"5 พ.ย.","gain":10553},{"label":"6 พ.ย.","gain":16789},{"label":"7 พ.ย.","gain":31819},{"label":"8 พ.ย.","gain":38598},{"label":"9 พ.ย.","gain":17209},{"label":"10 พ.ย.","gain":8759},{"label":"11 พ.ย.","gain":18096}]},{"id":"overtake","mark":"overtake","kicker":"8 พ.ย. 23:15","title":"แซงขึ้นที่ 1 ครั้งแรก","text":"21:02 ยังตามอยู่ 34,614 พอปิดวันกลายเป็นนำ 3,984 คืนเดียวไล่ได้ 38,598 ก้าว"},{"id":"tug","mark":"narrow","kicker":"ยังไม่จบง่าย ๆ","title":"สลับกันนำ 5 ครั้ง","text":"เราขึ้นนำรอบสุดท้าย 10 พ.ย. 23:10 แล้วไม่หลุดอีก ใกล้สุดเหลือนำแค่ 487 ก้าว (11 พ.ย. 22:34)"},{"id":"finish","mark":"last","kicker":"ล่าสุด 12 พ.ย. 08:08","title":"ตาม 10,857 ก้าวต่อคน","num":10857,"text":"ยินดีกับ เดินสับรับทรัพย์ ด้วยครับ แข่งกันสนุกมาก เราเดินกันเกินแผนไปไกล แค่นี้ก็ชนะตัวเองแล้ว"},{"id":"thanks","kicker":"ทีม ก้าวคนละแก้ว","title":"ขอบคุณทุกคนมาก ๆ ครับ","members":["BEN","RABBIT","BANK","TOP","ARM","BAS"],"lines":{}}]}}][0] || null;
+  var RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!RM) document.documentElement.classList.add("anim");
+  var Q = new URLSearchParams(location.search);
+  var FORCED = /^(win|lose)$/.test(Q.get("end") || "") ? Q.get("end") : null;
+  var app = document.getElementById("app");
+  var NS = "http://www.w3.org/2000/svg";
+  var uid = 0;
+  var live = [];          // cleanup callbacks of the current render
+  var confettiDone = false;
+
+  // ---------- helpers ----------
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = nb(text);
+    return e;
+  }
+  // keep the Thai repeat mark on the line of the word it repeats
+  function nb(t) { return typeof t === "string" ? t.replace(/ \u0e46/g, "\u00a0\u0e46") : t; }
+  // Thai headings break only between space-separated chunks (a chunk wider than the line still wraps inside)
+  function chunks(node, text) {
+    nb(text).split(" ").forEach(function (w, i) {
+      if (i) node.appendChild(document.createTextNode(" "));
+      node.appendChild(el("span", "ck", w));
+    });
+    return node;
+  }
+  function sv(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function fmt(n) { return Math.abs(n).toLocaleString("en-US"); }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function has(s) { return typeof s === "string" && s.trim() !== ""; }
+  function ease(u) { return u >= 1 ? 1 : 1 - Math.pow(2, -10 * u); }
+  function smooth(u) { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); }
+  var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+
+  function countUp(node, n, dur) {
+    node.setAttribute("aria-label", n.toLocaleString("en-US"));
+    if (RM) { node.textContent = n.toLocaleString("en-US"); return; }
+    var t0 = null, stop = false;
+    live.push(function () { stop = true; });
+    function f(ts) {
+      if (stop) return;
+      if (t0 == null) t0 = ts;
+      var u = Math.min(1, (ts - t0) / dur);
+      node.textContent = Math.round(n * ease(u)).toLocaleString("en-US");
+      if (u < 1) requestAnimationFrame(f);
+    }
+    node.textContent = "0";
+    requestAnimationFrame(f);
+  }
+
+  // one IntersectionObserver for reveals; cb(el) fires once when the element enters
+  function watch(node, cb, thr) {
+    if (!("IntersectionObserver" in window)) { node.classList.add("in"); if (cb) cb(node); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("in"); if (cb) cb(e.target); io.unobserve(e.target); }
+      });
+    }, { threshold: thr == null ? 0.25 : thr });
+    io.observe(node);
+    live.push(function () { io.disconnect(); });
+  }
+
+  // ---------- mascots (inline SVG, drawn here) ----------
+  // Our team: a glass of beer (golden, white foam) with legs and running shoes, sloshing (แก้ว / ก้าว).
+  function glassSVG(mode) {
+    var id = "gc" + (++uid);
+    return '<svg class="m glass ' + mode + '" viewBox="0 0 64 72" aria-hidden="true"><defs><clipPath id="' + id + '">' +
+      '<path d="M14 10H50L45.7 50.2Q45.4 52.2 43.4 52.2H20.6Q18.6 52.2 18.3 50.2Z"/></clipPath></defs>' +
+      '<g class="bob">' +
+      '<g class="leg lb" style="transform-origin:28px 52px"><path class="m-ink" d="M28 52v9" stroke-width="3.2" fill="none"/>' +
+      '<path d="M24.5 60.5h7.5a4 4 0 0 1 4 4v1.5h-11.5z" fill="#f8a91f" opacity=".8"/></g>' +
+      '<g class="arm ab" style="transform-origin:15px 29px"><path class="m-ink" d="M15 29l-8 7" stroke-width="3" fill="none"/></g>' +
+      '<path d="M12 8H52L47.2 50.6Q46.8 54 43.6 54H20.4Q17.2 54 16.8 50.6Z" fill="#fff" fill-opacity=".92"/>' +
+      '<g clip-path="url(#' + id + ')"><g class="water" style="transform-origin:32px 30px">' +
+      '<path d="M-14 23q7-4 14 0t14 0 14 0 14 0 14 0 14 0V62H-14Z" fill="#f8a91f"/>' +
+      '<circle cx="24" cy="45" r="1.5" fill="#fff" opacity=".55"/><circle cx="44" cy="46" r="1.2" fill="#fff" opacity=".5"/><circle cx="35" cy="48.5" r="1" fill="#fff" opacity=".5"/>' +
+      '<path d="M-14 23q7-4 14 0t14 0 14 0 14 0 14 0 14 0V17q-7-4-14 0t-14 0-14 0-14 0-14 0-14 0Z" fill="#fff"/></g></g>' +
+      '<path class="m-ink" d="M12 8H52L47.2 50.6Q46.8 54 43.6 54H20.4Q17.2 54 16.8 50.6Z" fill="none" stroke-width="2.6"/>' +
+      '<path d="M18.5 14l2.6 26" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".95"/>' +
+      '<circle cx="30" cy="34" r="2.3" fill="#221636"/><circle cx="40.5" cy="34" r="2.3" fill="#221636"/>' +
+      '<path class="m-ink" d="M31.5 40q4 3.2 7.6 0" stroke-width="2.1" fill="none"/>' +
+      '<g class="leg la" style="transform-origin:37px 52px"><path class="m-ink" d="M37 52v9" stroke-width="3.2" fill="none"/>' +
+      '<path d="M33.5 60.5h7.5a4 4 0 0 1 4 4v1.5h-11.5z" fill="#f8a91f"/><path d="M33.5 66h11.5" stroke="#fff" stroke-width="1.4"/></g>' +
+      '<g class="arm aa" style="transform-origin:49px 29px"><path class="m-ink" d="M49 29l8-6" stroke-width="3" fill="none"/></g>' +
+      '</g></svg>';
+  }
+  // The other team: a money bag with legs, quick shuffle steps, a coin now and then (สับ / ทรัพย์). Friendly face.
+  function bagSVG(mode) {
+    return '<svg class="m bag ' + mode + '" viewBox="0 0 64 72" aria-hidden="true">' +
+      '<g class="coin c1"><circle cx="13" cy="50" r="3.6" fill="#f6c443" stroke="#221636" stroke-width="1.3"/></g>' +
+      '<g class="coin c2"><circle cx="16" cy="44" r="3.2" fill="#f6c443" stroke="#221636" stroke-width="1.3"/></g>' +
+      '<g class="bob">' +
+      '<g class="leg lb" style="transform-origin:27px 53px"><path class="m-ink" d="M27 53v8" stroke-width="3.2" fill="none"/>' +
+      '<path d="M23.5 60h7.5a4 4 0 0 1 4 4v1.5h-11.5z" fill="#a3161a" opacity=".75"/></g>' +
+      '<path class="m-ink" d="M25 18C14 24 9.5 33 10 42.5 10.6 52 19.5 55.5 32 55.5S53.4 52 54 42.5C54.5 33 50 24 39 18Z" fill="#e5383b" stroke-width="2.6"/>' +
+      '<path d="M16 36q1-7 6-11" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".75"/>' +
+      '<path class="m-ink" d="M25.5 17.5L21 7.5Q26 10.5 29 8.5 32 5.5 35 8.5 38 10.5 43 7.5L38.5 17.5Z" fill="#e5383b" stroke-width="2.3"/>' +
+      '<path class="m-ink" d="M23.5 18.5Q32 22.5 40.5 18.5" stroke-width="3.2" fill="none"/>' +
+      '<circle cx="31" cy="33" r="2.3" fill="#221636"/><circle cx="41.5" cy="33" r="2.3" fill="#221636"/>' +
+      '<path class="m-ink" d="M32.5 38.5q4 3.2 7.6 0" stroke-width="2.1" fill="none"/>' +
+      '<text x="36.5" y="51" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="800" font-size="10" fill="#fff">฿</text>' +
+      '<g class="leg la" style="transform-origin:37px 53px"><path class="m-ink" d="M37 53v8" stroke-width="3.2" fill="none"/>' +
+      '<path d="M33.5 60h7.5a4 4 0 0 1 4 4v1.5h-11.5z" fill="#a3161a"/><path d="M33.5 65.5h11.5" stroke="#fff" stroke-width="1.4"/></g>' +
+      '</g></svg>';
+  }
+
+  // ---------- confetti (win ending only, stops by itself) ----------
+  function confetti(host) {
+    if (RM || confettiDone) return;
+    confettiDone = true;
+    var c = el("canvas", "confetti");
+    c.setAttribute("aria-hidden", "true");
+    host.appendChild(c);
+    var W = host.clientWidth, H = host.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = W * dpr; c.height = H * dpr;
+    var g = c.getContext("2d"); g.scale(dpr, dpr);
+    var cols = ["#ffffff", "#f6c443", "#f8a91f", "#ff7eb6", "#ffd76a", "#e4d9f7"];
+    var P = [], n = W < 600 ? 110 : 170;
+    for (var i = 0; i < n; i++) {
+      var left = i % 2 === 0;
+      var a = (left ? -Math.PI / 3.1 : -Math.PI + Math.PI / 3.1) + (Math.random() - .5) * .9;
+      var sp = 7 + Math.random() * 9 * (H / 800 + .4);
+      P.push({ x: left ? -10 : W + 10, y: H * (.62 + Math.random() * .2), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        w: 6 + Math.random() * 6, h: 4 + Math.random() * 7, r: Math.random() * 6.3, vr: (Math.random() - .5) * .3,
+        c: cols[i % cols.length], round: Math.random() < .3, sw: Math.random() * 6.3 });
+    }
+    var start = null, last = null, LIFE = 4200;
+    function f(ts) {
+      if (start == null) { start = last = ts; }
+      var dt = Math.min(2.5, (ts - last) / 16.7), age = ts - start; last = ts;
+      g.clearRect(0, 0, W, H);
+      g.globalAlpha = age > LIFE - 900 ? Math.max(0, (LIFE - age) / 900) : 1;
+      for (var i = 0; i < P.length; i++) {
+        var p = P[i];
+        p.vy += .19 * dt; p.vx *= Math.pow(.985, dt); p.vy *= Math.pow(.985, dt);
+        p.x += (p.vx + Math.sin(p.sw += .08 * dt) * .6) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+        g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c;
+        if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2.4, 0, 6.283); g.fill(); }
+        else { g.scale(1, Math.cos(p.sw)); g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
+        g.restore();
+      }
+      if (age < LIFE) requestAnimationFrame(f); else c.remove();
+    }
+    setTimeout(function () { requestAnimationFrame(f); }, 350);
+  }
+
+  function waveSVG() {
+    return '<svg class="wave" viewBox="0 0 1440 34" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path d="M0 22C120 8 240 8 360 18S600 32 720 22 960 6 1080 14 1320 30 1440 18V34H0Z"/></svg>';
+  }
+
+  // ---------- scenes ----------
+  function heroScene(s, ending) {
+    var win = ending === "win";
+    var sec = el("section", "hero" + (win ? "" : " calm"));
+    sec.id = "hero";
+    if (has(s.kicker)) sec.appendChild(el("p", "mast", s.kicker));
+    var buddy = el("div", "buddy");
+    buddy.innerHTML = win ? glassSVG("cheer") : glassSVG("idle") + bagSVG("idle");
+    var stage = el("div", "stage");
+    if (has(s.title)) stage.appendChild(chunks(el("h1"), s.title));
+    var big = null;
+    if (typeof s.num === "number") { big = el("p", "big num", s.num.toLocaleString("en-US")); stage.appendChild(big); }
+    if (has(s.unit)) stage.appendChild(el("p", "unit", s.unit));
+    var tail = el("div", "tail");
+    tail.style.display = "flex"; tail.style.flexDirection = "column";
+    if (has(s.text)) tail.appendChild(el("p", "say", s.text));
+    if (has(s.stamp)) {
+      var st = el("p", "stamp");
+      st.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+      st.appendChild(el("span", null, s.stamp));
+      tail.appendChild(st);
+    }
+    sec.appendChild(stage);
+    sec.appendChild(buddy);
+    sec.appendChild(tail);
+    var cue = el("a", "cue");
+    cue.href = "#s2";
+    cue.appendChild(el("span", null, "เลื่อนลง"));
+    cue.insertAdjacentHTML("beforeend", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>');
+    sec.appendChild(cue);
+    sec.insertAdjacentHTML("beforeend", waveSVG());
+    app.appendChild(sec);
+    if (big) countUp(big, s.num, 1900);
+    if (win) confetti(sec);
+  }
+
+  function heading(s, cls) {
+    var h = el("h2", cls || "t");
+    if (has(s.kicker)) h.appendChild(el("span", "ki", s.kicker));
+    if (has(s.title)) chunks(h, s.title);
+    return h;
+  }
+
+  function planScene(s) {
+    var sec = el("section", "plan");
+    var w = el("div", "in-w");
+    var h = heading(s); h.classList.add("rv"); w.appendChild(h);
+    var bars = (s.bars || []).filter(function (b) { return b && typeof b.value === "number"; });
+    if (bars.length) {
+      var max = Math.max.apply(null, bars.map(function (b) { return b.value; })) || 1;
+      var box = el("div", "bars");
+      bars.forEach(function (b) {
+        var row = el("div", "bar k-" + (b.kind || "x"));
+        var lab = el("div", "lab");
+        lab.appendChild(el("b", null, b.label || ""));
+        lab.appendChild(el("span", "num", b.value.toLocaleString("en-US")));
+        var trk = el("div", "trk"), fill = el("div", "fill");
+        fill.style.width = (Math.max(0, b.value) / max * 100) + "%";
+        trk.appendChild(fill); row.appendChild(lab); row.appendChild(trk); box.appendChild(row);
+      });
+      w.appendChild(box);
+      watch(box, null, .35);
+    }
+    if (has(s.text)) { var p = el("p", "txt rv", s.text); w.appendChild(p); watch(p); }
+    sec.appendChild(w);
+    app.appendChild(sec);
+    watch(h);
+    return sec;
+  }
+
+  function nightsChart(list) {
+    var ok = (list || []).filter(function (x) { return x && typeof x.gain === "number"; });
+    if (!ok.length) return null;
+    var wrap = el("div");
+    var maxP = Math.max(0, Math.max.apply(null, ok.map(function (x) { return x.gain; })));
+    var maxN = Math.max(0, -Math.min.apply(null, ok.map(function (x) { return x.gain; })));
+    var span = (maxP + maxN) || 1, zero = maxP / span * 100;   // % from top
+    var top = 0; ok.forEach(function (x, i) { if (x.gain > ok[top].gain) top = i; });
+    var box = el("div", "nights"), labs = el("div", "nlab");
+    box.setAttribute("aria-hidden", "true");
+    ok.forEach(function (x, i) {
+      var c = el("div", "c"), b = el("div", "b " + (x.gain >= 0 ? "pos" : "neg") + (i === top && x.gain > 0 ? " top" : ""));
+      var hgt = Math.abs(x.gain) / span * 100;
+      b.style.height = Math.max(hgt, 1.5) + "%";
+      if (x.gain >= 0) b.style.bottom = (100 - zero) + "%"; else b.style.top = zero + "%";
+      b.style.transitionDelay = (i * 55) + "ms";
+      c.appendChild(b);
+      if (i === top && x.gain > 0) {
+        var v = el("span", "val", x.gain.toLocaleString("en-US"));
+        v.style.bottom = (100 - zero + hgt) + "%";
+        c.appendChild(v);
+      }
+      box.appendChild(c);
+    });
+    if (maxN > 0) { var z = el("div", "zero"); z.style.top = zero + "%"; box.appendChild(z); }
+    // label the first, the tallest and the last night (spaced so they never collide)
+    var pick = [0, top, ok.length - 1].filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return a - b; });
+    var shown = [];
+    pick.forEach(function (i) {
+      if (shown.some(function (j) { return Math.abs(j - i) < 3; })) return;
+      shown.push(i);
+      var sp = el("span", null, ok[i].label || "");
+      var pct = (i + .5) / ok.length * 100;
+      sp.style.left = pct + "%";
+      if (i === 0) { sp.style.left = "0"; sp.style.transform = "none"; }
+      if (i === ok.length - 1) { sp.style.left = "auto"; sp.style.right = "0"; sp.style.transform = "none"; }
+      labs.appendChild(sp);
+    });
+    wrap.appendChild(box); wrap.appendChild(labs);
+    return wrap;
+  }
+
+  function storyCard(s, ending) {
+    var card = el("article", "card" + (s.id === "finish" && ending === "lose" ? " lose-end" : ""));
+    if (s.id === "finish" && typeof s.num === "number") {
+      if (has(s.kicker)) card.appendChild(el("p", "ki", s.kicker)).style.fontSize = "1rem";
+      var big = el("p", "big num", s.num.toLocaleString("en-US"));
+      card.appendChild(big);
+      card.appendChild(heading({ title: s.title }));
+      card._count = function () { countUp(big, s.num, 1500); };
+    } else {
+      card.appendChild(heading(s));
+    }
+    if (has(s.text)) card.appendChild(el("p", "txt", s.text));
+    if (s.nights) { var nc = nightsChart(s.nights); if (nc) card.appendChild(nc); }
+    return card;
+  }
+
+  function soloScene(s, ending) {
+    var sec = el("section", "solo");
+    var card = storyCard(s, ending);
+    card.classList.add("rv");
+    sec.appendChild(card);
+    app.appendChild(sec);
+    watch(card, function () { if (card._count) card._count(); });
+    return sec;
+  }
+
+  // ---------- the race: one pinned visual that the story scrolls through ----------
+  var RACE_IDS = { behind: 1, far: 1, night: 1, overtake: 1, tug: 1, finish: 1 };
+
+  function raceScene(list, ending) {
+    var R = V.race || {};
+    var pts = (R.points || []).filter(function (p) { return p && isFinite(p[0]) && isFinite(p[1]); })
+      .slice().sort(function (a, b) { return a[0] - b[0]; });
+    if (pts.length < 2) { list.forEach(function (s) { soloScene(s, ending); }); return; }
+    var days = (R.days || []).filter(function (d) { return d && isFinite(d.t); });
+    var marks = {};
+    (R.marks || []).forEach(function (m) { if (m && m.id) marks[m.id] = m; });
+    var changes = (R.changes || []).filter(function (c) { return c && isFinite(c.t); });
+    var t1 = isFinite(R.t1) ? R.t1 : pts[pts.length - 1][0];
+    var xmin = Math.min(isFinite(R.t0) ? R.t0 : pts[0][0], days.length ? days[0].t : Infinity, pts[0][0]);
+    t1 = Math.max(t1, pts[pts.length - 1][0]);
+    var lo = 0, hi = 0;
+    pts.forEach(function (p) { if (p[1] < lo) lo = p[1]; if (p[1] > hi) hi = p[1]; });
+    var maxAbs = Math.max(-lo, hi) || 1;
+
+    var sec = el("section", "race");
+    var fig = el("div", "fig"), inner = el("div", "fig-in");
+    fig.setAttribute("aria-hidden", "true");
+    var readout = el("div", "readout");
+    var rd = el("span", "d"), rv = el("span", "v");
+    readout.appendChild(rd); readout.appendChild(rv);
+    var track = el("div", "track");
+    var laneR = el("div", "lane"), laneU = el("div", "lane");
+    var fin = el("div", "finish");
+    var runR = el("div", "runner rival"), runU = el("div", "runner us");
+    runR.innerHTML = bagSVG("run"); runU.innerHTML = glassSVG("run");
+    runR.appendChild(el("span", "tag", (V.rival && V.rival.name) || ""));
+    runU.appendChild(el("span", "tag", (V.us && V.us.name) || ""));
+    laneR.appendChild(runR); laneU.appendChild(runU);
+    track.appendChild(laneR); track.appendChild(laneU); track.appendChild(fin);
+    var chart = el("div", "chart");
+    var svg = sv("svg", { "aria-hidden": "true" });
+    var call = el("div", "callout");
+    chart.appendChild(svg); chart.appendChild(call);
+    inner.appendChild(readout); inner.appendChild(track); inner.appendChild(chart);
+    fig.appendChild(inner);
+
+    var stepsBox = el("div", "steps");
+    var steps = list.map(function (s) {
+      var st = el("div", "step"), card = storyCard(s, ending);
+      st.appendChild(card); stepsBox.appendChild(st);
+      var m = s.mark && marks[s.mark] ? marks[s.mark] : null;
+      return { s: s, node: st, card: card, mark: m, target: m ? m.t : null, counted: false };
+    });
+    // a scene without a usable mark holds the chart where the previous scene left it
+    var prev = pts[0][0];
+    steps.forEach(function (st) { if (st.target == null) st.target = prev; prev = st.target; });
+
+    sec.appendChild(fig); sec.appendChild(stepsBox);
+    app.appendChild(sec);
+
+    // --- geometry (rebuilt on resize) ---
+    var G = {};
+    function layout() {
+      var W = chart.clientWidth, H = chart.clientHeight;
+      if (!W || !H) return;
+      if (G.X && W === G.W && H === G.H) { measure(); last = {}; update(true); return; }   // only the browser bar moved
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      var padL = 2, gutter = 40, padT = 8, padB = 22;
+      var x0 = padL, x1 = W - gutter;
+      var ylo = lo * 1.12, yhi = hi * 1.15;
+      if (yhi <= 0) yhi = maxAbs * .25; if (ylo >= 0) ylo = -maxAbs * .25;
+      var X = function (t) { return x0 + (t - xmin) / ((t1 - xmin) || 1) * (x1 - x0); };
+      var Y = function (v) { return padT + (yhi - v) / (yhi - ylo) * (H - padT - padB); };
+      G = { X: X, Y: Y, W: W, H: H, x1: x1 };
+      var zy = Y(0);
+      var defs = sv("defs", {}, svg);
+      var k = ++uid;
+      var cpUp = sv("clipPath", { id: "up" + k }, defs); sv("rect", { x: -4, y: -20, width: W + 8, height: zy + 20 }, cpUp);
+      var cpDn = sv("clipPath", { id: "dn" + k }, defs); sv("rect", { x: -4, y: zy, width: W + 8, height: H }, cpDn);
+      var cpRv = sv("clipPath", { id: "rv" + k }, defs); G.reveal = sv("rect", { x: -10, y: -20, width: 0, height: H + 40 }, cpRv);
+      // day grid + labels (thinned so labels keep ~48px apart)
+      var dayW = (X(xmin + 1) - X(xmin)) || 1, every = Math.max(1, Math.ceil(48 / dayW));
+      var grid = sv("g", {}, svg);
+      days.forEach(function (d, i) {
+        var gx = X(d.t);
+        if (gx >= x0 - .5 && gx <= x1) sv("line", { x1: gx, x2: gx, y1: padT, y2: H - padB, stroke: "#221636", "stroke-opacity": .06 }, grid);
+        var lx = X(d.t + .5);
+        if (i % every === 0 && lx >= x0 && lx < x1 - 18) {
+          var edge = lx < x0 + 20;   // the first day sits on the left edge: anchor it there instead of dropping it
+          var tx = sv("text", { x: edge ? x0 : lx, y: H - 6, "text-anchor": edge ? "start" : "middle" }, grid); tx.textContent = d.label || "";
+        }
+      });
+      // finish line at the end of the challenge
+      sv("line", { x1: x1, x2: x1, y1: padT, y2: H - padB, stroke: "#221636", "stroke-opacity": .4, "stroke-dasharray": "3 4" }, svg);
+      // area + line, split at zero (above = we lead, teal; below = we trail, amber), revealed left to right
+      var line = "", i;
+      for (i = 0; i < pts.length; i++) line += (i ? "L" : "M") + X(pts[i][0]).toFixed(1) + " " + Y(pts[i][1]).toFixed(1);
+      var area = line + "L" + X(pts[pts.length - 1][0]).toFixed(1) + " " + zy + "L" + X(pts[0][0]).toFixed(1) + " " + zy + "Z";
+      var rg = sv("g", { "clip-path": "url(#rv" + k + ")" }, svg);
+      var gu = sv("g", { "clip-path": "url(#up" + k + ")" }, rg), gd = sv("g", { "clip-path": "url(#dn" + k + ")" }, rg);
+      sv("path", { d: area, fill: "#f8a91f", "fill-opacity": .34 }, gu);
+      sv("path", { d: line, fill: "none", stroke: "#c47600", "stroke-width": 2.6, "stroke-linejoin": "round" }, gu);
+      sv("path", { d: area, fill: "#e5383b", "fill-opacity": .18 }, gd);
+      sv("path", { d: line, fill: "none", stroke: "#c62828", "stroke-width": 2.6, "stroke-linejoin": "round" }, gd);
+      // zero line = level
+      sv("line", { x1: x0, x2: x1, y1: zy, y2: zy, stroke: "#221636", "stroke-width": 1.6, "stroke-opacity": .7 }, svg);
+      var lab = function (txt, y, cls) { var e = sv("text", { x: x1 + 8, y: y, "class": cls || "" }, svg); e.textContent = txt; };
+      lab("นำ", Math.max(padT + 12, zy - 16), "side-up");
+      lab("เสมอ", zy + 4);
+      lab("ตาม", Math.min(H - padB - 2, zy + 26), "side-dn");
+      // lead changes: small ticks on the level line
+      G.ticks = changes.map(function (c) {
+        var tx = X(c.t);
+        return { t: c.t, n: sv("line", { x1: tx, x2: tx, y1: zy - 6, y2: zy + 6, stroke: c.to === "us" ? "#7a4a00" : "#a3161a", "stroke-width": 2.4, "stroke-linecap": "round", opacity: 0 }, svg) };
+      });
+      // highlighted mark + head
+      G.pulse = sv("circle", { r: 7, fill: "none", stroke: "#c47600", "stroke-width": 2, "class": "pulse", opacity: 0 }, svg);
+      G.ring = sv("circle", { r: 8.5, fill: "#fff", stroke: "#221636", "stroke-width": 2, opacity: 0 }, svg);
+      G.head = sv("circle", { r: 5.5, fill: "#c47600", stroke: "#fff", "stroke-width": 2.5 }, svg);
+      // runner lane geometry
+      G.TW = track.clientWidth;
+      G.rw = Math.max(runU.offsetWidth, runR.offsetWidth);
+      G.maxSep = Math.min(G.TW * .34, 190);
+      G.cMin = G.maxSep / 2 + G.rw / 2 + 6;
+      G.cMax = Math.max(G.cMin, G.TW - 28 - G.maxSep / 2 - G.rw / 2);
+      measure();
+      last = {};
+      update(true);
+    }
+
+    // --- scroll anchors ---
+    var desk = false, A = [];
+    function measure() {
+      desk = window.innerWidth >= 960;
+      var vh = window.innerHeight, sy = window.scrollY;
+      A = steps.map(function (st) {
+        var r = st.card.getBoundingClientRect();
+        // anchor: the scroll position where this card sits at its resting place in the viewport
+        var restTop = desk ? vh / 2 - r.height / 2 : vh - r.height - (st.node.getBoundingClientRect().bottom - r.bottom);
+        return r.top + sy - restTop;
+      });
+    }
+
+    function idxAt(t) {   // last point with time <= t
+      var a = 0, b = pts.length - 1;
+      if (t < pts[0][0]) return 0;
+      while (a < b) { var m = (a + b + 1) >> 1; if (pts[m][0] <= t + 1e-9) a = m; else b = m - 1; }
+      return a;
+    }
+
+    var last = {}, sign0 = null;
+    function update(force) {
+      if (!G.X) return;
+      var y = window.scrollY, vh = window.innerHeight, n = steps.length;
+      // active scene: the last one whose card has reached the focus band
+      var act = 0;
+      for (var i = 0; i < n; i++) if (y >= A[i] - vh * .3) act = i;
+      // chart time: hold on each scene's mark, travel to the next one between scenes
+      var t;
+      if (RM || n === 1) t = steps[act].target;
+      else if (y <= A[0]) t = steps[0].target;
+      else if (y >= A[n - 1]) t = steps[n - 1].target;
+      else {
+        var j = 0; while (j < n - 2 && y >= A[j + 1]) j++;
+        var u = (y - A[j]) / ((A[j + 1] - A[j]) || 1);
+        t = steps[j].target + (steps[j + 1].target - steps[j].target) * smooth((u - .2) / .6);
+      }
+      var k = idxAt(t), p = pts[k];
+      if (force || k !== last.k) {
+        last.k = k;
+        var hx = G.X(p[0]), hy = G.Y(p[1]), up = p[1] > 0, dn = p[1] < 0;
+        G.reveal.setAttribute("width", Math.max(0, hx + 10));
+        G.head.setAttribute("cx", hx); G.head.setAttribute("cy", hy);
+        G.head.setAttribute("fill", up ? "#c47600" : dn ? "#e5383b" : "#221636");
+        G.ticks.forEach(function (tk) { tk.n.setAttribute("opacity", tk.t <= p[0] + 1e-9 ? 1 : 0); });
+        // readout: day of the drawn point + the lead at that point
+        var dl = null; days.forEach(function (d) { if (d.t <= p[0]) dl = d.label; });
+        rd.textContent = dl || "";
+        rv.textContent = "";
+        rv.appendChild(document.createTextNode(up ? "นำ" : dn ? "ตาม" : "เสมอ"));
+        if (p[1] !== 0) rv.appendChild(el("span", "num", fmt(p[1])));
+        readout.className = "readout" + (up ? " up" : dn ? " down" : "");
+        // runners: centre travels toward the finish, the gap follows the lead (sqrt-ish so small leads stay visible)
+        var prog = clamp((p[0] - xmin) / ((t1 - xmin) || 1), 0, 1);
+        var c = G.cMin + (G.cMax - G.cMin) * prog;
+        var sep = (p[1] < 0 ? -1 : 1) * G.maxSep * Math.pow(Math.min(1, Math.abs(p[1]) / maxAbs), .6);
+        runU.style.transform = "translate3d(" + (c + sep / 2 - runU.offsetWidth / 2).toFixed(1) + "px,0,0)";
+        runR.style.transform = "translate3d(" + (c - sep / 2 - runR.offsetWidth / 2).toFixed(1) + "px,0,0)";
+        var sg = up ? 1 : dn ? -1 : 0;
+        if (!RM && sign0 === -1 && sg === 1) {
+          var gsvg = runU.querySelector("svg");
+          gsvg.classList.remove("hop"); void gsvg.getBoundingClientRect(); gsvg.classList.add("hop");
+        }
+        if (sg) sign0 = sg;
+      }
+      // highlighted mark: only once the line has arrived at it
+      var st = steps[act], m = st.mark;
+      var on = m && m.t <= p[0] + 1e-6;
+      if (force || on !== last.on || act !== last.act) {
+        last.on = on; last.act = act;
+        [G.ring, G.pulse].forEach(function (c) { c.setAttribute("opacity", on ? 1 : 0); });
+        fig.classList.toggle("peak", !!(on && st.s.id === "overtake"));
+        call.className = "callout";
+        if (on) {
+          var mx = G.X(m.t), my = G.Y(m.lead);
+          G.ring.setAttribute("cx", mx); G.ring.setAttribute("cy", my);
+          G.pulse.setAttribute("cx", mx); G.pulse.setAttribute("cy", my);
+          G.pulse.setAttribute("stroke", m.lead >= 0 ? "#c47600" : "#c62828");
+          call.textContent = "";
+          call.appendChild(el("span", "d", [m.label, m.time].filter(has).join(" ")));
+          var vv = el("span", "v", m.lead > 0 ? "นำ " : m.lead < 0 ? "ตาม " : "เสมอ");
+          if (m.lead !== 0) vv.appendChild(el("span", "num", fmt(m.lead)));
+          call.appendChild(vv);
+          var cw = call.offsetWidth, ch = call.offsetHeight;
+          var cx = clamp(mx - cw / 2, 0, Math.max(0, G.x1 + 4 - cw));
+          var cy = m.lead < 0 ? my - ch - 14 : my + 14;
+          if (cy < -6) cy = my + 14;
+          if (cy + ch > G.H) cy = my - ch - 14;
+          call.style.transform = "translate(" + cx.toFixed(0) + "px," + cy.toFixed(0) + "px)";
+          call.classList.add("on", m.lead >= 0 ? "up" : "down");
+        }
+      }
+      // phones: a card fades as it scrolls up over the pinned race
+      if (!desk) steps.forEach(function (s2, i) {
+        var o = 1 - clamp((y - A[i] - vh * .12) / (vh * .28), 0, 1);
+        if (s2._o !== o) { s2._o = o; s2.card.style.opacity = o; }
+      });
+      else steps.forEach(function (s2) { if (s2._o !== 1) { s2._o = 1; s2.card.style.opacity = ""; } });
+      // count-ups fire when their scene becomes active
+      if (!st.counted && st.card._count && y >= A[act] - vh * .3) { st.counted = true; st.card._count(); }
+    }
+
+    // night card bars + other per-card reveals
+    steps.forEach(function (st) { watch(st.card, null, .3); });
+
+    var ticking = false;
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; update(false); }); } }
+    var rt = null;
+    function onResize() { clearTimeout(rt); rt = setTimeout(layout, 120); }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    live.push(function () { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); });
+    // run cycle only while the race is on screen
+    if ("IntersectionObserver" in window && !RM) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { track.classList.toggle("running", e.isIntersecting); }); });
+      io.observe(sec);
+      live.push(function () { io.disconnect(); });
+    }
+    layout();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+    window.addEventListener("load", layout, { once: true });
+  }
+
+  function thanksScene(s) {
+    var sec = el("section", "thanks");
+    sec.insertAdjacentHTML("beforeend", waveSVG());
+    var ch = document.createElementNS(NS, "svg");
+    ch.setAttribute("class", "cheers"); ch.setAttribute("viewBox", "0 0 150 96"); ch.setAttribute("aria-hidden", "true");
+    ch.innerHTML = '<g class="gl l" style="transform-origin:46px 92px;transform-box:view-box"><svg x="6" y="12" width="76" height="84" viewBox="0 0 64 72">' + glassSVG("idle").replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") + '</svg></g>' +
+      '<g class="gl r" style="transform-origin:104px 92px;transform-box:view-box"><g transform="translate(144 12) scale(-1 1)"><svg width="76" height="84" viewBox="0 0 64 72">' + glassSVG("idle").replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") + '</svg></g></g>' +
+      '<g class="spark" stroke="#f6c443" stroke-width="3" stroke-linecap="round"><path d="M75 4v9M62 9l5 7M88 9l-5 7"/></g>';
+    sec.appendChild(ch);
+    if (has(s.title)) {
+      var h = chunks(el("h2", "rv"), s.title); sec.appendChild(h); watch(h);
+      // a thank-you that misses one line by a little is set slightly smaller rather than leave one word alone
+      var fit = function () {
+        h.style.fontSize = ""; h.style.whiteSpace = "nowrap";
+        var r = h.clientWidth / h.scrollWidth, fs = parseFloat(getComputedStyle(h).fontSize);
+        h.style.whiteSpace = "";
+        if (r < 1 && r > .8) h.style.fontSize = Math.floor(fs * r * .98) + "px";
+      };
+      fit();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+      window.addEventListener("resize", fit);
+      live.push(function () { window.removeEventListener("resize", fit); });
+    }
+    var names = (s.members || []).filter(has);
+    if (names.length) {
+      var ul = el("ul", "names");
+      names.forEach(function (nm, i) {
+        var li = el("li");
+        li.style.transitionDelay = (RM ? 0 : 200 + i * 170) + "ms";
+        li.appendChild(el("span", "num", nm));
+        var note = s.lines && s.lines[nm];
+        if (has(note)) li.appendChild(el("span", "note", note));
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+      watch(ul, null, .15);
+    }
+    if (has(s.kicker)) { var sg = el("p", "sign rv", s.kicker); sec.appendChild(sg); watch(sg); }
+    app.appendChild(sec);
+    watch(ch, null, .5);
+    return sec;
+  }
+
+  function backButton(parent) {
+    var a = el("a", "back");
+    a.href = (V && V.war) || "index.html?war=1";
+    a.appendChild(document.createTextNode("ดู War Room ย้อนหลัง"));
+    a.insertAdjacentHTML("beforeend", ARROW);
+    if (parent) parent.appendChild(a);
+    else { var f = el("section", "thanks"); f.style.minHeight = "auto"; f.appendChild(a); app.appendChild(f); }
+  }
+
+  // ---------- render ----------
+  function render() {
+    live.forEach(function (f) { try { f(); } catch (e) {} });
+    live = [];
+    app.textContent = "";
+    var old = document.querySelector(".preview"); if (old) old.remove();
+    if (!V) return;
+    document.getElementById("skip").href = V.war || "index.html?war=1";
+    var ending = FORCED || (V.outcome === "lose" ? "lose" : "win");
+    if (FORCED) document.body.appendChild(el("div", "preview", "ตัวอย่าง"));
+    var scenes = ((V.scenes || {})[ending] || []).filter(function (s) { return s && s.id; });
+    var thanks = null, firstAfterHero = true;
+    for (var i = 0; i < scenes.length; i++) {
+      var s = scenes[i], start = app.childElementCount;
+      if (s.id === "hero") heroScene(s, ending);
+      else if (s.id === "plan") planScene(s);
+      else if (s.id === "thanks") thanks = thanksScene(s);
+      else if (RACE_IDS[s.id]) {
+        var run = [s];
+        while (i + 1 < scenes.length && RACE_IDS[scenes[i + 1].id]) run.push(scenes[++i]);
+        raceScene(run, ending);
+      } else soloScene(s, ending);
+      if (s.id !== "hero" && firstAfterHero && app.children[start]) { app.children[start].id = "s2"; firstAfterHero = false; }
+    }
+    backButton(thanks);
+  }
+
+  var stamp = V ? JSON.stringify(V) : "";
+  render();
+  try {
+    fetch("v-c2120a14ff9b.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.scenes) return;
+        var s2 = JSON.stringify(d);
+        if (s2 === stamp) return;
+        V = d; stamp = s2; render();
+      })
+      .catch(function () {});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
