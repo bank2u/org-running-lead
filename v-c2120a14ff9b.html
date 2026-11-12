@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ขอบคุณทุกคน</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#4a2585">
+<meta name="theme-color" content="#120a26">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23075a55%22/%3E%3Cpath d=%22M18 14h28l-4 36H22z%22 fill=%22%23fff%22/%3E%3Cpath d=%22M20 30h24l-2.3 20H22.3z%22 fill=%22%238edfe9%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -283,6 +283,86 @@ html.anim .cheers.in .gl.r{transform:rotate(-12deg)}
 html.anim .cheers .spark{opacity:0;transition:opacity .4s .7s}
 html.anim .cheers.in .spark{opacity:1}
 
+/* ---------- one game world (user, 2026-11-12): the whole page is the 8-bit game, not only the race ----------
+   Dark night ground, purple title/ending screens (company CI), white-framed message windows with notched pixel corners,
+   numbers in the pixel face, Thai in Anuphan, pixel mascots, square confetti, stair-stepped edges. */
+:root{--night:#120a26;--frame:#f2ecff;
+  --notch:polygon(0 6px,6px 6px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 6px) calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 6px),0 calc(100% - 6px))}
+html{scrollbar-color:var(--stage) var(--night)}
+body{background:var(--night);color:#fff}
+::selection{background:var(--px-us);color:var(--night)}
+:focus-visible{outline-color:var(--px-us);border-radius:0}
+.big.num,.names .num,.bar .lab .num{font-family:"Press Start 2P",var(--num);font-weight:400;font-stretch:normal;letter-spacing:0}
+.skip,.back,.stamp{border-radius:0;clip-path:var(--notch);box-shadow:none}
+.skip{background:var(--frame);color:var(--night)}
+.preview{border-radius:0;clip-path:var(--notch);box-shadow:none}
+/* title screen */
+.hero::before{inset:0;opacity:1;background:
+  radial-gradient(circle,#fff 0 1.5px,transparent 2px) 0 0/97px 89px,
+  radial-gradient(circle,rgba(255,214,106,.8) 0 1.5px,transparent 2px) 41px 33px/131px 113px}
+.hero .big{font-size:clamp(2.2rem,10.4vw,4.6rem);line-height:1.2;margin-top:14px;color:var(--px-us)}
+.hero.calm{background:var(--stage);color:#fff}
+.hero.calm::before{opacity:.6;background:
+  radial-gradient(circle,#fff 0 1.5px,transparent 2px) 0 0/97px 89px,
+  radial-gradient(circle,rgba(255,214,106,.8) 0 1.5px,transparent 2px) 41px 33px/131px 113px}
+.hero.calm .mast,.hero.calm .unit,.hero.calm .cue{color:var(--on-deep)}
+.hero.calm h1{color:#fff}
+.hero.calm .big{color:#fff}
+.buddy img{width:100%;height:auto;display:block;image-rendering:pixelated}
+.hero.calm .buddy img{flex:1;min-width:0}
+html.anim .buddy img.j{animation:jump .48s steps(2,jump-none) infinite alternate}
+html.anim .buddy img.j+img.j{animation-delay:-.24s}
+.stamp{background:var(--px-us);color:var(--night)}
+.wave{height:24px}
+.hero .wave path{fill:var(--night)}
+/* plan */
+.ki{color:var(--px-us)}
+.txt{color:var(--px-dim)}
+.plan .txt{color:#fff}
+.bar .trk{border-radius:0;background:rgba(255,255,255,.07)}
+.bar .fill{border-radius:0;-webkit-mask:repeating-linear-gradient(90deg,#000 0 12px,transparent 12px 15px);mask:repeating-linear-gradient(90deg,#000 0 12px,transparent 12px 15px)}
+html.anim .bars .fill{transition-timing-function:steps(14,end)}
+.bar .lab .num{font-size:13px}
+.bar.k-plan .fill{background:#6f6390;box-shadow:none}
+.bar.k-plan .lab b,.bar.k-plan .lab .num{color:var(--px-dim)}
+.bar.k-us .fill{background:var(--px-us);box-shadow:none}
+.bar.k-us .lab b,.bar.k-us .lab .num{color:var(--px-us)}
+.bar.k-rival .fill{background:var(--px-rv)}
+.bar.k-rival .lab b,.bar.k-rival .lab .num{color:var(--px-rv)}
+/* race: the screen and the message windows share one frame */
+.legend .us{color:var(--px-us)} .legend .us i{background:var(--px-us);box-shadow:none}
+.legend .rival{color:var(--px-rv)} .legend .rival i{background:var(--px-rv)}
+.chart,.talk,.card{border:4px solid var(--frame);border-radius:0;clip-path:var(--notch);box-shadow:none}
+.chart::after{border-radius:0}
+.talk,.card{background:var(--screen);color:#fff}
+.talk .card{border:0;clip-path:none;background:none}
+.card .big{color:var(--px-us);font-size:clamp(1.9rem,9.4vw,3rem);line-height:1.25}
+.talk .card .big{font-size:clamp(1.7rem,8.4vw,2.4rem)}
+.card.lose-end .big{color:#fff}
+.dots i{background:#fff;opacity:.22}
+.dots i.on{opacity:1;background:var(--px-us)}
+.hint{color:#fff}
+.more{background:#fff}
+.stat{border-top-color:rgba(255,255,255,.22)}
+.stat .sl,.stat i{color:var(--px-dim)}
+.stat .a b{color:var(--px-dim)}
+.stat .z b{color:var(--px-us)}
+.stat .ar{color:var(--px-us)}
+.stat .dl{background:var(--px-us);color:var(--night);border-radius:0;clip-path:polygon(0 3px,3px 3px,3px 0,calc(100% - 3px) 0,calc(100% - 3px) 3px,100% 3px,100% calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,3px calc(100% - 3px),0 calc(100% - 3px))}
+.nights .b{border-radius:0}
+.nights .b.pos{background:var(--px-us);box-shadow:none}
+.nights .b.top{background:#fff}
+.nights .b.neg{background:var(--px-rv)}
+.nights .val{color:#fff}
+.nights .zero{background:#fff}
+.nlab span{color:var(--px-dim)}
+/* ending: the credits roll */
+.thanks .wave path{fill:var(--night)}
+.cheers image{image-rendering:pixelated}
+.names .num{font-size:clamp(1.4rem,7.4vw,2.6rem);line-height:1.5;color:#fff}
+.names li:nth-child(odd) .num{color:var(--px-us)}
+.back{background:var(--px-us);color:var(--night)}
+
 /* ---------- desktop ---------- */
 @media (min-width:960px){
   body{font-size:18px}
@@ -459,7 +539,7 @@ html.anim .cheers.in .spark{opacity:1}
   function piece(i, x, y, a, sp) {
     return { x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
       w: 6 + Math.random() * 6, h: 4 + Math.random() * 7, r: Math.random() * 6.3, vr: (Math.random() - .5) * .3,
-      c: COLS[i % COLS.length], round: Math.random() < .3, sw: Math.random() * 6.3 };
+      c: COLS[i % COLS.length], round: false, sw: Math.random() * 6.3 };
   }
   function fly(k, P, LIFE, delay) {
     var g = k.g, start = null, last = null, stop = false;
@@ -553,9 +633,19 @@ html.anim .cheers.in .spark{opacity:1}
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText);
   }
 
+  // a pixel sprite as an image URL (drawn 8x with hard edges, so no browser smoothing can blur it)
+  function spriteURL(svgText, cb) {
+    pixelate(svgText, 32, 36, function (d) {
+      var sm = document.createElement("canvas"); sm.width = 32; sm.height = 36; sm.getContext("2d").putImageData(d, 0, 0);
+      var bg = document.createElement("canvas"); bg.width = 256; bg.height = 288;
+      var g = bg.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(sm, 0, 0, 256, 288);
+      cb(bg.toDataURL("image/png"));
+    });
+  }
+
   function waveSVG() {
     return '<svg class="wave" viewBox="0 0 1440 34" preserveAspectRatio="none" aria-hidden="true">' +
-      '<path d="M0 22C120 8 240 8 360 18S600 32 720 22 960 6 1080 14 1320 30 1440 18V34H0Z"/></svg>';
+      '<path d="M0 22H160V14H320V6H480V14H640V22H800V14H960V6H1120V14H1280V22H1440V34H0Z"/></svg>';
   }
 
   // ---------- scenes ----------
@@ -566,6 +656,16 @@ html.anim .cheers.in .spark{opacity:1}
     if (has(s.kicker)) sec.appendChild(el("p", "mast", s.kicker));
     var buddy = el("div", "buddy");
     buddy.innerHTML = win ? glassSVG("cheer") : glassSVG("idle") + bagSVG("idle");
+    // pixel versions replace the vector mascots once drawn
+    var srcs = win ? [poseSVG(glassSVG("run"), -40)] : [poseSVG(glassSVG("run"), 14), poseSVG(bagSVG("run"), 14)], got = [];
+    srcs.forEach(function (sv, i) {
+      spriteURL(sv, function (u) {
+        got[i] = u;
+        if (got.filter(Boolean).length !== srcs.length) return;
+        buddy.textContent = "";
+        got.forEach(function (url) { var im = new Image(); im.src = url; im.alt = ""; im.className = "j"; buddy.appendChild(im); });
+      });
+    });
     var stage = el("div", "stage");
     if (has(s.title)) stage.appendChild(chunks(el("h1"), s.title));
     var big = null;
@@ -1032,6 +1132,14 @@ html.anim .cheers.in .spark{opacity:1}
       '<g class="gl r" style="transform-origin:104px 92px;transform-box:view-box"><g transform="translate(144 12) scale(-1 1)"><svg width="76" height="84" viewBox="0 0 64 72">' + glassSVG("idle").replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") + '</svg></g></g>' +
       '<g class="spark" stroke="#f6c443" stroke-width="3" stroke-linecap="round"><path d="M75 4v9M62 9l5 7M88 9l-5 7"/></g>';
     sec.appendChild(ch);
+    spriteURL(poseSVG(glassSVG("run"), 30), function (u) {
+      [].forEach.call(ch.querySelectorAll(".gl svg"), function (sv) {
+        sv.innerHTML = "";
+        var im = document.createElementNS(NS, "image");
+        im.setAttribute("href", u); im.setAttribute("width", "64"); im.setAttribute("height", "72");
+        sv.appendChild(im);
+      });
+    });
     if (has(s.title)) {
       var h = chunks(el("h2", "rv"), s.title); sec.appendChild(h); watch(h);
       // a thank-you that misses one line by a little is set slightly smaller rather than leave one word alone
