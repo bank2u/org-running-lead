@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23075a55%22/%3E%3Cpath d=%22M18 14h28l-4 36H22z%22 fill=%22%23fff%22/%3E%3Cpath d=%22M20 30h24l-2.3 20H22.3z%22 fill=%22%238edfe9%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400..700&family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400..700&family=Archivo:wdth,wght@62..125,400..900&family=Press+Start+2P&display=swap">
 <style>
 /* Victory page: its own world, not the War Room. Beer amber (yellow leaning orange) = our team, red = the other team
    (after its logo; user 2026-11-12). Deep purple fields open and close the story (hero, thanks) as the nod to the
@@ -22,6 +22,7 @@
   --water:#f8a91f; --on-deep:#dccdf5;
   --rv:#e5383b; --rv-ink:#a3161a; --rv-soft:#ffd9d6; --coin:#f6c443;
   --pop:#ff7eb6; --lime:#ffd76a;
+  --screen:#1a1033; --px-us:#ffb629; --px-rv:#ff6b6e; --px-dim:#b9a9dc;
   --th:"Anuphan",system-ui,sans-serif; --num:"Archivo","Anuphan",system-ui,sans-serif;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
   --safe-l:env(safe-area-inset-left,0px); --safe-r:env(safe-area-inset-right,0px);
@@ -37,6 +38,7 @@ h1,h2,h3,p{margin:0}
 h1,h2{overflow-wrap:anywhere}
 .ck{display:inline-block;max-width:100%}
 .num{font-family:var(--num);font-stretch:125%;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.px{font-family:"Press Start 2P",var(--num);font-weight:400;font-stretch:normal;letter-spacing:0;font-variant-numeric:normal}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* fixed chrome */
@@ -113,39 +115,55 @@ html.anim .bars.in .bar:nth-child(2) .fill{transition-delay:.25s}
 html.anim .bars.in .bar:nth-child(3) .fill{transition-delay:.4s}
 .plan .txt{margin-top:28px;font-size:18px;color:var(--ink)}
 
-/* ---------- race ---------- */
+/* ---------- race: an 8-bit game screen (user idea, 2026-11-12) ----------
+   The story page stays as it is; the race plays on a dark game screen set into it. The other team walks the level
+   line, our glass rides the head of the gap line: below it while we trail, above once we lead. Pixel sprites are the
+   same two mascots redrawn on a coarse grid; numbers on the screen use the pixel face, Thai stays in Anuphan. */
 .race{position:relative}
-.fig{position:sticky;top:0;height:100svh;z-index:1;padding:calc(var(--safe-t) + 14px) calc(var(--safe-r) + 16px) 0 calc(var(--safe-l) + 16px);pointer-events:none}
+.fig{position:sticky;top:0;height:100svh;z-index:1;padding:calc(var(--safe-t) + 12px) calc(var(--safe-r) + 12px) 0 calc(var(--safe-l) + 12px);pointer-events:none;overflow:hidden}
 .fig-in{max-width:980px;margin:0 auto}
-.readout{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding-right:96px}
-.readout .d{font:500 13px/1.3 var(--th);color:var(--muted)}
-.readout .v{font:700 22px/1.25 var(--th);display:flex;gap:8px;align-items:baseline}
-.readout .v .num{font-size:22px}
-.readout.up .v{color:var(--us-ink)} .readout.down .v{color:var(--rv-ink)}
-.track{position:relative;margin-top:8px;border-radius:16px;background:#e6e0f0;overflow:hidden}
-.lane{position:relative;height:82px}
-.lane+.lane{border-top:2px dashed rgba(255,255,255,.95)}
-.finish{position:absolute;top:0;bottom:0;right:14px;width:10px;
-  background:conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/10px 10px;opacity:.75}
-.runner{position:absolute;left:0;bottom:5px;display:flex;flex-direction:column;align-items:center;will-change:transform}
-.runner svg{width:54px;height:60px;display:block;overflow:visible}
-.tag{margin-top:-3px;padding:1px 8px;border-radius:999px;background:#fff;font:600 12px/1.45 var(--th);white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
-.runner.us .tag{color:var(--us-ink)} .runner.rival .tag{color:var(--rv-ink)}
-.chart{position:relative;margin-top:10px;height:clamp(150px,calc(100svh - 590px),300px)}
-.chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.chart text{font:500 11px var(--th);fill:var(--muted)}
-.chart .side-up{fill:var(--us-ink);font-weight:700;font-size:12px}
-.chart .side-dn{fill:var(--rv-ink);font-weight:700;font-size:12px}
-.callout{position:absolute;left:0;top:0;padding:5px 10px;border-radius:10px;background:var(--paper);box-shadow:0 6px 18px -8px rgba(50,22,95,.45);
-  white-space:nowrap;opacity:0;transition:opacity .3s;will-change:transform}
-.callout.on{opacity:1}
-.callout .d{display:block;font:500 11px/1.3 var(--th);color:var(--muted)}
-.callout .v{display:block;font:700 15px/1.3 var(--th)}
-.callout .v .num{font-size:15px}
-.callout.up .v{color:var(--us-ink)} .callout.down .v{color:var(--rv-ink)}
+.legend{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding-right:96px;font:600 13px/1.5 var(--th)}
+.legend span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.legend i{width:10px;height:10px;flex:none}
+.legend .us{color:var(--us-ink)} .legend .us i{background:var(--us);box-shadow:inset 0 0 0 2px var(--us-deep)}
+.legend .rival{color:var(--rv-ink)} .legend .rival i{background:var(--rv)}
+/* phones: the screen takes everything between the top row and the resting story card (--card = tallest card, set by JS) */
+.chart{position:relative;margin-top:8px;border-radius:12px;background:var(--screen);border:4px solid var(--ink);
+  box-shadow:0 14px 30px -18px rgba(50,22,95,.7);
+  height:clamp(240px,calc(100svh - var(--safe-t) - var(--safe-b) - 106px - var(--card,210px)),580px)}
+.chart::after{content:"";position:absolute;inset:0;border-radius:8px;pointer-events:none;z-index:4;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+.chart svg.plot{position:absolute;inset:0;width:100%;height:100%;overflow:visible;shape-rendering:crispEdges}
+.chart text{font:500 12px var(--th);fill:var(--px-dim)}
+.chart .side-up{fill:var(--px-us);font-weight:700;font-size:13px}
+.chart .side-dn{fill:var(--px-rv);font-weight:700;font-size:13px}
+.hud{position:absolute;z-index:5;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff}
+.hud .d{font:600 13px/1.4 var(--th);color:var(--px-dim);white-space:nowrap}
+.hud .v{font:700 16px/1.4 var(--th);display:flex;gap:8px;align-items:center;white-space:nowrap}
+.hud .v .px{font-size:15px;line-height:1}
+.hud.up .v{color:var(--px-us)} .hud.down .v{color:var(--px-rv)}
+.runner{position:absolute;left:0;top:0;width:64px;height:72px;margin:-67px 0 0 -32px;will-change:transform;z-index:2}
+.runner.us{z-index:3}
+.runner svg,.runner canvas{width:100%;height:100%;display:block;overflow:visible;transform-origin:50% 60%}
+.runner canvas{image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated}
+.runner .hop{animation:flip .9s steps(9,end)}
+@keyframes flip{0%{transform:translateY(0) rotate(0)}45%{transform:translateY(-51px) rotate(180deg)}100%{transform:translateY(0) rotate(360deg)}}
+html.anim .runner .party{animation:jump .48s steps(2,jump-none) infinite alternate}
+@keyframes jump{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+html.anim .chart:not(.moving) .runner canvas:not(.party):not(.hop){animation:stand 1s steps(2,jump-none) infinite alternate}
+html.anim .chart:not(.moving) .runner.rival canvas{animation-delay:-.5s}
+@keyframes stand{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+.dust{position:absolute;left:4px;bottom:6px;width:1px;height:1px}
+.dust i{position:absolute;width:6px;height:6px;background:#fff;opacity:0}
+.moving .dust i{animation:puff .48s steps(4,end) infinite}
+.moving .dust i:nth-child(2){animation-delay:.16s}
+.moving .dust i:nth-child(3){animation-delay:.32s}
+@keyframes puff{0%{transform:translate(6px,0);opacity:.8}100%{transform:translate(-24px,-12px);opacity:0}}
+html.anim .chart:not(.moving) .run .bob{animation:idle 2.6s ease-in-out infinite}
+html.anim .chart:not(.moving) .run.bag .bob{animation-delay:-1.3s}
 .pulse{transform-box:fill-box;transform-origin:center}
-html.anim .peak .pulse{animation:pulse 1.4s var(--ease) infinite}
-@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+html.anim .peak .pulse{animation:pulse 1.2s steps(5,end) infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(2.8);opacity:0}}
 
 .steps{position:relative;z-index:2;margin-top:-100svh}
 .step{min-height:100svh;display:flex;align-items:flex-end;padding:0 calc(var(--safe-r) + 14px) calc(var(--safe-b) + 22px) calc(var(--safe-l) + 14px)}
@@ -156,7 +174,7 @@ html.anim .peak .pulse{animation:pulse 1.4s var(--ease) infinite}
 .card .big{font-size:clamp(2.6rem,13vw,4.2rem);line-height:1.05;color:var(--us-ink);margin:2px 0 4px}
 .card.lose-end .big{color:var(--ink)}
 /* nights mini chart */
-.nights{position:relative;height:96px;margin-top:30px;display:flex;gap:4px}
+.nights{position:relative;height:60px;margin-top:22px;display:flex;gap:4px}
 .nights .c{position:relative;flex:1;height:100%}
 .nights .b{position:absolute;left:0;right:0;border-radius:4px;transform-origin:50% 100%}
 .nights .b.neg{transform-origin:50% 0;background:var(--rv)}
@@ -215,8 +233,6 @@ html.anim .names.in li{opacity:1;transform:none}
 @keyframes slosh{from{transform:translateX(-6px) rotate(-5deg)}to{transform:translateX(0) rotate(5deg)}}
 @keyframes coin{0%{transform:translate(0,0);opacity:0}12%{opacity:1}80%{opacity:1}100%{transform:translate(-14px,15px);opacity:0}}
 .coin{opacity:0}
-.hop{animation:hop .6s var(--ease)}
-@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-14px)}100%{transform:translateY(0)}}
 html.anim .cheer .bob{animation:cheer 1.1s var(--ease) infinite}
 .cheer .ab{transform:rotate(95deg)} .cheer .aa{transform:rotate(-12deg)}
 html.anim .cheer .aa{animation:waveR .55s ease-in-out infinite alternate}
@@ -253,20 +269,19 @@ html.anim .cheers.in .spark{opacity:1}
   .fig-in{width:100%}
   .steps{grid-column:1;grid-row:1;margin-top:0}
   .step{align-items:center;padding:0}
-  .readout{padding-right:0}
-  .readout .v,.readout .v .num{font-size:28px}
-  .lane{height:104px}
-  .runner svg{width:66px;height:74px}
-  .tag{font-size:13px}
-  .chart{height:min(360px,42vh)}
+  .legend{padding-right:0;min-height:0;flex-direction:row;justify-content:flex-start;gap:18px;font-size:14px}
+  .runner{width:96px;height:108px;margin:-100px 0 0 -48px}
+  .hud{left:14px;right:14px;top:12px}
+  .hud .d{font-size:15px}
+  .hud .v{font-size:19px}
+  .hud .v .px{font-size:18px}
+  .chart{height:min(580px,64vh)}
   .card{padding:26px 28px 28px}
   .names{grid-template-columns:repeat(3,1fr);row-gap:44px}
   .cheers{width:190px;height:122px}
 }
 @media (max-height:700px) and (max-width:959px){
-  .lane{height:70px}
-  .runner svg{width:42px;height:47px}
-  .chart{height:140px}
+  .runner{width:48px;height:54px;margin:-50px 0 0 -24px}
   .card{padding:16px 16px 18px}
   .card .txt{font-size:15px}
 }
@@ -395,44 +410,112 @@ html.anim .cheers.in .spark{opacity:1}
       '</g></svg>';
   }
 
-  // ---------- confetti (win ending only, stops by itself) ----------
-  function confetti(host) {
-    if (RM || confettiDone) return;
-    confettiDone = true;
+  // ---------- confetti (stops by itself) ----------
+  var COLS = ["#ffffff", "#f6c443", "#f8a91f", "#ff7eb6", "#ffd76a", "#e4d9f7"];
+  function canvasOn(host) {
     var c = el("canvas", "confetti");
     c.setAttribute("aria-hidden", "true");
     host.appendChild(c);
     var W = host.clientWidth, H = host.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     c.width = W * dpr; c.height = H * dpr;
     var g = c.getContext("2d"); g.scale(dpr, dpr);
-    var cols = ["#ffffff", "#f6c443", "#f8a91f", "#ff7eb6", "#ffd76a", "#e4d9f7"];
-    var P = [], n = W < 600 ? 110 : 170;
-    for (var i = 0; i < n; i++) {
-      var left = i % 2 === 0;
-      var a = (left ? -Math.PI / 3.1 : -Math.PI + Math.PI / 3.1) + (Math.random() - .5) * .9;
-      var sp = 7 + Math.random() * 9 * (H / 800 + .4);
-      P.push({ x: left ? -10 : W + 10, y: H * (.62 + Math.random() * .2), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        w: 6 + Math.random() * 6, h: 4 + Math.random() * 7, r: Math.random() * 6.3, vr: (Math.random() - .5) * .3,
-        c: cols[i % cols.length], round: Math.random() < .3, sw: Math.random() * 6.3 });
-    }
-    var start = null, last = null, LIFE = 4200;
+    return { c: c, g: g, W: W, H: H };
+  }
+  function piece(i, x, y, a, sp) {
+    return { x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      w: 6 + Math.random() * 6, h: 4 + Math.random() * 7, r: Math.random() * 6.3, vr: (Math.random() - .5) * .3,
+      c: COLS[i % COLS.length], round: Math.random() < .3, sw: Math.random() * 6.3 };
+  }
+  function fly(k, P, LIFE, delay) {
+    var g = k.g, start = null, last = null, stop = false;
+    live.push(function () { stop = true; k.c.remove(); });
     function f(ts) {
+      if (stop) return;
       if (start == null) { start = last = ts; }
       var dt = Math.min(2.5, (ts - last) / 16.7), age = ts - start; last = ts;
-      g.clearRect(0, 0, W, H);
+      g.clearRect(0, 0, k.W, k.H);
       g.globalAlpha = age > LIFE - 900 ? Math.max(0, (LIFE - age) / 900) : 1;
       for (var i = 0; i < P.length; i++) {
         var p = P[i];
         p.vy += .19 * dt; p.vx *= Math.pow(.985, dt); p.vy *= Math.pow(.985, dt);
         p.x += (p.vx + Math.sin(p.sw += .08 * dt) * .6) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+        if (p.px) { g.fillStyle = p.c; g.fillRect(Math.round(p.x / 3) * 3, Math.round(p.y / 3) * 3, p.w, p.w); continue; }
         g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c;
         if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2.4, 0, 6.283); g.fill(); }
         else { g.scale(1, Math.cos(p.sw)); g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
         g.restore();
       }
-      if (age < LIFE) requestAnimationFrame(f); else c.remove();
+      if (age < LIFE) requestAnimationFrame(f); else k.c.remove();
     }
-    setTimeout(function () { requestAnimationFrame(f); }, 350);
+    setTimeout(function () { requestAnimationFrame(f); }, delay || 0);
+  }
+  // hero of the win ending: two cannons from the sides, once
+  function confetti(host) {
+    if (RM || confettiDone) return;
+    confettiDone = true;
+    var k = canvasOn(host), P = [], n = k.W < 600 ? 110 : 170;
+    for (var i = 0; i < n; i++) {
+      var left = i % 2 === 0;
+      var a = (left ? -Math.PI / 3.1 : -Math.PI + Math.PI / 3.1) + (Math.random() - .5) * .9;
+      P.push(piece(i, left ? -10 : k.W + 10, k.H * (.62 + Math.random() * .2), a, 7 + Math.random() * 9 * (k.H / 800 + .4)));
+    }
+    fly(k, P, 4200, 350);
+  }
+  // a burst of square pieces from one point of the game screen (the overtake, the finish)
+  function pop(host, x, y) {
+    if (RM) return;
+    var k = canvasOn(host), P = [];
+    for (var i = 0; i < 64; i++) {
+      var pc = piece(i, x, y, -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.5, 4 + Math.random() * 9);
+      pc.px = true; pc.w = i % 3 ? 6 : 9;
+      P.push(pc);
+    }
+    fly(k, P, 2200, 0);
+  }
+  // ---------- pixel sprites: the same mascots, redrawn on a coarse grid for the game screen ----------
+  var PAL = [[34, 22, 54], [255, 255, 255], [248, 169, 31], [229, 56, 59], [163, 22, 26], [246, 196, 67]];
+  // a standalone copy of a mascot with its limbs swung by `a` degrees (limbs in white: the screen is dark)
+  function poseSVG(src, a) {
+    return src.replace(/<g class="coin[^>]*>.*?<\/g>/g, "").replace(/<text[^>]*>.*?<\/text>/g, "")
+      .replace(/class="(leg|arm) [la]([ab])" style="transform-origin:(\d+)px (\d+)px"/g, function (m, kind, side, ox, oy) {
+        var d = (side === "a" ? a : -a) * (kind === "arm" ? .8 : 1);
+        return 'data-limb="1" transform="rotate(' + d + " " + ox + " " + oy + ')"';
+      })
+      .replace(/data-limb="1"([^>]*)><path class="m-ink"([^>]*?)stroke-width="[\d.]+"/g, 'data-limb="1"$1><path stroke="#fff" stroke-linecap="round"$2stroke-width="4.2"')
+      .replace(/class="m-ink"/g, 'stroke="#221636" stroke-linecap="round" stroke-linejoin="round"')
+      .replace(/^<svg[^>]*>/, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72" width="64" height="72">');
+  }
+  // draw it large, then keep one palette colour per cell
+  function pixelate(svgText, cols, rows, cb) {
+    var img = new Image(), K = 6;
+    img.onload = function () {
+      try {
+        var big = document.createElement("canvas"); big.width = cols * K; big.height = rows * K;
+        var g = big.getContext("2d"); g.drawImage(img, 0, 0, big.width, big.height);
+        var src = g.getImageData(0, 0, big.width, big.height).data, out = g.createImageData(cols, rows), c;
+        for (var cy = 0; cy < rows; cy++) for (var cx = 0; cx < cols; cx++) {
+          var cnt = [0, 0, 0, 0, 0, 0], filled = 0;
+          for (var y = 0; y < K; y++) for (var x = 0; x < K; x++) {
+            var o = ((cy * K + y) * big.width + cx * K + x) * 4;
+            if (src[o + 3] < 128) continue;
+            filled++;
+            var best = 0, bd = 1e9;
+            for (c = 0; c < PAL.length; c++) {
+              var dr = src[o] - PAL[c][0], dg = src[o + 1] - PAL[c][1], db = src[o + 2] - PAL[c][2], d = dr * dr + dg * dg + db * db;
+              if (d < bd) { bd = d; best = c; }
+            }
+            cnt[best]++;
+          }
+          if (filled < K * K * .42) continue;
+          var top = 0; for (c = 1; c < PAL.length; c++) if (cnt[c] > cnt[top]) top = c;
+          if (cnt[0] >= K * K * .3) top = 0;
+          var q = (cy * cols + cx) * 4;
+          out.data[q] = PAL[top][0]; out.data[q + 1] = PAL[top][1]; out.data[q + 2] = PAL[top][2]; out.data[q + 3] = 255;
+        }
+        cb(out);
+      } catch (e) {}
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText);
   }
 
   function waveSVG() {
@@ -593,6 +676,7 @@ html.anim .cheers.in .spark{opacity:1}
     var t1 = isFinite(R.t1) ? R.t1 : pts[pts.length - 1][0];
     var xmin = Math.min(isFinite(R.t0) ? R.t0 : pts[0][0], days.length ? days[0].t : Infinity, pts[0][0]);
     t1 = Math.max(t1, pts[pts.length - 1][0]);
+    var tA = pts[0][0], tZ = pts[pts.length - 1][0];
     var lo = 0, hi = 0;
     pts.forEach(function (p) { if (p[1] < lo) lo = p[1]; if (p[1] > hi) hi = p[1]; });
     var maxAbs = Math.max(-lo, hi) || 1;
@@ -600,23 +684,51 @@ html.anim .cheers.in .spark{opacity:1}
     var sec = el("section", "race");
     var fig = el("div", "fig"), inner = el("div", "fig-in");
     fig.setAttribute("aria-hidden", "true");
-    var readout = el("div", "readout");
+    var readout = el("div", "hud");
     var rd = el("span", "d"), rv = el("span", "v");
     readout.appendChild(rd); readout.appendChild(rv);
-    var track = el("div", "track");
-    var laneR = el("div", "lane"), laneU = el("div", "lane");
-    var fin = el("div", "finish");
-    var runR = el("div", "runner rival"), runU = el("div", "runner us");
-    runR.innerHTML = bagSVG("run"); runU.innerHTML = glassSVG("run");
-    runR.appendChild(el("span", "tag", (V.rival && V.rival.name) || ""));
-    runU.appendChild(el("span", "tag", (V.us && V.us.name) || ""));
-    laneR.appendChild(runR); laneU.appendChild(runU);
-    track.appendChild(laneR); track.appendChild(laneU); track.appendChild(fin);
+    var legend = el("div", "legend");
+    [["us", V.us && V.us.name], ["rival", V.rival && V.rival.name]].forEach(function (a) {
+      if (!has(a[1])) return;
+      var sp = el("span", a[0]); sp.appendChild(el("i")); sp.appendChild(document.createTextNode(a[1])); legend.appendChild(sp);
+    });
     var chart = el("div", "chart");
-    var svg = sv("svg", { "aria-hidden": "true" });
-    var call = el("div", "callout");
-    chart.appendChild(svg); chart.appendChild(call);
-    inner.appendChild(readout); inner.appendChild(track); inner.appendChild(chart);
+    var svg = sv("svg", { "aria-hidden": "true", "class": "plot" });
+    var DUST = '<span class="dust"><i></i><i></i><i></i></span>';
+    var runR = el("div", "runner rival"), runU = el("div", "runner us");
+    runR.innerHTML = DUST + bagSVG("run"); runU.innerHTML = DUST + glassSVG("run");
+    var glass = function () { return runU.lastElementChild; };
+    chart.appendChild(svg); chart.appendChild(readout); chart.appendChild(runR); chart.appendChild(runU);
+    inner.appendChild(legend); inner.appendChild(chart);
+    // pixel sprites replace the vector mascots once both frames of the walk are drawn (the vector ones stay if that fails)
+    var SC = 32, SR = 36, fno = 0;
+    [[runU, glassSVG("run")], [runR, bagSVG("run")]].forEach(function (a) {
+      var run = a[0], fr = [];
+      [26, -26].forEach(function (deg, i) {
+        pixelate(poseSVG(a[1], deg), SC, SR, function (d) {
+          fr[i] = d;
+          if (!fr[0] || !fr[1] || run._cv) return;
+          var cv = document.createElement("canvas"); cv.width = SC; cv.height = SR;
+          cv.getContext("2d").putImageData(fr[0], 0, 0);
+          run.replaceChild(cv, run.lastElementChild);
+          run._cv = cv; run._fr = fr; run._f = 0;
+          last = {}; update(true);
+        });
+      });
+    });
+    // two-frame walk while the chart travels (and while the glass cheers at the end)
+    if (!RM) {
+      var ft = setInterval(function () {
+        fno ^= 1;
+        var mv = chart.classList.contains("moving");
+        [runU, runR].forEach(function (r) {
+          if (!r._cv) return;
+          var want = mv || (r === runU && last.party) ? fno : 0;
+          if (want !== r._f) { r._f = want; r._cv.getContext("2d").putImageData(r._fr[want], 0, 0); }
+        });
+      }, 120);
+      live.push(function () { clearInterval(ft); });
+    }
     fig.appendChild(inner);
 
     var stepsBox = el("div", "steps");
@@ -634,80 +746,94 @@ html.anim .cheers.in .spark{opacity:1}
     app.appendChild(sec);
 
     // --- geometry (rebuilt on resize) ---
-    var G = {};
+    var G = {}, desk = false, A = [];
     function layout() {
+      desk = window.innerWidth >= 960;
+      if (desk) fig.style.removeProperty("--card");
+      else {
+        // room for the story card under the screen; one much taller card (the nights chart) may overlap the date axis instead
+        var hs = steps.map(function (st) { return st.card.offsetHeight; }).sort(function (a, b) { return b - a; });
+        var mh = hs.length > 1 && hs[0] - hs[1] > 30 ? hs[1] + 12 : hs[0];
+        if (mh) fig.style.setProperty("--card", mh + "px");
+      }
       var W = chart.clientWidth, H = chart.clientHeight;
       if (!W || !H) return;
       if (G.X && W === G.W && H === G.H) { measure(); last = {}; update(true); return; }   // only the browser bar moved
       while (svg.firstChild) svg.removeChild(svg.firstChild);
       svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      var padL = 2, gutter = 40, padT = 8, padB = 22;
+      var rw = runU.offsetWidth || 60, rh = runU.offsetHeight || 68;
+      // head room above the highest point for a mascot standing on it, under the score line
+      var padL = 10, gutter = 44, padT = Math.round(rh * .92) + 38, padB = 28;
       var x0 = padL, x1 = W - gutter;
-      var ylo = lo * 1.12, yhi = hi * 1.15;
+      var ylo = lo * 1.08, yhi = hi;
       if (yhi <= 0) yhi = maxAbs * .25; if (ylo >= 0) ylo = -maxAbs * .25;
       var X = function (t) { return x0 + (t - xmin) / ((t1 - xmin) || 1) * (x1 - x0); };
       var Y = function (v) { return padT + (yhi - v) / (yhi - ylo) * (H - padT - padB); };
-      G = { X: X, Y: Y, W: W, H: H, x1: x1 };
       var zy = Y(0);
+      G = { X: X, Y: Y, W: W, H: H, x1: x1, zy: zy, rw: rw, off: Math.min(46, rw * .78) };
       var defs = sv("defs", {}, svg);
       var k = ++uid;
       var cpUp = sv("clipPath", { id: "up" + k }, defs); sv("rect", { x: -4, y: -20, width: W + 8, height: zy + 20 }, cpUp);
       var cpDn = sv("clipPath", { id: "dn" + k }, defs); sv("rect", { x: -4, y: zy, width: W + 8, height: H }, cpDn);
       var cpRv = sv("clipPath", { id: "rv" + k }, defs); G.reveal = sv("rect", { x: -10, y: -20, width: 0, height: H + 40 }, cpRv);
-      // day grid + labels (thinned so labels keep ~48px apart)
-      var dayW = (X(xmin + 1) - X(xmin)) || 1, every = Math.max(1, Math.ceil(48 / dayW));
+      var pat = sv("pattern", { id: "fl" + k, width: 8, height: 8, patternUnits: "userSpaceOnUse" }, defs);
+      sv("rect", { width: 4, height: 4, fill: "#fff" }, pat); sv("rect", { x: 4, y: 4, width: 4, height: 4, fill: "#fff" }, pat);
+      // day grid + labels (thinned so labels keep ~52px apart)
+      var dayW = (X(xmin + 1) - X(xmin)) || 1, every = Math.max(1, Math.ceil(52 / dayW));
       var grid = sv("g", {}, svg);
       days.forEach(function (d, i) {
         var gx = X(d.t);
-        if (gx >= x0 - .5 && gx <= x1) sv("line", { x1: gx, x2: gx, y1: padT, y2: H - padB, stroke: "#221636", "stroke-opacity": .06 }, grid);
+        if (gx >= x0 - .5 && gx <= x1) sv("line", { x1: Math.round(gx) + .5, x2: Math.round(gx) + .5, y1: 34, y2: H - padB, stroke: "#fff", "stroke-opacity": .09 }, grid);
         var lx = X(d.t + .5);
         if (i % every === 0 && lx >= x0 && lx < x1 - 18) {
           var edge = lx < x0 + 20;   // the first day sits on the left edge: anchor it there instead of dropping it
-          var tx = sv("text", { x: edge ? x0 : lx, y: H - 6, "text-anchor": edge ? "start" : "middle" }, grid); tx.textContent = d.label || "";
+          var tx = sv("text", { x: edge ? x0 : lx, y: H - 9, "text-anchor": edge ? "start" : "middle" }, grid); tx.textContent = d.label || "";
         }
       });
       // finish line at the end of the challenge
-      sv("line", { x1: x1, x2: x1, y1: padT, y2: H - padB, stroke: "#221636", "stroke-opacity": .4, "stroke-dasharray": "3 4" }, svg);
-      // area + line, split at zero (above = we lead, teal; below = we trail, amber), revealed left to right
-      var line = "", i;
-      for (i = 0; i < pts.length; i++) line += (i ? "L" : "M") + X(pts[i][0]).toFixed(1) + " " + Y(pts[i][1]).toFixed(1);
-      var area = line + "L" + X(pts[pts.length - 1][0]).toFixed(1) + " " + zy + "L" + X(pts[0][0]).toFixed(1) + " " + zy + "Z";
+      sv("rect", { x: Math.round(x1) - 4, y: 34, width: 8, height: H - padB - 34, fill: "url(#fl" + k + ")", opacity: .75 }, svg);
+      // area + line, split at zero (above = we lead, amber; below = we trail, red), revealed left to right
+      // drawn in 3px stair steps, like terrain on a game screen
+      var Q = 3, snap = function (v) { return Math.round(v / Q) * Q; };
+      zy = G.zy = snap(zy);
+      var line = "", i, px = null, py = null, fx = 0;
+      for (i = 0; i < pts.length; i++) {
+        var sx = snap(X(pts[i][0])), sy = snap(Y(pts[i][1]));
+        if (px == null) { line = "M" + sx + " " + sy; fx = sx; }
+        else if (sx !== px || sy !== py) line += (sx !== px ? "H" + sx : "") + (sy !== py ? "V" + sy : "");
+        px = sx; py = sy;
+      }
+      var area = line + "V" + zy + "H" + fx + "Z";
       var rg = sv("g", { "clip-path": "url(#rv" + k + ")" }, svg);
       var gu = sv("g", { "clip-path": "url(#up" + k + ")" }, rg), gd = sv("g", { "clip-path": "url(#dn" + k + ")" }, rg);
-      sv("path", { d: area, fill: "#f8a91f", "fill-opacity": .34 }, gu);
-      sv("path", { d: line, fill: "none", stroke: "#c47600", "stroke-width": 2.6, "stroke-linejoin": "round" }, gu);
-      sv("path", { d: area, fill: "#e5383b", "fill-opacity": .18 }, gd);
-      sv("path", { d: line, fill: "none", stroke: "#c62828", "stroke-width": 2.6, "stroke-linejoin": "round" }, gd);
-      // zero line = level
-      sv("line", { x1: x0, x2: x1, y1: zy, y2: zy, stroke: "#221636", "stroke-width": 1.6, "stroke-opacity": .7 }, svg);
-      var lab = function (txt, y, cls) { var e = sv("text", { x: x1 + 8, y: y, "class": cls || "" }, svg); e.textContent = txt; };
-      lab("นำ", Math.max(padT + 12, zy - 16), "side-up");
+      sv("path", { d: area, fill: "#f8a91f", "fill-opacity": .5 }, gu);
+      sv("path", { d: line, fill: "none", stroke: "#ffb629", "stroke-width": 3 }, gu);
+      sv("path", { d: area, fill: "#e5383b", "fill-opacity": .38 }, gd);
+      sv("path", { d: line, fill: "none", stroke: "#ff6b6e", "stroke-width": 3 }, gd);
+      // level line = where the other team runs
+      sv("line", { x1: x0, x2: x1, y1: zy, y2: zy, stroke: "#fff", "stroke-width": 2, "stroke-dasharray": "6 4" }, svg);
+      var lab = function (txt, y, cls) { var e = sv("text", { x: x1 + 9, y: y, "class": cls || "" }, svg); e.textContent = txt; };
+      lab("นำ", zy - 18, "side-up");
       lab("เสมอ", zy + 4);
-      lab("ตาม", Math.min(H - padB - 2, zy + 26), "side-dn");
+      lab("ตาม", zy + 28, "side-dn");
       // lead changes: small ticks on the level line
       G.ticks = changes.map(function (c) {
         var tx = X(c.t);
-        return { t: c.t, n: sv("line", { x1: tx, x2: tx, y1: zy - 6, y2: zy + 6, stroke: c.to === "us" ? "#7a4a00" : "#a3161a", "stroke-width": 2.4, "stroke-linecap": "round", opacity: 0 }, svg) };
+        return { t: c.t, n: sv("line", { x1: tx, x2: tx, y1: zy - 7, y2: zy + 7, stroke: c.to === "us" ? "#ffb629" : "#ff6b6e", "stroke-width": 3, opacity: 0 }, svg) };
       });
+      // the gap itself: a dashed drop from the level line to our point
+      G.conn = sv("line", { "stroke-width": 2, "stroke-dasharray": "3 3" }, svg);
       // highlighted mark + head
-      G.pulse = sv("circle", { r: 7, fill: "none", stroke: "#c47600", "stroke-width": 2, "class": "pulse", opacity: 0 }, svg);
-      G.ring = sv("circle", { r: 8.5, fill: "#fff", stroke: "#221636", "stroke-width": 2, opacity: 0 }, svg);
-      G.head = sv("circle", { r: 5.5, fill: "#c47600", stroke: "#fff", "stroke-width": 2.5 }, svg);
-      // runner lane geometry
-      G.TW = track.clientWidth;
-      G.rw = Math.max(runU.offsetWidth, runR.offsetWidth);
-      G.maxSep = Math.min(G.TW * .34, 190);
-      G.cMin = G.maxSep / 2 + G.rw / 2 + 6;
-      G.cMax = Math.max(G.cMin, G.TW - 28 - G.maxSep / 2 - G.rw / 2);
+      G.pulse = sv("rect", { width: 18, height: 18, fill: "none", stroke: "#ffb629", "stroke-width": 3, "class": "pulse", opacity: 0 }, svg);
+      G.ring = sv("rect", { width: 18, height: 18, fill: "none", stroke: "#fff", "stroke-width": 3, opacity: 0 }, svg);
+      G.head = sv("rect", { width: 9, height: 9, fill: "#ffb629" }, svg);
       measure();
       last = {};
       update(true);
     }
 
     // --- scroll anchors ---
-    var desk = false, A = [];
     function measure() {
-      desk = window.innerWidth >= 960;
       var vh = window.innerHeight, sy = window.scrollY;
       A = steps.map(function (st) {
         var r = st.card.getBoundingClientRect();
@@ -724,12 +850,19 @@ html.anim .cheers.in .spark{opacity:1}
       return a;
     }
 
-    var last = {}, sign0 = null;
+    // a short burst of confetti from one point of the chart
+    function popAt(x, y) {
+      var fr = fig.getBoundingClientRect(), cr = chart.getBoundingClientRect();
+      pop(fig, cr.left - fr.left + x, cr.top - fr.top + y);
+    }
+
+    // scroll sets the goal; the drawn time eases after it, so the runners keep a little momentum
+    var last = {}, sign0 = null, cur = null, goal = 0, act = 0, raf = 0;
     function update(force) {
       if (!G.X) return;
       var y = window.scrollY, vh = window.innerHeight, n = steps.length;
       // active scene: the last one whose card has reached the focus band
-      var act = 0;
+      act = 0;
       for (var i = 0; i < n; i++) if (y >= A[i] - vh * .3) act = i;
       // chart time: hold on each scene's mark, travel to the next one between scenes
       var t;
@@ -741,61 +874,10 @@ html.anim .cheers.in .spark{opacity:1}
         var u = (y - A[j]) / ((A[j + 1] - A[j]) || 1);
         t = steps[j].target + (steps[j + 1].target - steps[j].target) * smooth((u - .2) / .6);
       }
-      var k = idxAt(t), p = pts[k];
-      if (force || k !== last.k) {
-        last.k = k;
-        var hx = G.X(p[0]), hy = G.Y(p[1]), up = p[1] > 0, dn = p[1] < 0;
-        G.reveal.setAttribute("width", Math.max(0, hx + 10));
-        G.head.setAttribute("cx", hx); G.head.setAttribute("cy", hy);
-        G.head.setAttribute("fill", up ? "#c47600" : dn ? "#e5383b" : "#221636");
-        G.ticks.forEach(function (tk) { tk.n.setAttribute("opacity", tk.t <= p[0] + 1e-9 ? 1 : 0); });
-        // readout: day of the drawn point + the lead at that point
-        var dl = null; days.forEach(function (d) { if (d.t <= p[0]) dl = d.label; });
-        rd.textContent = dl || "";
-        rv.textContent = "";
-        rv.appendChild(document.createTextNode(up ? "นำ" : dn ? "ตาม" : "เสมอ"));
-        if (p[1] !== 0) rv.appendChild(el("span", "num", fmt(p[1])));
-        readout.className = "readout" + (up ? " up" : dn ? " down" : "");
-        // runners: centre travels toward the finish, the gap follows the lead (sqrt-ish so small leads stay visible)
-        var prog = clamp((p[0] - xmin) / ((t1 - xmin) || 1), 0, 1);
-        var c = G.cMin + (G.cMax - G.cMin) * prog;
-        var sep = (p[1] < 0 ? -1 : 1) * G.maxSep * Math.pow(Math.min(1, Math.abs(p[1]) / maxAbs), .6);
-        runU.style.transform = "translate3d(" + (c + sep / 2 - runU.offsetWidth / 2).toFixed(1) + "px,0,0)";
-        runR.style.transform = "translate3d(" + (c - sep / 2 - runR.offsetWidth / 2).toFixed(1) + "px,0,0)";
-        var sg = up ? 1 : dn ? -1 : 0;
-        if (!RM && sign0 === -1 && sg === 1) {
-          var gsvg = runU.querySelector("svg");
-          gsvg.classList.remove("hop"); void gsvg.getBoundingClientRect(); gsvg.classList.add("hop");
-        }
-        if (sg) sign0 = sg;
-      }
-      // highlighted mark: only once the line has arrived at it
-      var st = steps[act], m = st.mark;
-      var on = m && m.t <= p[0] + 1e-6;
-      if (force || on !== last.on || act !== last.act) {
-        last.on = on; last.act = act;
-        [G.ring, G.pulse].forEach(function (c) { c.setAttribute("opacity", on ? 1 : 0); });
-        fig.classList.toggle("peak", !!(on && st.s.id === "overtake"));
-        call.className = "callout";
-        if (on) {
-          var mx = G.X(m.t), my = G.Y(m.lead);
-          G.ring.setAttribute("cx", mx); G.ring.setAttribute("cy", my);
-          G.pulse.setAttribute("cx", mx); G.pulse.setAttribute("cy", my);
-          G.pulse.setAttribute("stroke", m.lead >= 0 ? "#c47600" : "#c62828");
-          call.textContent = "";
-          call.appendChild(el("span", "d", [m.label, m.time].filter(has).join(" ")));
-          var vv = el("span", "v", m.lead > 0 ? "นำ " : m.lead < 0 ? "ตาม " : "เสมอ");
-          if (m.lead !== 0) vv.appendChild(el("span", "num", fmt(m.lead)));
-          call.appendChild(vv);
-          var cw = call.offsetWidth, ch = call.offsetHeight;
-          var cx = clamp(mx - cw / 2, 0, Math.max(0, G.x1 + 4 - cw));
-          var cy = m.lead < 0 ? my - ch - 14 : my + 14;
-          if (cy < -6) cy = my + 14;
-          if (cy + ch > G.H) cy = my - ch - 14;
-          call.style.transform = "translate(" + cx.toFixed(0) + "px," + cy.toFixed(0) + "px)";
-          call.classList.add("on", m.lead >= 0 ? "up" : "down");
-        }
-      }
+      goal = t;
+      if (force || RM || cur == null) { cur = goal; draw(true); }
+      else if (!raf && cur !== goal) raf = requestAnimationFrame(tick);
+      else if (cur === goal) draw(false);
       // phones: a card fades as it scrolls up over the pinned race
       if (!desk) steps.forEach(function (s2, i) {
         var o = 1 - clamp((y - A[i] - vh * .12) / (vh * .28), 0, 1);
@@ -803,7 +885,77 @@ html.anim .cheers.in .spark{opacity:1}
       });
       else steps.forEach(function (s2) { if (s2._o !== 1) { s2._o = 1; s2.card.style.opacity = ""; } });
       // count-ups fire when their scene becomes active
+      var st = steps[act];
       if (!st.counted && st.card._count && y >= A[act] - vh * .3) { st.counted = true; st.card._count(); }
+    }
+    function tick() {
+      raf = 0;
+      var d = goal - cur;
+      cur = Math.abs(d) < .004 ? goal : cur + d * .16;
+      draw(false);
+      if (cur !== goal) raf = requestAnimationFrame(tick);
+    }
+
+    function draw(force) {
+      var t = clamp(cur, tA, tZ), k = idxAt(t), p = pts[k], q = pts[Math.min(k + 1, pts.length - 1)];
+      // position follows the line between two captures; every number shown is a captured one
+      var v = q[0] > p[0] ? p[1] + (q[1] - p[1]) * clamp((t - p[0]) / (q[0] - p[0]), 0, 1) : p[1];
+      var hx = Math.round(G.X(t) / 3) * 3, hy = Math.round(G.Y(v) / 3) * 3, zy = G.zy, up = p[1] > 0, dn = p[1] < 0;
+      var moving = cur !== goal;
+      if (moving !== last.moving) { last.moving = moving; chart.classList.toggle("moving", moving); chart.classList.toggle("running", moving); }
+      G.reveal.setAttribute("width", Math.max(0, hx + 10));
+      G.head.setAttribute("x", hx - 4.5); G.head.setAttribute("y", hy - 4.5);
+      var col = v > 0 ? "#ffb629" : v < 0 ? "#ff6b6e" : "#fff";
+      G.head.setAttribute("fill", col);
+      G.conn.setAttribute("x1", hx); G.conn.setAttribute("x2", hx); G.conn.setAttribute("y1", zy); G.conn.setAttribute("y2", hy);
+      G.conn.setAttribute("stroke", col);
+      // our glass stands on the head of the line; the other team runs the level line, ahead of us or behind
+      var gx = clamp(hx, G.rw / 2 - 8, G.W - G.rw / 2 + 8);
+      var bx = clamp(gx - G.off * clamp(v / (maxAbs * .08), -1, 1), G.rw / 2 - 8, G.W - G.rw / 2 + 8);
+      runU.style.transform = "translate3d(" + gx.toFixed(1) + "px," + hy.toFixed(1) + "px,0)";
+      runR.style.transform = "translate3d(" + bx.toFixed(1) + "px," + zy.toFixed(1) + "px,0)";
+      if (force || k !== last.k) {
+        last.k = k;
+        G.ticks.forEach(function (tk) { tk.n.setAttribute("opacity", tk.t <= p[0] + 1e-9 ? 1 : 0); });
+        // readout: day of the drawn point + the lead at that point
+        var dl = null; days.forEach(function (d) { if (d.t <= p[0]) dl = d.label; });
+        rd.textContent = dl || "";
+        rv.textContent = "";
+        rv.appendChild(document.createTextNode(up ? "นำ" : dn ? "ตาม" : "เสมอ"));
+        if (p[1] !== 0) rv.appendChild(el("span", "px", fmt(p[1])));
+        readout.className = "hud" + (up ? " up" : dn ? " down" : "");
+        var sg = up ? 1 : dn ? -1 : 0;
+        if (!RM && !force && sign0 === -1 && sg === 1) {   // we take the lead: the glass flips over the line
+          var gl = glass();
+          gl.classList.remove("hop"); void gl.getBoundingClientRect(); gl.classList.add("hop");
+          popAt(hx, zy - 20);
+        }
+        if (sg) sign0 = sg;
+      }
+      // highlighted mark: only once the line has arrived at it
+      var st = steps[act], m = st.mark;
+      var on = !!(m && m.t <= t + 1e-6);
+      if (force || on !== last.on || act !== last.act) {
+        last.on = on; last.act = act;
+        [G.ring, G.pulse].forEach(function (c) { c.setAttribute("opacity", on ? 1 : 0); });
+        fig.classList.toggle("peak", !!(on && st.s.id === "overtake"));
+        if (on) {
+          var mx = G.X(m.t), my = G.Y(m.lead);
+          mx = Math.round(mx / 3) * 3 - 9; my = Math.round(my / 3) * 3 - 9;
+          G.ring.setAttribute("x", mx); G.ring.setAttribute("y", my);
+          G.pulse.setAttribute("x", mx); G.pulse.setAttribute("y", my);
+          G.pulse.setAttribute("stroke", m.lead >= 0 ? "#ffb629" : "#ff6b6e");
+        }
+      }
+      // the last scene of the win ending: the glass stops running and cheers
+      var party = ending === "win" && !moving && act === steps.length - 1 && steps[act].s.id === "finish" && p[1] > 0;
+      if (party !== last.party) {
+        last.party = party;
+        var g2 = glass();
+        g2.classList.toggle("party", party);
+        if (g2.tagName !== "CANVAS") { g2.classList.toggle("cheer", party); g2.classList.toggle("run", !party); }
+        if (party && !force) popAt(hx, hy - 30);
+      }
     }
 
     // night card bars + other per-card reveals
@@ -815,13 +967,7 @@ html.anim .cheers.in .spark{opacity:1}
     function onResize() { clearTimeout(rt); rt = setTimeout(layout, 120); }
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
-    live.push(function () { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); });
-    // run cycle only while the race is on screen
-    if ("IntersectionObserver" in window && !RM) {
-      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { track.classList.toggle("running", e.isIntersecting); }); });
-      io.observe(sec);
-      live.push(function () { io.disconnect(); });
-    }
+    live.push(function () { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); cancelAnimationFrame(raf); });
     layout();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
     window.addEventListener("load", layout, { once: true });
