@@ -81,6 +81,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tabs { display: flex; gap: 4px; }
 .tabs button { appearance: none; border: 0; background: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 7px 14px; border-radius: 999px; transition: background-color 160ms, color 160ms; }
 .tabs button svg { width: 18px; height: 18px; flex: none; }
+.tabs button[hidden] { display: none; }
 @media (hover: hover) { .tabs button:hover { color: var(--ink); background: var(--blue-soft); } }
 .tabs button[aria-selected="true"] { background: var(--blue); color: #fff; font-weight: 600; }
 
