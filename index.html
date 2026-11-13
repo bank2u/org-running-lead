@@ -450,6 +450,11 @@ table.heat { border-collapse: separate; border-spacing: 2px; font-size: 13px; mi
   .wrap { padding-bottom: calc(var(--nav-h) + 40px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (max-width: 760px) {
+  .top-in { flex-wrap: wrap; gap: 8px 12px; padding-top: 10px; }
+  .brand { order: 1; margin-right: 0; flex: 1 1 auto; }
+  .fresh { order: 2; }
+  .tabs { order: 3; flex: 1 1 100%; justify-content: center; gap: 6px; padding: 4px; background: var(--blue-soft); border-radius: 999px; }
+  .tabs button { flex: 1 1 0; justify-content: center; padding: 8px 10px; }
   body { font-size: 14px; }
   .pad { padding: 16px; }
   .hero { padding: 18px 16px 14px; }
