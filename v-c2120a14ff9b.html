@@ -187,7 +187,7 @@ html.anim .more{animation:more .9s steps(2,jump-none) infinite alternate}
 .more.end{visibility:hidden}
 @keyframes more{from{transform:translateY(-3px)}to{transform:translateY(1px)}}
 .steps{position:relative;z-index:2;margin-top:-100svh;padding-bottom:60svh;pointer-events:none}
-.step{min-height:72svh}
+.step{min-height:96svh}
 .card{width:100%;max-width:560px;margin:0 auto;background:var(--paper);border-radius:22px;padding:20px 20px 22px;
   box-shadow:0 18px 40px -22px rgba(50,22,95,.45),0 2px 6px -2px rgba(50,22,95,.12);will-change:opacity}
 .card h2.t{font-size:clamp(1.45rem,6vw,2.1rem)}
@@ -1090,12 +1090,12 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       var st = steps[act];
       if (!st.counted && st.card._count && y >= A[0] - vh * .3) { st.counted = true; st.card._count(); }
     }
-    // the run-in plays once on its own clock when the screen comes into view: about 3.4 s, a third of it on the day(s) we led
+    // the run-in plays once on its own clock when the screen comes into view: about 5 s, a third of it on the day(s) we led
     var intro = PRE && !RM ? "wait" : "done", in0 = 0;
     function runIn(now) {
       if (intro !== "run") return;
       if (!in0) in0 = now;
-      var u = clamp((now - in0 - 350) / 3050, 0, 1);
+      var u = clamp((now - in0 - 450) / 4800, 0, 1);
       cur = u < .36 ? PRE.t0 + (PRE.flip - PRE.t0) * (u / .36) : PRE.flip + (tA - PRE.flip) * (u - .36) / .64;
       draw(false);
       if (u < 1) raf = requestAnimationFrame(runIn);
@@ -1104,7 +1104,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     function tick() {
       raf = 0;
       var d = goal - cur;
-      cur = Math.abs(d) < .004 ? goal : cur + d * .16;
+      cur = Math.abs(d) < .004 ? goal : cur + d * .085;
       draw(false);
       if (cur !== goal) raf = requestAnimationFrame(tick);
     }
@@ -1212,12 +1212,12 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     "headJoy": [
       "....HHHHHH........",
       "...HHHHHHHH.......",
-      "..HHWGGWGGW.......",
-      "..CCCCCCCCCCCcc...",
-      "..HHSSSSSSS.......",
-      "..HSSSSKKKS.......",
-      "..HSSSSSSSSS......",
-      "...SSSSWWWSS......",
+      "..HHWGGWGGW....SS.",
+      "..CCCCCCCCCCCccSS.",
+      "..HHSSSSSSS...SS..",
+      "..HSSSSKKKS...SS..",
+      "..HSSSSSSSSS.SS...",
+      "...SSSSWWWSS.SS...",
       "...sSSSWWWS.SS....",
       "....sSSSSS..SS...."],
     "body": [
@@ -1450,7 +1450,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       var up = lift(rx), fy = GY - Math.round(up), px = Math.round(rx) - cam - 8;
       if (ended) {
         var bob = RM ? 0 : (Math.floor(clock * (win ? 5 : 2)) % 2) * (win ? 3 : 1);
-        g.drawImage(SP.joy, px, fy - 22 - bob); g.drawImage(SP.mug, px + 11, fy - 22 - bob - 2);
+        g.drawImage(SP.joy, px, fy - 22 - bob); g.drawImage(SP.mug, px + 16, fy - 22 - bob - 1);
       } else {
         var f = up > .5 ? 3 : [0, 1, 2, 1][Math.floor(Math.max(0, rx - START) / 5) % 4];
         g.drawImage(SP.run[f], px, fy - 22); g.drawImage(SP.mug, px + 11, fy - 22 + 8 + (f === 1 ? 1 : 0));
