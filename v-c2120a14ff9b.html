@@ -230,7 +230,10 @@ html.anim .card.in .nights .b{transform:scaleY(1)}
 html.anim .names li{opacity:0;transform:translate3d(0,14px,0);transition:opacity .3s steps(3,end),transform .3s steps(3,end)}
 html.anim .names li.on{opacity:1;transform:none}
 .lv{max-width:728px;margin:0 auto}
-.lv-scr{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.lv-scr{position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.lv-again{display:none;position:absolute;right:8px;top:8px;border:0;padding:8px 12px;background:var(--px-us);color:var(--night);
+  font:700 14px/1.2 var(--th);clip-path:var(--notch);cursor:pointer}
+html.anim .lv.end .lv-again{display:block}
 .lv-scr canvas{display:block;margin:0 auto;image-rendering:pixelated}
 .lv-cap{min-height:1.6em;margin-top:12px;font:600 1rem/1.6 var(--th);color:var(--px-us)}
 .lv+.names{margin-top:18px}
@@ -1286,16 +1289,27 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       ".DDDDDDDDDDDDD",
       ".ddddddddddddd"],
     "cramp": [
-      ".....EEEE.",
-      "....EEEE..",
-      "...EEEE...",
-      "..EKEEKEE.",
-      "..eeEEEE..",
-      "....EEE...",
-      "...EEE....",
-      "..EEE.....",
-      "..EE......",
-      ".Ee......."],
+      "....SSSS....",
+      "....SSSS....",
+      "....SSSSS...",
+      "....SSSSSs..",
+      "....SSSSSs..",
+      ".....SSSs...",
+      ".....SSSs...",
+      ".....SSS....",
+      ".....SSS....",
+      "....WWWWWW..",
+      "...WWWWWWWO.",
+      "...WWOOOWWW."],
+    "pain": [
+      "..E.......E.",
+      ".E.........E",
+      "EE........EE",
+      ".E.........E",
+      "E.........E.",
+      "............",
+      ".E........E.",
+      "E..........E"],
     "cloud": [
       "......NNNNNN..........",
       "....NNNNNNNNNN..NNN...",
@@ -1330,19 +1344,21 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       if (gl) for (var r = 0; r < 5; r++) for (var b = 0; b < 3; b++) if (+gl.charAt(r) & (4 >> b)) g.fillRect(x + i * 4 + b, y + r, 1, 1);
     }
   }
-  var LV_TOP = { sleepy: 9, work: 10, cramp: 10 };   // stomped kinds -> sprite height
+  var LV_TOP = { sleepy: 9, work: 10, cramp: 12 };   // stomped kinds -> sprite height
   var LV_BITS = { sleepy: ["#9a7cf0", "#ffffff"], work: ["#f2ecff", "#b9a9dc"], cramp: ["#ff5a5f", "#ffd76a"] };
 
   // -> the level node, or null when it cannot be drawn. hit(i) = block i was headed, done() = the runner arrived.
-  function levelNode(s, win, blocks, hit, done) {
+  function levelNode(s, win, blocks, hit, done, reset) {
     var list = (s.level || []).filter(function (o) { return o && (o.k === "rain" || o.k === "sign" || LV_TOP[o.k]); });
     var cv = document.createElement("canvas"), g = cv.getContext && cv.getContext("2d");
     if (!g || !list.length || !blocks) return null;
     var wrap = el("div", "lv"), scr = el("div", "lv-scr"), cap = el("p", "lv-cap");
     cv.setAttribute("aria-hidden", "true");
-    scr.appendChild(cv); wrap.appendChild(scr); wrap.appendChild(cap);
+    var again = el("button", "lv-again", "\u21bb เล่นอีกครั้ง");
+    again.type = "button";
+    scr.appendChild(cv); scr.appendChild(again); wrap.appendChild(scr); wrap.appendChild(cap);
     var A = LV_ART, SP = {}, k;
-    for (k in { mug: 1, sleepy: 1, work: 1, cramp: 1, cloud: 1, heart: 1 }) SP[k] = lvSprite(A[k]);
+    for (k in { mug: 1, sleepy: 1, work: 1, cramp: 1, pain: 1, cloud: 1, heart: 1 }) SP[k] = lvSprite(A[k]);
     SP.run = A.legs.map(function (l) { return lvSprite(A.head.concat(A.body, l)); });
     SP.joy = lvSprite(A.headJoy.concat(A.bodyUp, A.legs[1]));
     var LH = 84, GY = 72, SPEED = 56, LW = 120, START = -14;
@@ -1415,7 +1431,8 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
         } else {
           var im = SP[th.k];
           if (gone < 0) {
-            g.drawImage(im, sx - (im.width >> 1), GY - im.height - (th.k === "cramp" ? Math.round(Math.abs(Math.sin(clock * 9)) * 2) : 0));
+            g.drawImage(im, sx - (im.width >> 1), GY - im.height);
+            if (th.k === "cramp" && Math.floor(clock * 6) % 3) g.drawImage(SP.pain, sx - 6 + (Math.floor(clock * 6) % 2), GY - 12);
             if (th.k === "sleepy") { lvText(g, "Z", sx + 5, GY - 17 - Math.round(clock * 6) % 4, "#cfe3ff"); lvText(g, "Z", sx + 10, GY - 24 - Math.round(clock * 6 + 2) % 4, "#cfe3ff"); }
           } else if (gone < .7 || ended) g.drawImage(im, sx - (im.width >> 1), GY - 3, im.width, 3);
         }
@@ -1448,6 +1465,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       things.forEach(function (th) { if (th.at < 0) th.at = 0; });
       bx.forEach(function (b, j) { if (b.at < 0) { b.at = 0; hit(j); } });
       say(things.length);
+      wrap.classList.add("end");
       done(scr);
     }
     function frame(ts) {
@@ -1472,9 +1490,18 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       g.setTransform(K, 0, 0, K, 0, 0); g.imageSmoothingEnabled = false;
       draw();
     }
+    // bring the screen and the names under it into view together (phones: the names sit below the screen)
+    function focus() {
+      if (RM) return;
+      var nx = wrap.nextElementSibling, a = wrap.getBoundingClientRect(), b = (nx && nx.classList.contains("names") ? nx : wrap).getBoundingClientRect();
+      var pad = Math.max(64, (window.innerHeight - (b.bottom - a.top)) / 2);
+      if (a.top >= pad - 8 && b.bottom <= window.innerHeight) return;
+      window.scrollTo({ top: Math.round(a.top + window.scrollY - pad), behavior: "smooth" });
+    }
     function replay() {
       if (state !== "end" || RM) return;
       clock = 0; bits = []; capAt = -1; cap.textContent = "";
+      wrap.classList.remove("end"); reset(); focus();
       things.forEach(function (th) { th.at = -1; });
       bx.forEach(function (b) { b.at = -1; });
       state = "run"; wake();
@@ -1489,8 +1516,8 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       if (RM || !("IntersectionObserver" in window)) { clock = (END - START) / SPEED; finish(); draw(); return; }
       var io = new IntersectionObserver(function (es) {
         vis = es[es.length - 1].isIntersecting;
-        if (vis) { if (state === "idle") state = "run"; wake(); }
-      }, { threshold: .6 });
+        if (vis) { if (state === "idle") { state = "run"; setTimeout(focus, 150); } wake(); }
+      }, { threshold: .45 });
       io.observe(scr);
       live.push(function () { io.disconnect(); });
     });
@@ -1507,7 +1534,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
         var a = scr.getBoundingClientRect(), b = sec.getBoundingClientRect();
         pop(sec, a.left - b.left + a.width / 2, a.top - b.top + a.height * .45);
       }
-    });
+    }, function () { lis.forEach(function (li) { li.classList.remove("on"); }); });
     if (level) sec.appendChild(level);
     if (names.length) {
       var ul = el("ul", "names" + (s.lines && names.some(function (nm) { return has(s.lines[nm]); }) ? "" : " duo"));
