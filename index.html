@@ -114,6 +114,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .bad .hero { background: linear-gradient(155deg, var(--red-2), var(--red) 45%, var(--red-deep)); box-shadow: 0 18px 40px -18px rgba(94, 11, 20, .75); }
 .bad .hero .when, .bad .hero .unit { color: var(--red-ink); }
 .bad .delta { background: #fff; color: var(--red); font-size: 15px; }
+/* the final result (user, 2026-11-14): the victory page's purple stage and gold, not the live blue/red */
+.war.over .hero { background: linear-gradient(155deg, #6a3bb0, #4a2585 45%, #32165f); box-shadow: 0 18px 40px -18px rgba(50, 22, 95, .75); }
+.war.over .hero .when, .war.over .hero .unit { color: #dccdf5; }
+.war.over .hero .big { color: #ffd76a; }
+.war.over .delta { background: #fff6dc; color: #7a4a00; }
 .alarm { display: none; margin: 14px -20px -16px; padding: 10px 20px; background: rgba(0, 0, 0, .22); font-size: 14px; font-weight: 600; align-items: center; gap: 8px; }
 .alarm svg { width: 18px; height: 18px; flex: none; }
 .bad .alarm { display: flex; }
@@ -726,7 +731,7 @@ function drawWar() {
   if (!WR) { host.innerHTML = `<div class="panel pad"><p class="empty">ยังไม่มีภาพ Team Ranking ที่อ่านได้ แคปหน้า Team Ranking แล้วรันใหม่</p></div>`; return; }
   const chase = WR.mode === "chase", rv = rvName(WR.rival.rank), a = WR.as_of, T = WR.today;
   const good = T.us >= T.rival;
-  host.className = "war" + (good ? "" : " bad") + (OVER ? " over" : "");
+  host.className = "war" + (good || (OVER && !chase) ? "" : " bad") + (OVER ? " over" : "");   // the final result in our colour when we won
   const moved = WR.base.gap - WR.gap;                    // + = good for us (the gap closed, or our lead grew)
   const since = WR.base.night ? "เทียบกับเมื่อวาน" : `ตั้งแต่ ${WR.base.time}`;
   const dtext = chase ? (moved >= 0 ? `ระยะห่างแคบลง <span class="n">${full(moved)}</span> ${since}` : `ระยะห่างขยับขึ้น <span class="n">${full(-moved)}</span> ${since}`)
@@ -741,10 +746,10 @@ function drawWar() {
   const ms = WR.moments;
   host.innerHTML = `
     <section class="hero" aria-label="สถานะตอนนี้">
-      <div class="when">${a.dow} ${a.label} · ${KIND[a.kind]} · ${a.days_left ? `อีก ${a.days_left} วันจบการแข่ง` : OVER ? "จบการแข่งแล้ว · ผลสุดท้าย" : "วันสุดท้ายของการแข่ง"}</div>
-      <div class="verb">${chase ? `ตามหลัง${rv}` : `นำ${rv}`}</div>
+      <div class="when">${OVER ? `จบการแข่งแล้ว · ผลสุดท้าย ${a.dow} ${a.label}` : `${a.dow} ${a.label} · ${KIND[a.kind]} · ${a.days_left ? `อีก ${a.days_left} วันจบการแข่ง` : "วันสุดท้ายของการแข่ง"}`}</div>
+      <div class="verb">${OVER ? (chase ? `จบที่อันดับ ${WR.us.rank} ห่าง${rv}` : `เราคืออันดับ 1 ชนะ${rv}`) : chase ? `ตามหลัง${rv}` : `นำ${rv}`}</div>
       <div class="big">${full(Math.abs(WR.gap))}</div>
-      <div class="unit">ก้าวต่อคน</div>
+      <div class="unit">${OVER ? "ก้าวเฉลี่ยต่อคน" : "ก้าวต่อคน"}</div>
       <div class="delta">${moved >= 0 ? ARROW_IN : ARROW_OUT}<span>${dtext}</span></div>
       <div class="rule" id="dist"></div>
       ${OVER ? "" : `<div class="alarm" role="status">${ALERT}<span>${alarm}</span></div>`}
@@ -765,7 +770,7 @@ function drawWar() {
         : `<div class="${m.gain > 0 ? "g" : ""}${m.from ? " run" : ""}"><span class="tm">${m.from ? `${esc(m.from)}<small>–${m.time}</small>` : m.time}</span><span>${esc(m.text)}</span><span class="d">${m.gain > 0 ? "+" : ""}${full(Math.abs(m.gain))}</span>${whoStrip(m.who, true)}</div>`).join("")}</div>`
         : `<p class="empty">วันนี้ยังไม่มีช่วงไหนที่ระยะห่างขยับเกิน 500</p>`}
     </section>`;
-  drawDistance($("#dist"), good);
+  drawDistance($("#dist"), good || (OVER && !chase));
   drawDay();
   drawRace();
 }
@@ -895,14 +900,15 @@ function drawDistance(host, good) {
   const X = v => L + (R - L) * (1 - Math.min(max, Math.abs(v)) / max);
   const a = X(WR.base.gap), b = X(WR.gap);
   el("line", { x1: L, x2: R, y1: y, y2: y, stroke: "#fff", "stroke-opacity": .2, "stroke-width": 6, "stroke-linecap": "round" }, s);
-  run(el("line", { x1: Math.min(a, b), x2: Math.max(a, b), y1: y, y2: y, stroke: good ? C("--sky") : "#fff", "stroke-width": 6, "stroke-linecap": "round" }, s), [{ opacity: 0 }, { opacity: 1 }], 200, 500);
+  run(el("line", { x1: Math.min(a, b), x2: Math.max(a, b), y1: y, y2: y, stroke: good ? (OVER ? "#f8a91f" : C("--sky")) : "#fff", "stroke-width": 6, "stroke-linecap": "round" }, s), [{ opacity: 0 }, { opacity: 1 }], 200, 500);
   el("line", { x1: a, x2: a, y1: y - 7, y2: y + 7, stroke: "#fff", "stroke-opacity": .7, "stroke-width": 2, "stroke-linecap": "round" }, s);
-  run(el("rect", { x: b - 2, y: y - 12, width: 4, height: 24, rx: 2, fill: good ? C("--sky") : "#fff" }, s),
+  run(el("rect", { x: b - 2, y: y - 12, width: 4, height: 24, rx: 2, fill: good ? (OVER ? "#f8a91f" : C("--sky")) : "#fff" }, s),
     [{ transform: `translate(${a - b}px, 0)` }, { transform: "none" }], 150, 900);
   el("line", { x1: R, x2: R, y1: y - 10, y2: y + 10, stroke: "#fff", "stroke-width": 2, "stroke-linecap": "round" }, s);
   txt(s, R, y - 15, WR.mode === "chase" ? `ทัน${rvName(WR.rival.rank)}` : "เสมอกัน", { "text-anchor": "end", "font-size": 11, "font-weight": 600, fill: "#fff" });
   txt(s, Math.max(L, Math.min(R - 40, a)), y + 24, `${WR.base.night ? "เมื่อคืน" : WR.base.time} ${full(Math.abs(WR.base.gap))}`, { "text-anchor": a < 60 ? "start" : "middle", "font-size": 11, fill: "#fff", "fill-opacity": .8 });
-  txt(s, b, y - 15, OVER ? "จบ" : "ตอนนี้", { "text-anchor": b < L + 24 ? "start" : "middle", "font-size": 11, "font-weight": 700, fill: "#fff" });
+  if (OVER) txt(s, b, y + 24, `จบ ${full(Math.abs(WR.gap))}`, { "text-anchor": b > R - 40 ? "end" : b < L + 24 ? "start" : "middle", "font-size": 11, "font-weight": 700, fill: "#fff" });
+  else txt(s, b, y - 15, "ตอนนี้", { "text-anchor": b < L + 24 ? "start" : "middle", "font-size": 11, "font-weight": 700, fill: "#fff" });
 }
 
 // one day's steps for both teams as two rising lines; the space between them is who is winning the day.
