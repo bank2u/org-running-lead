@@ -1850,7 +1850,7 @@ function viewUs(host) {
   const s = svgIn(c, w, h, "ก้าวเฉลี่ยต่อคนต่อวันของทีมเรา เทียบ" + ANL);
   V.forEach((d, i) => { if (d.type !== "weekday") el("rect", { x: L + i * slot + 1, y: Tp - 8, width: slot - 2, height: h - Tp - 4, rx: 8, fill: C("--tint") }, s); });
   for (const v of ticks(max)) { el("line", { x1: L, x2: w - R, y1: Y(v), y2: Y(v), stroke: v ? RULE2 : RULE }, s); txt(s, L - 6, Y(v) + 4, v ? k(v).replace(".0k", "k") : "0", { "text-anchor": "end", "font-size": 11, fill: MUTED }); }
-  const kk = v => narrow ? (v / 1000).toFixed(1).replace(".0", "") : k(v).replace(".0k", "k");
+  const kk = v => narrow ? String(Math.round(v / 1000)) : k(v).replace(".0k", "k");   // phone: whole thousands, so 14 neighbours never touch (exact values in the tooltip)
   V.forEach((d, i) => {
     const off = d.type !== "weekday", cx = L + i * slot + slot / 2, x = cx - bw / 2, diff = d.us_gain - d.leader_gain, win = diff >= 0;
     const g = el("g", {}, s);
@@ -1862,8 +1862,8 @@ function viewUs(host) {
     fade(txt(s, cx, Math.min(Y(d.us_gain), ty) - 8, kk(d.us_gain), { "text-anchor": "middle", "font-size": narrow ? 10 : 12, "font-weight": 700, fill: C("--blue") }), i * 40 + 350, 300);
     txt(s, cx, base + 16, d.label.split(" ")[0], { "text-anchor": "middle", "font-size": 11, fill: INK2 });
     txt(s, cx, base + 29, d.dow, { "text-anchor": "middle", "font-size": 10, fill: off ? INK : MUTED, "font-weight": off ? 600 : 400 });
-    const ad = Math.abs(diff), dtxt = ad < 1000 ? full(ad) : narrow && ad >= 10000 ? String(Math.round(ad / 1000)) : kk(ad);   // phone: "+14" so neighbours never touch
-    txt(s, cx, base + 47, `${win ? "+" : "−"}${dtxt}`, { "text-anchor": "middle", "font-size": narrow ? 11 : 12, "font-weight": 800, fill: win ? GOOD : BAD, "font-family": "var(--num)" });
+    const ad = Math.abs(diff), dtxt = ad < 1000 ? full(ad) : kk(ad);
+    txt(s, cx, base + 47, `${win ? "+" : "−"}${dtxt}`, { "text-anchor": "middle", "font-size": narrow ? 10 : 12, "font-weight": 700, "letter-spacing": narrow ? "-.3" : "0", fill: win ? GOOD : BAD, "font-family": "var(--num)" });
     hover(el("rect", { x: L + i * slot, y: Tp - 8, width: slot, height: h - Tp, fill: "transparent" }, g), () =>
       `<b>${d.dow} ${d.label}</b> · ${TYPE[d.type] || ""}<div class="r"><span><i style="background:${US}"></i>เรา</span><b>${full(d.us_gain)}</b></div>` +
       `<div class="r"><span><i style="background:${RV}"></i>${ANL}</span><b>${full(d.leader_gain)}</b></div>` +
