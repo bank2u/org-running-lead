@@ -415,6 +415,10 @@ button.rg-c[aria-expanded="true"] { box-shadow: inset 0 0 0 2px currentColor; }
 .stl b.nm { font-weight: 600; color: var(--ink); }
 .stl b.nm.off { color: var(--off-ink); }
 .stl-c { margin-top: 14px; }
+.stl-key { list-style: none; margin: 12px 0 0; padding: 10px 12px; display: grid; gap: 6px; background: var(--tint); border-radius: 12px; max-width: 560px; }
+.stl-key li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 12px; line-height: 1.4; color: var(--ink-2); }
+.stl-key svg { width: 22px; height: 14px; display: block; }
+.stl-key + .stl-c { margin-top: 10px; }
 .stl-c svg { display: block; overflow: visible; }
 .stl p.ct + .stl-c { margin-top: 2px; }
 /* Beat 2: the caveat sits right under the minis, behind a bar glyph in the cliff's colour */
@@ -1920,7 +1924,6 @@ function stlClock(c, Q, noteEl) {
   const s = svgIn(c, w, h, "");
   s.setAttribute("role", "group"); s.removeAttribute("aria-label");
   const hours = [6, 12, 18].filter(hr => hr * 60 > a0);
-  let quietDone = false;
   rows.forEach((r, i) => {
     const y0 = i * RH, cy = y0 + NH + TH / 2, hid = r.tag === "hid";
     const g = el("g", { role: "img", "aria-label": `${r.alias}: ${hid ? "เปิดโหมดซ่อนตัว" : r.tag === "normal" ? "ปกติ" : ""}` +
@@ -1928,15 +1931,19 @@ function stlClock(c, Q, noteEl) {
     // name line: bib + alias
     stlBib(g, 10, y0 + 11, r.alias);
     txt(g, 26, y0 + 16, r.alias, { "font-size": 14, "font-weight": 600, fill: INK });
+    // the row in words, so the marks below never need decoding: "หยุด 08:08 · ปกติราว 23:16"
+    if (r.d12_last) {
+      const hd = txt(g, w - Rp, y0 + 16, "", { "text-anchor": "end", "font-size": 12, fill: MUTED });
+      const ts = (t, a = {}) => { const e = document.createElementNS("http://www.w3.org/2000/svg", "tspan"); Object.entries(a).forEach(([k2, v]) => e.setAttribute(k2, v)); e.textContent = t; hd.appendChild(e); };
+      ts("หยุด ");
+      ts(r.d12_last, { "font-weight": 700, fill: hid ? OFFI : INK, style: NUMF });
+      if (r.usual_last) { ts("  ·  ปกติราว "); ts(r.usual_last, { "font-weight": 600, fill: HOTI, style: NUMF }); }
+    }
     // hour guides on the track only (they never cross the names)
     [...hours, 24].forEach(hr => el("line", { x1: X(hr * 60), x2: X(hr * 60), y1: y0 + NH, y2: y0 + NH + TH, stroke: RULE2 }, g));
     const ticks = el("g", {}, g);
     r.usual_days.forEach(([, t]) => el("rect", { x: X(tmin(t)) - 1, y: cy - 6, width: 2, height: 12, fill: HOT }, ticks));
     fade(ticks, 0, 300);
-    if (i === 0 && r.usual_max) {
-      const ux = Math.min(w - Rp, X(tmin(r.usual_max)) + 1);
-      txt(g, ux, y0 + 16, `ปกติ ${Q.usual.from === Q.usual.to ? Q.usual.to : stlRange(Q.usual.from, Q.usual.to)}`, { "text-anchor": "end", "font-size": 11, "font-weight": 600, fill: HOTI });
-    }
     if (!r.d12_last) {
       txt(g, L, cy + 4, `${Q.d12.label} ไม่มีภาพแคปตอนดึก`, { "font-size": 12, fill: MUTED });
       return;
@@ -1954,18 +1961,8 @@ function stlClock(c, Q, noteEl) {
       const tw = stlW(tl, 7);
       if (dx - 10 - tw < 0) { tl.setAttribute("text-anchor", "start"); tl.setAttribute("x", dx + 8); tl.setAttribute("y", cy - 6); after = dx + 8 + tw + 6; }
       fade(tl, 300, 300);
-      if (!quietDone && r.d12_seen_to) {
-        const sx = X(tmin(r.d12_seen_to)), first = X(Math.min(...r.usual_days.map(([, t]) => tmin(t))));
-        const ql = txt(g, after, cy - 6, `นิ่งถึง ${r.d12_seen_to}`, { "font-size": 11, fill: OFFI });
-        const qw = stlW(ql, 6.5);
-        if (sx - dx >= qw + 20 && after + qw <= Math.min(sx, first) - 4) { quietDone = true; fade(ql, 800, 300); }
-        else ql.remove();
-      }
     }
   });
-  // no quiet row had room for "นิ่งถึง …": it joins the note instead (visual spec §3)
-  const qr = rows.find(r => r.tag === "hid" && r.d12_seen_to);
-  if (qr && !quietDone) noteEl.textContent += ` นิ่งถึง ${qr.d12_seen_to}`;
   // clock under the last row: 06:00, 12:00, 18:00 inside the range, "เที่ยงคืน" at the end
   hours.forEach(hr => {
     const x = X(hr * 60), t = txt(s, x, hT + 16, `${String(hr).padStart(2, "0")}:00`, { "text-anchor": "middle", "font-size": 11, fill: MUTED });
@@ -2069,8 +2066,14 @@ function viewStealth(host) {
         ? `<p>วันนั้น ${stlNames(Q.hid_names.map(a => nm(a, "off")))} ยอดหยุดขยับเร็วกว่าทุกวันก่อนหน้า` +
           (Q.normal_names.length ? ` ส่วน ${stlNames(Q.normal_names.map(a => nm(a)))} ขยับตามเวลาปกติ` : "") + `</p>`
         : `<p>วันนั้นทุกคนยอดขยับตามเวลาปกติ</p>`) +
-      `<div class="stl-c" id="slq"></div>` +
-      `<p class="note" id="slqn">ขีดและจุดคือเวลาที่เราเห็นยอดขยับครั้งสุดท้าย นับเฉพาะวันที่มีภาพแคปหลัง ${esc(R.night_from)}</p></section>`;
+      `<ul class="stl-key">` +
+        `<li><svg viewBox="0 0 22 14" aria-hidden="true"><rect x="5" y="1" width="2" height="12" fill="${HOT}"/><rect x="11" y="1" width="2" height="12" fill="${HOT}"/><rect x="15" y="1" width="2" height="12" fill="${HOT}"/></svg>` +
+          `<span>วันปกติ (${esc(stlRange(Q.usual.from, Q.usual.to))}) ยอดขยับครั้งสุดท้ายตอนนี้ วันละขีด</span></li>` +
+        `<li><svg viewBox="0 0 22 14" aria-hidden="true"><circle cx="5.5" cy="7" r="5" fill="${OFF}"/><circle cx="16.5" cy="7" r="5" fill="${C("--hot-ink")}"/></svg><span>${esc(Q.d12.label)} ยอดขยับครั้งสุดท้าย (ส้ม = หยุดเร็วกว่าปกติ)</span></li>` +
+        (Q.hid_names.length ? `<li><svg viewBox="0 0 22 14" aria-hidden="true"><circle cx="4" cy="7" r="3.5" fill="${OFF}"/><line x1="4" x2="20" y1="7" y2="7" stroke="${OFF}" stroke-width="2"/><rect x="19" y="2" width="2" height="10" fill="${OFF}"/></svg>` +
+          `<span>หลังจากนั้นยอดนิ่ง ทั้งที่เรายังแคปภาพถึงดึก</span></li>` : "") +
+      `</ul><div class="stl-c" id="slq"></div>` +
+      `<p class="note" id="slqn">ยิ่งจุดอยู่ซ้ายของขีด ยิ่งหยุดเร็วกว่าปกติ นับเฉพาะวันที่มีภาพแคปหลัง ${esc(R.night_from)}</p></section>`;
     // Beat 2: where the quiet steps went (one two-day line per quiet member)
     if (HID.length) {
       const capped = HID.some(m => m.est_capped);
