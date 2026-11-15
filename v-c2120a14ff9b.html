@@ -1402,6 +1402,8 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
   // runs (slower as night falls), a jump blip per obstacle, a rising note per heart block and a fanfare after the last one.
   var SND = (function () {
     var AC = window.AudioContext || window.webkitAudioContext, ctx = null, out = null, on = false, getU = null, timer = 0, nextT = 0, step = 0;
+    var want = true;   // the default is sound ON; browsers only allow it after the first tap, so it starts then (api.unlock)
+    try { want = localStorage.getItem("vsnd") !== "off"; } catch (e) {}
     var F = function (semi) { return 523.25 * Math.pow(2, semi / 12); };   // C5 = 0
     var LEAD = [0, 4, 7, 12, 7, 4, 7, 0, 2, 5, 9, 5, 4, 2, 0, -1, 0, 4, 7, 9, 12, 9, 7, 4, 2, 7, 5, 4, 2, 4, 7, null];
     var BASS = [-24, null, -24, null, -17, null, -17, null, -22, null, -22, null, -19, null, -19, null];
@@ -1433,13 +1435,19 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     var api = {
       ok: !!AC,
       get on() { return on; },
-      toggle: function () {
+      get want() { return want; },
+      // the first tap anywhere: the sound the viewer wants (default on) starts now
+      unlock: function () { if (want && !on) api.toggle(true); },
+      toggle: function (force) {
         if (!AC) return false;
-        if (!ctx) { ctx = new AC(); out = ctx.createGain(); out.gain.value = .5; out.connect(ctx.destination); }
-        on = !on;
+        var next = force == null ? !want : force;
+        want = next;
+        try { localStorage.setItem("vsnd", want ? "on" : "off"); } catch (e) {}
+        if (!ctx) { if (!want) return false; ctx = new AC(); out = ctx.createGain(); out.gain.value = .5; out.connect(ctx.destination); }
+        on = want;
         if (on) { ctx.resume(); if (getU) run(getU); else if (window.scrollY < window.innerHeight * .5) api.jingle(); }
         else { clearInterval(timer); timer = 0; }
-        return on;
+        return want;
       },
       music: function (u) { run(u); },
       jingle: function () {
@@ -1467,11 +1475,18 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
   (function () {
     if (!SND.ok) return;
     var b = document.createElement("button");
-    b.type = "button"; b.className = "snd ok"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "เสียงเพลง");
+    b.type = "button"; b.className = "snd ok"; b.setAttribute("aria-pressed", SND.want ? "true" : "false"); b.setAttribute("aria-label", "เสียงเพลง");
     b.title = "เปิด/ปิดเสียงเพลง";
     b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><g class="on"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g><g class="off"><path d="M17 9l5 6M22 9l-5 6"/></g></svg>';
     b.addEventListener("click", function () { b.setAttribute("aria-pressed", SND.toggle() ? "true" : "false"); });
     document.body.appendChild(b);
+    // default on: the first tap or key press anywhere (not the speaker button itself) lets the sound start
+    var first = function (e) {
+      if (e.target && e.target.closest && e.target.closest(".snd")) return;
+      ["pointerup", "touchend", "keydown"].forEach(function (n) { document.removeEventListener(n, first, true); });
+      SND.unlock();
+    };
+    ["pointerup", "touchend", "keydown"].forEach(function (n) { document.addEventListener(n, first, true); });
   })();
   // the level's sky through one day, by run progress u (0 = start line, 1 = the end): [u, top, bottom, hills]
   var LV_SKY = [[0, [58, 36, 98], [214, 120, 104], [92, 52, 110]], [.14, [72, 104, 190], [156, 176, 228], [92, 78, 150]],
