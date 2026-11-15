@@ -46,6 +46,12 @@ h1,h2{overflow-wrap:anywhere}
   display:inline-flex;align-items:center;gap:6px;padding:0 14px 0 18px;border-radius:999px;background:rgba(255,255,255,.94);
   color:var(--ink);text-decoration:none;font:600 15px/1 var(--th);box-shadow:0 4px 14px -4px rgba(50,22,95,.35)}
 .skip svg{width:18px;height:18px}
+.snd{position:fixed;z-index:50;top:calc(var(--safe-t) + 12px);right:calc(var(--safe-r) + 112px);width:44px;height:44px;border:0;padding:0;display:none;
+  align-items:center;justify-content:center;background:var(--frame,#f2ecff);color:var(--night,#120a26);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.snd.ok{display:inline-flex}
+.snd svg{width:22px;height:22px}
+.snd .off{display:none} .snd[aria-pressed="false"] .on{display:none} .snd[aria-pressed="false"] .off{display:inline}
+.snd:active{transform:scale(.96)}
 .skip:hover{background:#fff}
 .skip:active{transform:scale(.97)}
 .preview{position:fixed;z-index:50;top:calc(var(--safe-t) + 20px);right:calc(var(--safe-r) + 102px);padding:6px 12px;border-radius:999px;
@@ -1391,6 +1397,82 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
   var LV_BITS = { sleepy: ["#9a7cf0", "#ffffff"], work: ["#f2ecff", "#b9a9dc"], cramp: ["#ff5a5f", "#ffd76a"] };
 
   // -> the level node, or null when it cannot be drawn. hit(i) = block i was headed, done() = the runner arrived.
+  // 8-bit sound (user, 2026-11-15): synthesised with Web Audio (square / triangle, no files). Off until the viewer taps the
+  // speaker (browsers do not allow sound before a tap). A short jingle at the start, a looping tune while the pixel level
+  // runs (slower as night falls), a jump blip per obstacle, a rising note per heart block and a fanfare after the last one.
+  var SND = (function () {
+    var AC = window.AudioContext || window.webkitAudioContext, ctx = null, out = null, on = false, getU = null, timer = 0, nextT = 0, step = 0;
+    var F = function (semi) { return 523.25 * Math.pow(2, semi / 12); };   // C5 = 0
+    var LEAD = [0, 4, 7, 12, 7, 4, 7, 0, 2, 5, 9, 5, 4, 2, 0, -1, 0, 4, 7, 9, 12, 9, 7, 4, 2, 7, 5, 4, 2, 4, 7, null];
+    var BASS = [-24, null, -24, null, -17, null, -17, null, -22, null, -22, null, -19, null, -19, null];
+    function tone(t, semi, dur, type, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.value = F(semi);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .02);
+    }
+    function sweep(t, a, b, dur, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "square"; o.frequency.setValueAtTime(F(a), t); o.frequency.exponentialRampToValueAtTime(F(b), t + dur);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .02);
+    }
+    function tick() {
+      if (!ctx || !on || !getU) return;
+      var u = Math.max(0, Math.min(1, getU())), night = u < .66 ? 0 : Math.min(1, (u - .66) / .2);
+      var dt = 60 / (156 - 48 * night) / 2;   // eighth notes: ~156 bpm by day, ~108 at night
+      if (nextT < ctx.currentTime) nextT = ctx.currentTime + .05;
+      while (nextT < ctx.currentTime + .12) {
+        var n = LEAD[step % LEAD.length], b = BASS[step % BASS.length];
+        if (n != null) tone(nextT, n - (night > .5 ? 12 : 0), dt * 1.6, "square", .07);
+        if (b != null) tone(nextT, b + 12, dt * 1.9, "triangle", .16);
+        nextT += dt; step++;
+      }
+    }
+    function run(u) { getU = u; clearInterval(timer); timer = 0; if (u && on && ctx) { step = 0; nextT = 0; timer = setInterval(tick, 25); tick(); } }
+    var api = {
+      ok: !!AC,
+      get on() { return on; },
+      toggle: function () {
+        if (!AC) return false;
+        if (!ctx) { ctx = new AC(); out = ctx.createGain(); out.gain.value = .5; out.connect(ctx.destination); }
+        on = !on;
+        if (on) { ctx.resume(); if (getU) run(getU); else if (window.scrollY < window.innerHeight * .5) api.jingle(); }
+        else { clearInterval(timer); timer = 0; }
+        return on;
+      },
+      music: function (u) { run(u); },
+      jingle: function () {
+        if (!on || !ctx) return; var t = ctx.currentTime + .05;
+        [0, 4, 7, 12, 7, 12, 16].forEach(function (n, i) { tone(t + i * .1, n, .16, "square", .08); });
+        tone(t + .7, 19, .5, "square", .08); tone(t + .7, 12, .5, "triangle", .1);
+      },
+      jump: function () { if (on && ctx) sweep(ctx.currentTime + .01, 2, 14, .13, .07); },
+      box: function (j) {   // one step up the scale per heart block
+        if (!on || !ctx) return; var t = ctx.currentTime + .01, n = [0, 2, 4, 7, 9, 12][Math.min(5, j)] + 12;
+        sweep(t, n - 5, n, .06, .08); tone(t + .05, n, .22, "square", .09); tone(t + .05, n + 12, .14, "triangle", .05);
+      },
+      win: function () {
+        if (!on || !ctx) return; var t = ctx.currentTime + .08;
+        [0, 4, 7, 12, 16, 19, 24].forEach(function (n, i) { tone(t + i * .09, n, .2, "square", .08); });
+        var e = t + .7;
+        [[12, "square"], [16, "square"], [19, "square"], [0, "triangle"]].forEach(function (c) { tone(e, c[0], 1.4, c[1], c[1] === "square" ? .06 : .14); });
+        tone(e + .45, 28, .9, "square", .05);
+      }
+    };
+    document.addEventListener("visibilitychange", function () { if (ctx) { if (document.hidden) ctx.suspend(); else if (on) ctx.resume(); } });
+    return api;
+  })();
+  // the speaker button: fixed beside "ข้าม", only when the browser can make sound
+  (function () {
+    if (!SND.ok) return;
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "snd ok"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "เสียงเพลง");
+    b.title = "เปิด/ปิดเสียงเพลง";
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><g class="on"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g><g class="off"><path d="M17 9l5 6M22 9l-5 6"/></g></svg>';
+    b.addEventListener("click", function () { b.setAttribute("aria-pressed", SND.toggle() ? "true" : "false"); });
+    document.body.appendChild(b);
+  })();
   // the level's sky through one day, by run progress u (0 = start line, 1 = the end): [u, top, bottom, hills]
   var LV_SKY = [[0, [58, 36, 98], [214, 120, 104], [92, 52, 110]], [.14, [72, 104, 190], [156, 176, 228], [92, 78, 150]],
     [.42, [64, 120, 214], [150, 196, 240], [96, 86, 160]], [.6, [92, 64, 150], [236, 140, 96], [96, 56, 120]],
@@ -1448,11 +1530,11 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     function advance(rx) {
       things.forEach(function (th, j) {
         if (rx >= th.x - 48) say(Math.max(capAt, j));
-        if (th.at < 0 && rx >= th.x) { th.at = clock; if (LV_BITS[th.k]) burst(th.x, GY - 6, LV_BITS[th.k], 9); }
+        if (th.at < 0 && rx >= th.x) { th.at = clock; SND.jump(); if (LV_BITS[th.k]) burst(th.x, GY - 6, LV_BITS[th.k], 9); }
       });
       bx.forEach(function (b, j) {
         if (rx >= b.x - 40 && j === 0) say(things.length);
-        if (b.at < 0 && rx >= b.x) { b.at = clock; hit(j); }
+        if (b.at < 0 && rx >= b.x) { b.at = clock; SND.box(j); hit(j); }
       });
     }
     function draw() {
@@ -1527,8 +1609,10 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
         g.fillStyle = p.c; g.fillRect(Math.round(p.x + p.vx * a) - cam, Math.round(p.y + p.vy * a + 130 * a * a), 2, 2);
       });
     }
+    var tune = function () { return state === "run" ? Math.max(0, Math.min(1, clock * SPEED / (END - START))) : state === "end" ? 1 : 0; };
     function finish() {
-      state = "end";
+      var natural = state === "run";
+      state = "end"; SND.music(null); if (natural && !RM) SND.win();
       things.forEach(function (th) { if (th.at < 0) th.at = 0; });
       bx.forEach(function (b, j) { if (b.at < 0) { b.at = 0; hit(j); } });
       say(things.length);
@@ -1571,11 +1655,11 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       wrap.classList.remove("end"); reset(); focus();
       things.forEach(function (th) { th.at = -1; });
       bx.forEach(function (b) { b.at = -1; });
-      state = "run"; wake();
+      state = "run"; SND.music(tune); wake();
     }
     scr.addEventListener("click", replay);
     window.addEventListener("resize", size);
-    live.push(function () { stop = true; cancelAnimationFrame(raf); window.removeEventListener("resize", size); });
+    live.push(function () { stop = true; SND.music(null); cancelAnimationFrame(raf); window.removeEventListener("resize", size); });
     // sized once it is in the page; reduced motion (or no observer) shows the last frame at once
     requestAnimationFrame(function () {
       if (stop) return;
@@ -1583,7 +1667,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       if (RM || !("IntersectionObserver" in window)) { clock = (END - START) / SPEED; finish(); draw(); return; }
       var io = new IntersectionObserver(function (es) {
         vis = es[es.length - 1].isIntersecting;
-        if (vis) { if (state === "idle") { state = "run"; setTimeout(focus, 150); } wake(); }
+        if (vis) { if (state === "idle") { state = "run"; setTimeout(focus, 150); } if (state === "run") SND.music(tune); wake(); } else SND.music(null);
       }, { threshold: .45 });
       io.observe(scr);
       live.push(function () { io.disconnect(); });
