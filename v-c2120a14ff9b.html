@@ -134,7 +134,16 @@ html.anim .bars.in .bar:nth-child(3) .fill{transition-delay:.4s}
   flex:1 1 auto;min-height:200px;max-height:580px}
 .chart::after{content:"";position:absolute;inset:0;border-radius:8px;pointer-events:none;z-index:4;
   background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
-.chart svg.plot{position:absolute;inset:0;width:100%;height:100%;overflow:visible;shape-rendering:crispEdges}
+/* sky behind the plot: dawn / day / dusk / night by the clock time of the drawn point (the x axis is days, the fraction is the hour) */
+.chart .sky{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.chart .sky .orb{position:absolute;width:15px;height:15px;margin:-7px 0 0 -7px;image-rendering:pixelated}
+.chart .sky .orb.sun{background:#ffd76a;box-shadow:0 0 0 3px rgba(255,215,106,.28)}
+.chart .sky .orb.moon{background:#ece6ff;box-shadow:inset -5px -3px 0 0 #b9a9dc,0 0 0 3px rgba(236,230,255,.18)}
+.chart .sky .stars{position:absolute;inset:0}
+.chart .sky .star{position:absolute;width:3px;height:3px;background:#fff}
+html.anim .chart .sky .star{animation:twinkle 2.4s steps(2,jump-none) infinite alternate}
+@keyframes twinkle{from{opacity:.35}to{opacity:1}}
+.chart svg.plot{position:absolute;inset:0;z-index:1;width:100%;height:100%;overflow:visible;shape-rendering:crispEdges}
 .chart text{font:500 12px var(--th);fill:var(--px-dim)}
 .chart .side-up{fill:var(--px-us);font-weight:700;font-size:13px}
 .chart .side-dn{fill:var(--px-rv);font-weight:700;font-size:13px}
@@ -866,7 +875,11 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     var runR = el("div", "runner rival"), runU = el("div", "runner us");
     runR.innerHTML = DUST + bagSVG("run"); runU.innerHTML = DUST + glassSVG("run");
     var glass = function () { return runU.lastElementChild; };
-    chart.appendChild(svg); chart.appendChild(readout); chart.appendChild(runR); chart.appendChild(runU);
+    var sky = el("div", "sky"), sun = el("i", "orb sun"), moon = el("i", "orb moon"), starBox = el("div", "stars");
+    sky.appendChild(sun); sky.appendChild(moon);
+    for (var si = 0; si < 26; si++) { var st0 = el("i", "star"); st0.style.left = ((si * 37 + 11) % 97 + 1) + "%"; st0.style.top = ((si * 53 + 7) % 58 + 3) + "%"; st0.style.animationDelay = (-(si % 5) * .45) + "s"; if (si % 3 === 0) st0.style.width = st0.style.height = "2px"; starBox.appendChild(st0); }
+    sky.appendChild(starBox);
+    chart.appendChild(sky); chart.appendChild(svg); chart.appendChild(readout); chart.appendChild(runR); chart.appendChild(runU);
     legend.setAttribute("aria-hidden", "true"); chart.setAttribute("aria-hidden", "true");
     // phones: message window under the screen (cards are moved into it by layout)
     var talk = el("div", "talk"), dots = el("div", "dots"), more = el("i", "more");
@@ -1151,12 +1164,31 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
       if (cur !== goal) raf = requestAnimationFrame(tick); else tk0 = 0;
     }
 
+    // sky: [hour, top colour, bottom colour]; kept dark so the white and lilac labels keep their contrast
+    var SKY = [[0, [26, 16, 51], [26, 16, 51]], [5, [26, 16, 51], [40, 24, 72]], [6.5, [58, 36, 98], [138, 78, 104]], [8.5, [52, 52, 120], [96, 84, 128]],
+      [12, [38, 58, 122], [63, 85, 160]], [16, [40, 56, 118], [70, 84, 150]], [18.2, [66, 40, 104], [138, 72, 92]], [20, [44, 26, 84], [78, 40, 90]],
+      [21.5, [26, 16, 51], [32, 20, 62]], [24, [26, 16, 51], [26, 16, 51]]];
+    function mix(a, b, u) { return [0, 1, 2].map(function (i) { return Math.round(a[i] + (b[i] - a[i]) * u); }); }
+    function skyAt(t) {
+      var h = (t - Math.floor(t)) * 24, i = 0;
+      while (i < SKY.length - 2 && h >= SKY[i + 1][0]) i++;
+      var a = SKY[i], b = SKY[i + 1], u = clamp((h - a[0]) / (b[0] - a[0]), 0, 1);
+      var top = mix(a[1], b[1], u), bot = mix(a[2], b[2], u);
+      sky.style.background = "linear-gradient(rgb(" + top + "),rgb(" + bot + "))";
+      var day = h >= 6 && h < 18, p = day ? (h - 6) / 12 : ((h < 6 ? h + 24 : h) - 18) / 12;
+      var o = day ? sun : moon, off = day ? moon : sun;
+      o.style.display = ""; off.style.display = "none";
+      o.style.left = (8 + 84 * p).toFixed(1) + "%"; o.style.top = (46 - 36 * Math.sin(Math.PI * p)).toFixed(1) + "%";
+      var nv = h < 5 || h >= 21.5 ? 1 : h < 6.5 ? 1 - (h - 5) / 1.5 : h >= 19 ? (h - 19) / 2.5 : 0;
+      starBox.style.opacity = nv.toFixed(2);
+    }
     function draw(force) {
       var t = clamp(cur, PRE ? PRE.t0 : tA, tZ), pre = !!PRE && t < tA, k = idxAt(t), p = pts[k], q = pts[Math.min(k + 1, pts.length - 1)];
       // position follows the line between two captures; every number shown is a captured one
       var v = q[0] > p[0] ? p[1] + (q[1] - p[1]) * clamp((t - p[0]) / (q[0] - p[0]), 0, 1) : p[1];
       if (pre) { v = preV(t); p = [t, t < PRE.flip ? 1 : -1]; k = "p" + Math.floor(t) + (p[1] > 0 ? "u" : "d"); }   // run-in: side only, no number
       var hx = Math.round(G.X(t) / 3) * 3, hy = Math.round(G.Y(v) / 3) * 3, zy = G.zy, up = p[1] > 0, dn = p[1] < 0;
+      skyAt(t);
       var moving = cur !== goal && !(holdT && performance.now() < holdT);
       if (moving !== last.moving) { last.moving = moving; chart.classList.toggle("moving", moving); chart.classList.toggle("running", moving); }
       G.reveal.setAttribute("width", Math.max(0, hx + 10));
