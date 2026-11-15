@@ -1400,7 +1400,7 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
     u = Math.max(0, Math.min(1, u));
     var i = 0; while (i < LV_SKY.length - 2 && u >= LV_SKY[i + 1][0]) i++;
     var A = LV_SKY[i], B = LV_SKY[i + 1], v = (u - A[0]) / ((B[0] - A[0]) || 1), m = function (k) { return [0, 1, 2].map(function (c) { return A[k][c] + (B[k][c] - A[k][c]) * v; }); };
-    var sun = u < .7;   // the sun crosses from the start line to dusk, then the moon rises
+    var sun = u < .7;   // the sun crosses from the start line to dusk
     return { top: m(1), bot: m(2), hill: lvMix(m(3), m(3), 0), sun: sun, p: sun ? u / .7 : (u - .7) / .3,
       night: u < .66 ? 0 : Math.min(1, (u - .66) / .2) };
   }
@@ -1466,14 +1466,11 @@ html.anim .bars .fill{transition-timing-function:steps(14,end)}
         for (j = 0; j < 22; j++) { q = (j * 67 + 13) % 211; g.fillRect(((q * 3 - Math.round(cam * .12)) % (LW + 20) + LW + 20) % (LW + 20) - 10, (j * 29) % 46 + 2, 1, 1); }
         g.globalAlpha = 1;
       }
-      // sun by day, moon by night: a pixel disc on an arc across the screen
+      // the sun crosses on an arc until dusk; the night has stars only
       var ox = Math.round(8 + (LW - 22) * sk.p), oy = Math.round(30 - 24 * Math.sin(Math.PI * sk.p));
       if (sk.sun) {
         g.fillStyle = "#ffd76a"; g.fillRect(ox + 1, oy, 5, 7); g.fillRect(ox, oy + 1, 7, 5);
         g.fillStyle = "#fff1b8"; g.fillRect(ox + 2, oy + 1, 2, 2);
-      } else {
-        g.fillStyle = "#ece6ff"; g.fillRect(ox + 1, oy, 5, 7); g.fillRect(ox, oy + 1, 7, 5);
-        g.fillStyle = lvMix(sk.top, sk.bot, oy / GY); g.fillRect(ox + 3, oy - 1, 5, 6);
       }
       g.fillStyle = sk.hill;
       for (j = 0; j < 12; j++) {
